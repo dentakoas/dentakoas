@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:cloudinary/cloudinary.dart';
 import 'package:denta_koas/src/cores/data/repositories/authentication.repository/authentication_repository.dart';
 import 'package:denta_koas/src/features/appointment/data/model/likes_model.dart';
 import 'package:denta_koas/src/features/appointment/data/model/post_model.dart';
@@ -282,6 +285,37 @@ class PostRepository extends GetxController {
     throw 'Failed to like post.';
   }
 
+  Future<String?> uploadToCloudinary(
+      File imageFile, fileNames, int index) async {
+    try {
+      var cloudinary = Cloudinary.signedConfig(
+        apiKey: '338626958888276',
+        apiSecret: '8SxMxVmbz4tinfex31MJtaj7x6A',
+        cloudName: 'dxw9ywgfq',
+      );
+
+      final response = await cloudinary.upload(
+        file: imageFile.path,
+        folder: 'post/images', // Cloudinary folder,
+        fileBytes: await imageFile.readAsBytes(),
+        resourceType: CloudinaryResourceType.image,
+        fileName: fileNames[index],
+        progressCallback: (count, total) {
+          final progress = ((count / total) * 100).toStringAsFixed(2);
+          Logger().i('Upload progress: $progress%');
+        },
+      );
+
+      if (!response.isSuccessful) {
+        throw Exception('Failed to upload image');
+      }
+
+      return response.secureUrl;
+    } catch (e) {
+      Logger().e('Error uploading image: $e');
+    }
+    return null;
+  }
   
 }
 

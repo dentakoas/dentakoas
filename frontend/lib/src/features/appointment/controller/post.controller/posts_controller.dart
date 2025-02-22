@@ -168,8 +168,24 @@ class PostController extends GetxController {
           .convertToInt(GeneralInformationController
               .instance.requiredParticipant.text
               .trim());
+      final images = GeneralInformationController.instance.selectedImages;
+      final imageNames = GeneralInformationController.instance.fileNames;
+      
+
       Logger().i('Title: $title, Description: $description, '
           'SelectedTreatmentId: $selectedTreatmentId, RequiredParticipant: $requiredParticipant');
+
+      // Upload images to cloud storage
+      final imageUrls = GeneralInformationController.instance.uploadedUrls;
+      for (var index = 0; index < images.length; index++) {
+        final imageUrl = await PostRepository.instance.uploadToCloudinary(
+          images[index],
+          imageNames[index],
+          index,
+        );
+        Logger().f('Uploaded image URL: $imageUrl');
+        imageUrls.add(imageUrl!);
+      }
 
       // Initialize the model for general information post
       final newPost = PostModel(
@@ -177,6 +193,7 @@ class PostController extends GetxController {
         koasId: UserController.instance.user.value.koasProfile!.id!,
         title: title,
         desc: description,
+        images: imageUrls,
         requiredParticipant: requiredParticipant,
         patientRequirement: values,
         treatmentId: selectedTreatmentId,

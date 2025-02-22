@@ -1,19 +1,20 @@
-import 'package:denta_koas/src/cores/data/repositories/post.repository/post_repository.dart';
+import 'dart:io';
+
+import 'package:cloudinary/cloudinary.dart';
 import 'package:denta_koas/src/cores/data/repositories/treatments.repository/treatment_repository.dart';
-import 'package:denta_koas/src/features/appointment/controller/post.controller/posts_controller.dart';
-import 'package:denta_koas/src/features/appointment/data/model/post_model.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/create_post/schedule/create_schedule.dart';
-import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/helpers/network_manager.dart';
 import 'package:denta_koas/src/utils/popups/full_screen_loader.dart';
 import 'package:denta_koas/src/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
+import 'package:uuid/uuid.dart';
 
 class GeneralInformationController extends GetxController {
-  static GeneralInformationController get instance => Get.find();
+static GeneralInformationController get instance => Get.find();
 
   final title = TextEditingController();
   final description = TextEditingController();
@@ -22,20 +23,91 @@ class GeneralInformationController extends GetxController {
       <TextEditingController>[].obs;
   final selectedTreatment = ''.obs;
 
-  RxMap<String, String> treatmentsMap = <String, String>{}.obs; // {id: alias}
-  List<DropdownMenuItem<String>> items =
-      []; // Update this to store DropdownMenuItem<String>
-  String selectedTreatmentId = ''; // Untuk menyimpan ID yang dipilih
-
+  RxMap<String, String> treatmentsMap = <String, String>{}.obs;
+  String selectedTreatmentId = '';
   late List<String> patientRequirementsValues;
 
   final GlobalKey<FormState> generalInformationFormKey = GlobalKey<FormState>();
 
+  var cloudinary = Cloudinary.signedConfig(
+    apiKey: '338626958888276',
+    apiSecret: '8SxMxVmbz4tinfex31MJtaj7x6A',
+    cloudName: 'dxw9ywgfq',
+  );
+
+  // Image Upload related variables
+  final RxList<File> selectedImages = <File>[].obs;
+  final RxList<String> fileNames = <String>[].obs;
+  final RxList<String> uploadedUrls = <String>[].obs;
+  final ImagePicker picker = ImagePicker();
+  final RxBool isUploading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
-    initializeInputs(1); // Initialize the inputs with a default count
+    initializeInputs(1);
     getTreatments();
+  }
+
+  // Image picking and upload methods
+  Future<void> pickImage() async {
+    try {
+      if (selectedImages.length >= 4) {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Maximum 4 images can be uploaded',
+        );
+        return;
+      }
+
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        final file = File(image.path);
+        final fileSize = await file.length();
+
+        if (fileSize <= 2 * 1024 * 1024) {
+          const uuid = Uuid();
+          final randomFileName = '${uuid.v4()}.${image.path.split('.').last}';
+
+          selectedImages.add(file);
+          fileNames.add(randomFileName);
+
+          // Upload image immediately after selection
+          // await uploadToCloudinary(file, fileNames.length - 1);
+        } else {
+          TLoaders.errorSnackBar(
+            title: 'Error',
+            message: 'Maximum file size is 2MB',
+          );
+        }
+      }
+    } catch (e) {
+      Logger().e('Error picking image: $e');
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to pick image',
+      );
+    }
+  }
+
+  void removeImage(int index) {
+    if (index >= 0 && index < selectedImages.length) {
+      selectedImages.removeAt(index);
+      fileNames.removeAt(index);
+      if (index < uploadedUrls.length) {
+        uploadedUrls.removeAt(index);
+      }
+    }
+  }
+
+  void previewImage(BuildContext context, File image) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        child: Image.file(image, fit: BoxFit.contain),
+      ),
+    );
   }
 
   void createGeneralInformation() async {

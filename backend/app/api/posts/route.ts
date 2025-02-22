@@ -79,11 +79,10 @@ export async function GET(req: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error fetching Posts", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    if (error instanceof Error) {
+      console.log(error.stack);
+      console.error("Failed to fetch post", error);
+    }
   }
 }
 
@@ -95,6 +94,7 @@ export async function POST(req: Request) {
     treatmentId,
     title,
     desc,
+    images,
     patientRequirement,
     requiredParticipant,
     dateRangeStart,
@@ -139,6 +139,7 @@ export async function POST(req: Request) {
       data: {
         title,
         desc,
+        images,
         patientRequirement,
         requiredParticipant,
         status,

@@ -225,6 +225,110 @@ class PostPreviewScren extends StatelessWidget {
                 ),
             const SizedBox(height: TSizes.spaceBtwSections),
 
+            // Images preview section
+            const SectionHeading(
+              title: 'Images',
+              showActionButton: false,
+            ),
+            const SizedBox(height: TSizes.spaceBtwItems),
+            Obx(() {
+              final controller = GeneralInformationController.instance;
+              if (controller.selectedImages.isEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(TSizes.md),
+                  decoration: BoxDecoration(
+                    color: TColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: TColors.grey),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Iconsax.gallery, color: TColors.textSecondary),
+                      SizedBox(width: TSizes.spaceBtwItems / 2),
+                      Text(
+                        'No images uploaded',
+                        style: TextStyle(
+                          color: TColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: TSizes.spaceBtwItems,
+                  mainAxisSpacing: TSizes.spaceBtwItems,
+                  childAspectRatio: 1,
+                ),
+                itemCount: controller.selectedImages.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: TColors.grey),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.file(
+                          controller.selectedImages[index],
+                          fit: BoxFit.cover,
+                        ),
+                        if (index < controller.uploadedUrls.length)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 4,
+                              horizontal: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                            ),
+                            child: Text(
+                              controller.fileNames[index],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            }),
+            const SizedBox(height: TSizes.spaceBtwSections),
+
             const SectionHeading(title: 'Status post', showActionButton: false),
             DDropdownMenu(
               prefixIcon: Iconsax.info_circle,

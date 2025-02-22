@@ -15,6 +15,7 @@ class PostModel {
   TreatmentModel? treatment;
   String? title;
   String? desc;
+  List<String>? images;
   dynamic patientRequirement; // json type can be dynamic
   int? requiredParticipant;
   StatusPost? status;
@@ -36,6 +37,7 @@ class PostModel {
     this.treatment,
     this.title,
     this.desc,
+    this.images,
     this.patientRequirement,
     this.requiredParticipant = 0,
     this.status = StatusPost.Pending,
@@ -67,6 +69,9 @@ class PostModel {
           : null,
       title: data['title'],
       desc: data['desc'],
+      images: data['images'] != null && data['images'] is List
+          ? List<String>.from(data['images'])
+          : [],
       patientRequirement: data['patientRequirement'] != null &&
               data['patientRequirement'] is List
           ? List<String>.from(data['patientRequirement'])
@@ -95,6 +100,7 @@ class PostModel {
       'treatmentId': treatmentId,
       'title': title,
       'desc': desc,
+      'images': images,
       'patientRequirement': patientRequirement,
       'requiredParticipant': requiredParticipant,
       'status': status.toString().split('.').last,
@@ -116,6 +122,7 @@ class PostModel {
       treatment: TreatmentModel.empty(),
       title: '',
       desc: '',
+      images: [],
       schedule: [],
       review: [],
       likes: [],

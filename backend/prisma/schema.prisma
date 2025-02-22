@@ -1,16 +1,301 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma_schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate_init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL_DEV")
+}
+
+model User {
+  id                 String              @id
+  givenName          String?
+  familyName         String?
+  name               String?             @unique @db.VarChar(50)
+  email              String?             @unique
+  emailVerified      DateTime?           @map("email_verified")
+  password           String?
+  phone              String?             @db.VarChar(13)
+  address            String?
+  image              String?
+  role               Role?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updateAt           DateTime            @updatedAt @map("updated_at")
+  Account            Account[]
+  FasilitatorProfile FasilitatorProfile?
+  KoasProfile        KoasProfile?
+  Like               Like[]
+  sender             Notification[]      @relation("Sender")
+  recipient          Notification[]      @relation("Recipient")
+  PasienProfile      PasienProfile?
+  Post               Post[]
+  Review             Review[]
+  sessions           Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  type              String?
+  provider          String
+  providerAccountId String   @map("provider_account_id")
+  token_type        String?
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  scope             String?
+  id_token          String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId], map: "accounts_user_id_fkey")
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String?  @map("user_id")
+  sessionToken String   @map("session_token") @db.Text
+  accessToken  String?  @map("access_token") @db.Text
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "sessions_user_id_fkey")
+  @@map("sessions")
+}
+
+model Otp {
+  id        String   @id @default(cuid())
+  email     String
+  otp       String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email, otp])
+  @@map("otps")
+}
+
+model KoasProfile {
+  id           String         @id @default(cuid())
+  userId       String         @unique @map("user_id")
+  koasNumber   String?        @unique @map("koas_number")
+  age          String?
+  gender       String?
+  departement  String?
+  university   String?
+  bio          String?
+  whatsappLink String?        @map("whatsapp_link")
+  status       StatusKoas     @default(Pending)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updateAt     DateTime       @updatedAt @map("updated_at")
+  universityId String?
+  experience   Int?           @default(0)
+  Appointment  Appointment[]
+  University   University?    @relation(fields: [universityId], references: [id])
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Notification Notification[]
+  Post         Post[]
+  Review       Review[]
+
+  @@index([universityId], map: "koas-profile_universityId_fkey")
+  @@map("koas_profile")
+}
+
+model PasienProfile {
+  id          String        @id @default(cuid())
+  userId      String        @unique @map("user_id")
+  age         String?
+  gender      String?
+  bio         String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updateAt    DateTime      @updatedAt @map("updated_at")
+  Appointment Appointment[]
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("pasien_profile")
+}
+
+model FasilitatorProfile {
+  id         String  @id @default(cuid())
+  userId     String  @unique @map("user_id")
+  university String?
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fasilitator_profile")
+}
+
+model University {
+  id          String        @id @default(cuid())
+  name        String
+  alias       String
+  location    String
+  latitude    Float?
+  longitude   Float?
+  image       String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updateAt    DateTime      @updatedAt @map("updated_at")
+  koasProfile KoasProfile[]
+
+  @@map("universities")
+}
+
+model Post {
+  id                  String        @id @default(cuid())
+  userId              String        @map("user_id")
+  koasId              String        @map("koas_id")
+  treatmentId         String        @map("treatment_id")
+  title               String
+  desc                String        @db.VarChar(500)
+  images              Json?
+  patientRequirement  Json?         @map("patient_requirement")
+  requiredParticipant Int           @default(0) @map("required_participant")
+  status              StatusPost    @default(Pending)
+  published           Boolean       @default(false)
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updateAt            DateTime      @updatedAt @map("updated_at")
+  likes               Like[]
+  koas                KoasProfile   @relation(fields: [koasId], references: [id], onDelete: Cascade)
+  treatment           TreatmentType @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Review              Review[]
+  Schedule            Schedule[]
+
+  @@index([userId], map: "user_id")
+  @@index([koasId], map: "koas_id")
+  @@index([treatmentId], map: "treatment_id")
+  @@map("posts")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  postId    String   @map("post_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([postId], map: "post_id")
+  @@index([userId], map: "user_id")
+  @@map("likes")
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  message     String
+  createdAt   DateTime           @default(now())
+  koasId      String?
+  senderId    String?
+  status      StatusNotification @default(Unread)
+  title       String
+  updatedAt   DateTime           @updatedAt
+  userId      String?
+  koasProfile KoasProfile?       @relation(fields: [koasId], references: [id], onDelete: Cascade)
+  sender      User?              @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient   User?              @relation("Recipient", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([koasId], map: "notifications_koasId_fkey")
+  @@index([senderId], map: "notifications_senderId_fkey")
+  @@index([userId], map: "notifications_userId_fkey")
+  @@map("notifications")
+}
+
+model TreatmentType {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updateAt  DateTime @updatedAt @map("updated_at")
+  alias     String
+  Post      Post[]
+
+  @@map("treatment_types")
+}
+
+model Schedule {
+  id          String        @id @default(cuid())
+  postId      String        @map("post_id")
+  dateStart   DateTime      @map("date_start")
+  dateEnd     DateTime      @map("date_end")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updateAt    DateTime      @updatedAt @map("updated_at")
+  Appointment Appointment[]
+  post        Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  timeslot    Timeslot[]
+
+  @@index([postId], map: "post_id")
+  @@map("schedules")
+}
+
+model Timeslot {
+  id                  String        @id @default(cuid())
+  scheduleId          String        @map("schedule_id")
+  startTime           String        @map("start_time")
+  endTime             String        @map("end_time")
+  maxParticipants     Int?          @map("max_participants")
+  currentParticipants Int           @default(0) @map("current_participants")
+  isAvailable         Boolean       @default(true) @map("is_available")
+  Appointment         Appointment[]
+  schedule            Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, startTime, endTime], name: "unique_timeslot")
+  @@map("timeslots")
+}
+
+model Review {
+  id          String       @id @default(cuid())
+  postId      String       @map("post_id")
+  pasienId    String       @map("user_id")
+  rating      Decimal      @default(0.000000000000000000000000000000)
+  comment     String?      @db.VarChar(500)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  koasId      String?      @map("koas_id")
+  KoasProfile KoasProfile? @relation(fields: [koasId], references: [userId])
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [pasienId], references: [id])
+
+  @@index([postId], map: "post_id")
+  @@index([pasienId], map: "pasien_Id")
+  @@index([koasId], map: "koas_id")
+  @@map("reviews")
+}
+
+model Appointment {
+  id         String            @id @default(cuid())
+  pasienId   String            @map("pasien_id")
+  koasId     String            @map("koas_id")
+  scheduleId String            @map("schedule_id")
+  timeslotId String            @map("timeslot_id")
+  date       String
+  status     StatusAppointment @default(Pending)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  koas       KoasProfile       @relation(fields: [koasId], references: [id])
+  pasien     PasienProfile     @relation(fields: [pasienId], references: [id])
+  schedule   Schedule          @relation(fields: [scheduleId], references: [id])
+  timeslot   Timeslot          @relation(fields: [timeslotId], references: [id])
+
+  @@index([koasId], map: "appointment_koas_id_fkey")
+  @@index([pasienId], map: "appointment_pasien_id_fkey")
+  @@index([scheduleId], map: "appointment_schedule_id_fkey")
+  @@index([timeslotId], map: "appointment_timeslot_id_fkey")
+  @@map("appointments")
+}
+
+model verificationrequest {
+  id        String   @id
+  email     String
+  token     String   @unique(map: "VerificationRequest_token_key")
+  expires   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  @@unique([email, token], map: "VerificationRequest_email_token_key")
 }
 
 enum Role {
@@ -20,13 +305,6 @@ enum Role {
   Fasilitator
 
   @@map("roles")
-}
-
-enum Gender {
-  Male
-  Female
-
-  @@map("genders")
 }
 
 enum StatusPost {
@@ -59,295 +337,4 @@ enum StatusAppointment {
 enum StatusNotification {
   Unread
   Read
-}
-
-model User {
-  id                 String              @id
-  givenName          String?
-  familyName         String?
-  name               String?             @unique @db.VarChar(50) // Batas maksimum 20 karakter
-  email              String?             @unique
-  emailVerified      DateTime?           @map("email_verified")
-  password           String?
-  phone              String?             @db.VarChar(13) // Batas maksimum 13 karakter
-  address            String?
-  image              String?
-  role               Role?
-  KoasProfile        KoasProfile?
-  PasienProfile      PasienProfile?
-  FasilitatorProfile FasilitatorProfile?
-  Account            Account[]
-  Post               Post[]
-  Like               Like[]
-  sessions           Session[]
-  sender             Notification[]      @relation("Sender")
-  recipient          Notification[]      @relation("Recipient")
-  createdAt          DateTime            @default(now()) @map("created_at")
-  updateAt           DateTime            @updatedAt @map("updated_at")
-  Review             Review[]
-
-  @@map("users")
-}
-
-model Account {
-  id                String   @id @default(cuid())
-  userId            String   @map("user_id")
-  type              String?
-  provider          String
-  providerAccountId String   @map("provider_account_id")
-  token_type        String?
-  refresh_token     String?  @db.Text
-  access_token      String?  @db.Text
-  expires_at        Int?
-  scope             String?
-  id_token          String?  @db.Text
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  userId       String?  @map("user_id")
-  sessionToken String   @map("session_token") @db.Text
-  accessToken  String?  @map("access_token") @db.Text
-  expires      DateTime
-  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@map("sessions")
-}
-
-model VerificationRequest {
-  id        String   @id @default(cuid())
-  email     String
-  token     String   @unique
-  expires   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([email, token])
-}
-
-model Otp {
-  id        String   @id @default(cuid())
-  email     String
-  otp       String   @unique
-  expires   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([email, otp])
-  @@map("otps")
-}
-
-model KoasProfile {
-  id           String     @id @default(cuid())
-  userId       String     @unique @map("user_id")
-  universityId String?
-  koasNumber   String?    @unique @map("koas_number")
-  age          String?
-  gender       String?
-  departement  String?
-  university   String?
-  experience   Int?       @default(0)
-  bio          String?
-  whatsappLink String?    @map("whatsapp_link")
-  status       StatusKoas @default(Pending) // enum dapat ditambahkan jika ada daftar nilai yang terbatas
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updateAt     DateTime   @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  Post         Post[]
-  Appointment  Appointment[]
-  Notification Notification[]
-  Review       Review[]
-  University   University?    @relation(fields: [universityId], references: [id])
-
-  @@map("koas_profile")
-}
-
-model PasienProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique @map("user_id")
-  age       String?
-  gender    String? // enum dapat ditambahkan jika ada daftar nilai yang terbatas
-  bio       String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updateAt  DateTime @updatedAt @map("updated_at")
-
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Appointment Appointment[]
-
-  @@map("pasien_profile")
-}
-
-model FasilitatorProfile {
-  id         String  @id @default(cuid())
-  userId     String  @unique @map("user_id")
-  university String?
-  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("fasilitator_profile")
-}
-
-model University {
-  id        String   @id @default(cuid())
-  name      String
-  alias     String
-  location  String
-  latitude  Float?
-  longitude Float?
-  image     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updateAt  DateTime @updatedAt @map("updated_at")
-
-  koasProfile KoasProfile[]
-
-  @@map("universities")
-}
-
-model Post {
-  id                  String     @id @default(cuid())
-  userId              String     @map("user_id")
-  koasId              String     @map("koas_id")
-  treatmentId         String     @map("treatment_id")
-  title               String
-  desc                String     @db.VarChar(500)
-  patientRequirement  Json?      @map("patient_requirement")
-  requiredParticipant Int        @default(0) @map("required_participant")
-  status              StatusPost @default(Pending) // enum dapat ditambahkan jika ada daftar nilai yang terbatas
-  published           Boolean    @default(false)
-  Schedule            Schedule[]
-  Review              Review[]
-  likes               Like[]
-  createdAt           DateTime   @default(now()) @map("created_at")
-  updateAt            DateTime   @updatedAt @map("updated_at")
-
-  koas      KoasProfile   @relation(fields: [koasId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  treatment TreatmentType @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
-
-  @@index([userId], name: "user_id")
-  @@index([koasId], name: "koas_id")
-  @@index([treatmentId], name: "treatment_id")
-  @@map("posts")
-}
-
-model Like {
-  id        String   @id @default(cuid())
-  postId    String   @map("post_id")
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id])
-  Post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  @@index([postId], name: "post_id")
-  @@index([userId], name: "user_id")
-  @@map("likes")
-}
-
-model Notification {
-  id        String             @id @default(cuid())
-  title     String
-  message   String
-  status    StatusNotification @default(Unread) // Enum untuk status notifikasi
-  userId    String? // ID penerima (koas, fasilitator, dll)
-  senderId  String? // ID pengirim (jika diperlukan)
-  koasId    String? // Opsional, untuk notifikasi terkait Koas
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-
-  recipient   User?        @relation("Recipient", fields: [userId], references: [id], onDelete: Cascade)
-  sender      User?        @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
-  koasProfile KoasProfile? @relation(fields: [koasId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
-}
-
-model TreatmentType {
-  id        String   @id @default(cuid())
-  name      String
-  alias     String
-  createdAt DateTime @default(now()) @map("created_at")
-  updateAt  DateTime @updatedAt @map("updated_at")
-  Post      Post[]
-
-  @@map("treatment_types")
-}
-
-model Schedule {
-  id        String   @id @default(cuid())
-  postId    String   @map("post_id")
-  dateStart DateTime @map("date_start")
-  dateEnd   DateTime @map("date_end")
-  createdAt DateTime @default(now()) @map("created_at")
-  updateAt  DateTime @updatedAt @map("updated_at")
-
-  post        Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-  timeslot    Timeslot[]
-  Appointment Appointment[]
-
-  @@index([postId], name: "post_id")
-  @@map("schedules")
-}
-
-model Timeslot {
-  id                  String  @id @default(cuid())
-  scheduleId          String  @map("schedule_id")
-  startTime           String  @map("start_time")
-  endTime             String  @map("end_time")
-  maxParticipants     Int?    @map("max_participants")
-  currentParticipants Int     @default(0) @map("current_participants")
-  isAvailable         Boolean @default(true) @map("is_available")
-
-  schedule    Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  Appointment Appointment[]
-
-  @@unique([scheduleId, startTime, endTime], name: "unique_timeslot")
-  @@map("timeslots")
-}
-
-model Review {
-  id        String   @id @default(cuid())
-  postId    String   @map("post_id")
-  pasienId  String   @map("user_id")
-  koasId    String?  @map("koas_id")
-  rating    Decimal  @default(0) // Skala 1_5
-  comment   String?  @db.VarChar(500)
-  createdAt DateTime @default(now()) @map("created_at")
-
-  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user        User         @relation(fields: [pasienId], references: [id])
-  KoasProfile KoasProfile? @relation(fields: [koasId], references: [userId])
-
-  @@index([postId], name: "post_id")
-  @@index([pasienId], name: "pasien_Id")
-  @@index([koasId], name: "koas_id")
-  @@map("reviews")
-}
-
-model Appointment {
-  id         String            @id @default(cuid())
-  pasienId   String            @map("pasien_id")
-  koasId     String            @map("koas_id")
-  scheduleId String            @map("schedule_id")
-  timeslotId String            @map("timeslot_id")
-  date       String
-  status     StatusAppointment @default(Pending)
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-
-  pasien   PasienProfile @relation(fields: [pasienId], references: [id])
-  koas     KoasProfile   @relation(fields: [koasId], references: [id])
-  schedule Schedule      @relation(fields: [scheduleId], references: [id])
-  timeslot Timeslot      @relation(fields: [timeslotId], references: [id])
-
-  @@map("appointments")
 }
