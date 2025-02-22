@@ -41,7 +41,7 @@ class HomeScreen extends StatelessWidget {
                       HomeAppBar(),
                       SizedBox(height: TSizes.spaceBtwSections),
                       HomeBannerSection(),
-                      SizedBox(height: TSizes.spaceBtwSections),
+                      SizedBox(height: TSizes.spaceBtwSections / 4),
                       HomeUpcomingScheduleSection(),
                       SizedBox(height: TSizes.spaceBtwSections),
                       HomePopularCategoriesSection(),

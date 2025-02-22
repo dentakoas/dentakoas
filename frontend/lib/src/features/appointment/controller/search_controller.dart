@@ -17,49 +17,121 @@ class SearchPostController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Initialize filteredPosts with all posts immediately
     filteredPosts.assignAll(postController.posts);
-    // Set up listener for posts changes
     ever(postController.posts, (_) {
       if (query.value.isEmpty) {
         filteredPosts.assignAll(postController.posts);
+        _updateInitialSuggestions(); // Add initial suggestions when posts change
       } else {
         _updateFilteredPosts(showAll: false);
       }
     });
+    // Initialize suggestions on startup
+    _updateInitialSuggestions();
   }
 
   void setSort(String sort) {
     print('Setting sort to: $sort');
     selectedSort.value = sort;
     query.value = '';
-    suggestions.clear();
+    _updateInitialSuggestions(); // Update suggestions when sort changes
     _updateFilteredPosts(showAll: true);
+  }
+
+  void _updateInitialSuggestions() {
+    Set<String> uniqueSuggestions = {};
+    
+    switch (selectedSort.value) {
+      case 'Name':
+        uniqueSuggestions = postController.posts
+            .map((post) => post.user.fullName)
+            .where((name) => name.isNotEmpty)
+            .toSet();
+        break;
+      case 'Treatment':
+        uniqueSuggestions = postController.posts
+            .map((post) => post.treatment.alias)
+            .where((treatment) => treatment.isNotEmpty)
+            .toSet();
+        break;
+      case 'University':
+        uniqueSuggestions = postController.posts
+            .map((post) => post.user.koasProfile?.university ?? '')
+            .where((uni) => uni.isNotEmpty)
+            .toSet();
+        break;
+      case 'Title':
+        uniqueSuggestions = postController.posts
+            .map((post) => post.title)
+            .where((title) => title.isNotEmpty)
+            .toSet();
+        break;
+    }
+    
+    suggestions.value = uniqueSuggestions.toList()..sort();
   }
 
   void updateSearch(String newQuery) {
     print('Updating search with query: $newQuery');
-    isSearching.value = true;
     query.value = newQuery;
+    
     if (newQuery.isEmpty) {
-      suggestions.clear();
-      filteredPosts.assignAll(
-          postController.posts); // Show all posts when query is empty
+      _updateInitialSuggestions();
+      filteredPosts.assignAll(postController.posts);
     } else {
       updateSuggestions(newQuery);
       _updateFilteredPosts(showAll: false);
     }
   }
 
-  void onSearchFocusLost() {
-    isSearching.value = false;
+  void updateSuggestions(String searchQuery) {
+    final normalizedQuery = searchQuery.toLowerCase().trim();
+    List<String> newSuggestions = [];
+
+    // Filter suggestions based on query
+    switch (selectedSort.value) {
+      case 'Name':
+        newSuggestions = postController.posts
+            .where((post) =>
+                post.user.fullName.toLowerCase().contains(normalizedQuery))
+            .map((post) => post.user.fullName)
+            .where((name) => name.isNotEmpty)
+            .toList();
+        break;
+      case 'Treatment':
+        newSuggestions = postController.posts
+            .where((post) =>
+                post.treatment.alias.toLowerCase().contains(normalizedQuery))
+            .map((post) => post.treatment.alias)
+            .where((treatment) => treatment.isNotEmpty)
+            .toList();
+        break;
+      case 'University':
+        newSuggestions = postController.posts
+            .where((post) => (post.user.koasProfile?.university ?? '')
+                .toLowerCase()
+                .contains(normalizedQuery))
+            .map((post) => post.user.koasProfile?.university ?? '')
+            .where((uni) => uni.isNotEmpty)
+            .toList();
+        break;
+      case 'Title':
+        newSuggestions = postController.posts
+            .where((post) => post.title.toLowerCase().contains(normalizedQuery))
+            .map((post) => post.title)
+            .where((title) => title.isNotEmpty)
+            .toList();
+        break;
+    }
+
+    suggestions.value = newSuggestions.toSet().toList()..sort();
   }
 
+  // Rest of the methods remain the same...
   void _updateFilteredPosts({bool showAll = false}) {
     List<Post> posts = List.from(postController.posts);
     final normalizedQuery = query.value.toLowerCase().trim();
 
-    // Apply filtering only if not showing all and query is not empty
     if (!showAll && normalizedQuery.isNotEmpty) {
       posts = posts.where((post) {
         switch (selectedSort.value) {
@@ -79,83 +151,10 @@ class SearchPostController extends GetxController {
       }).toList();
     }
 
-    // Always apply sorting
     _applySorting(posts);
-    
     filteredPosts.assignAll(posts);
   }
 
-
-  void updateSuggestions(String searchQuery) {
-    final normalizedQuery = searchQuery.toLowerCase().trim();
-    List<String> newSuggestions = [];
-
-    if (normalizedQuery.isEmpty) {
-      // Show all data based on selectedSort
-      switch (selectedSort.value) {
-        case 'Name':
-          newSuggestions =
-              postController.posts.map((post) => post.user.fullName).toList();
-          break;
-        case 'Treatment':
-          newSuggestions =
-              postController.posts.map((post) => post.treatment.alias).toList();
-          break;
-        case 'University':
-          newSuggestions = postController.posts
-              .map((post) => post.user.koasProfile?.university ?? '')
-              .where((uni) => uni.isNotEmpty)
-              .toList();
-          break;
-        case 'Title':
-          newSuggestions =
-              postController.posts.map((post) => post.title).toList();
-          break;
-      }
-    } else {
-      // Filter suggestions based on query
-      switch (selectedSort.value) {
-        case 'Name':
-          newSuggestions = postController.posts
-              .where((post) =>
-                  post.user.fullName.toLowerCase().contains(normalizedQuery))
-              .map((post) => post.user.fullName)
-              .toList();
-          break;
-        case 'Treatment':
-          newSuggestions = postController.posts
-              .where((post) =>
-                  post.treatment.alias.toLowerCase().contains(normalizedQuery))
-              .map((post) => post.treatment.alias)
-              .toList();
-          break;
-        case 'University':
-          newSuggestions = postController.posts
-              .where((post) => (post.user.koasProfile?.university ?? '')
-                  .toLowerCase()
-                  .contains(normalizedQuery))
-              .map((post) => post.user.koasProfile?.university ?? '')
-              .where((uni) => uni.isNotEmpty)
-              .toList();
-          break;
-        case 'Title':
-          newSuggestions = postController.posts
-              .where(
-                  (post) => post.title.toLowerCase().contains(normalizedQuery))
-              .map((post) => post.title)
-              .toList();
-          break;
-      }
-    }
-
-    suggestions.value = newSuggestions.toSet().toList();
-  }
-
-  List<Post> getSortedPosts() {
-    return filteredPosts.toList();
-  }
-
-  
   void _applySorting(List<Post> posts) {
     switch (selectedSort.value) {
       case 'Popularity':

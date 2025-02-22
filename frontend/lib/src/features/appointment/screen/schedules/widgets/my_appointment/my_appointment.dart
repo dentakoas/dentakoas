@@ -150,7 +150,8 @@ class MyAppointmentScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => controller.openWhatsApp(
                     phone: appointment.koas!.user!.phone!,
-                    message: 'Hello, I have an appointment with you'),
+                    message:
+                        'Hello, ${appointment.koas!.user!.fullName}, this is ${appointment.pasien!.user!.fullName}. I have an appointment with you on ${controller.formatAppointmentDate(appointment.date)} at ${controller.getAppointmentTimestampRange(appointment)} for ${appointment.schedule!.post.treatment.alias}. My contact appointment ID is **${appointment.id}**. Thank you and cii u ong top😎🤘!'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(

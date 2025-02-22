@@ -3,6 +3,7 @@ import 'package:denta_koas/src/commons/widgets/shimmer/schedule_card_shimmer.dar
 import 'package:denta_koas/src/commons/widgets/text/section_heading.dart';
 import 'package:denta_koas/src/features/appointment/controller/appointment.controller/appointments_controller.dart';
 import 'package:denta_koas/src/features/appointment/screen/home/widgets/cards/appointment_card.dart';
+import 'package:denta_koas/src/features/appointment/screen/schedules/widgets/my_appointment/my_appointment.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/features/personalization/model/user_model.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
@@ -31,9 +32,18 @@ class HomeUpcomingScheduleSection extends StatelessWidget {
                 onPressed: () {},
               );
             }
+            if (controller.ongoingAppointments.isNotEmpty) {
+              return SectionHeading(
+                title: 'Ongoing Schedule',
+                showActionButton: true,
+                onPressed: () {},
+              );
+            }
+            
             return const SizedBox();
           } 
           ),
+          
 
           // Popular Appointments
           Obx(() {
@@ -47,19 +57,42 @@ class HomeUpcomingScheduleSection extends StatelessWidget {
                 },
               );
             }
-            if (controller.confirmedAppointments.isEmpty) {
-              return const SizedBox();
-              // return const Padding(
-              //   padding: EdgeInsets.all(TSizes.defaultSpace),
-              //   child: Text('you do not have any upcoming schedule'),
-              // );
-            }
-            return DGridLayout(
+              if (controller.confirmedAppointments.isNotEmpty) {
+                return DGridLayout(
+                  itemCount: 1,
+                  crossAxisCount: 1,
+                  mainAxisExtent: 165,
+                  itemBuilder: (_, index) {
+                    final appointment = controller.confirmedAppointments[index];
+                    final role = UserController.instance.user.value.role;
+                    return AppointmentCards(
+                      key: ValueKey(appointment.id),
+                      imgUrl: role == Role.Koas.name
+                          ? appointment.pasien!.user!.image ?? TImages.user
+                          : appointment.koas!.user!.image ?? TImages.user,
+                      name: role == Role.Koas.name
+                          ? appointment.pasien?.user?.fullName ?? ''
+                          : appointment.koas?.user?.fullName ?? '',
+                      category:
+                          appointment.schedule?.post.treatment.alias ?? '',
+                      date: controller.formatAppointmentDate(appointment.date),
+                      timestamp:
+                          controller.getAppointmentTimestampRange(appointment),
+                      onTap: () => Get.to(
+                        () => const MyAppointmentScreen(),
+                        arguments: appointment,
+                      ),
+                    );
+                  },
+                );
+              }
+              if (controller.ongoingAppointments.isNotEmpty) {
+                return DGridLayout(
                 itemCount: 1,
                 crossAxisCount: 1,
                 mainAxisExtent: 165,
                 itemBuilder: (_, index) {
-                  final appointment = controller.confirmedAppointments[index];
+                    final appointment = controller.ongoingAppointments[index];
                   final role = UserController.instance.user.value.role;
                   return AppointmentCards(
                     key: ValueKey(appointment.id),
@@ -76,6 +109,8 @@ class HomeUpcomingScheduleSection extends StatelessWidget {
                   );
                 },
               );
+              }
+              return const SizedBox();
             },
           )
           // const UpcomingScheduleShimmer(),
