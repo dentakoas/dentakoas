@@ -2,12 +2,14 @@ import 'package:denta_koas/src/commons/widgets/appbar/appbar.dart';
 import 'package:denta_koas/src/commons/widgets/images/circular_image.dart';
 import 'package:denta_koas/src/commons/widgets/notifications/notification_menu.dart';
 import 'package:denta_koas/src/commons/widgets/shimmer/home_appbar_shimmer.dart';
+import 'package:denta_koas/src/features/appointment/controller/search_controller.dart';
 import 'package:denta_koas/src/features/appointment/screen/notifications/notification.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({
@@ -16,34 +18,36 @@ class HomeAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(UserController());
+    final userController = Get.put(UserController());
+    final searchController = Get.put(SearchPostController());
+
     return Obx(() {
-      if (controller.profileLoading.value) {
+      if (userController.profileLoading.value) {
         return const HomeAppBarShimmer();
       } else {
         return DAppBar(
-          avatar: controller.user.value.image != null
+          avatar: userController.user.value.image != null
               ? CircularImage(
-                  image: controller.user.value.image!,
+                  image: userController.user.value.image!,
                   padding: 0,
                   isNetworkImage: true,
                 )
               : Image.asset(
-            TImages.user,
-            fit: BoxFit.cover,
-          ),
+                  TImages.user,
+                  fit: BoxFit.cover,
+                ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                controller.updateGreetingMessage(),
+                userController.updateGreetingMessage(),
                 style: Theme.of(context)
                     .textTheme
                     .labelMedium!
                     .apply(color: TColors.black),
               ),
               Text(
-                controller.user.value.fullName,
+                userController.user.value.fullName,
                 style: Theme.of(context)
                     .textTheme
                     .headlineSmall!
@@ -52,6 +56,19 @@ class HomeAppBar extends StatelessWidget {
             ],
           ),
           actions: [
+            // 🔄 SWITCHER BUTTON
+            IconButton(
+              icon: Icon(
+                searchController.isSearching.value
+                    ? Iconsax.close_circle
+                    : Iconsax.search_normal_14,
+                color: TColors.black,
+              ),
+              onPressed: () {
+                searchController.isSearching.toggle();
+              },
+            ),
+            // 🔔 NOTIFICATION BUTTON
             NotificationCounterIcon(
               onPressed: () => Get.to(() => const NotificationScreen()),
             ),

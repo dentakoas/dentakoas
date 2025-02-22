@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-// improved_search_container.dart
 class ImprovedSearchContainer extends StatefulWidget {
   const ImprovedSearchContainer({
     super.key,
@@ -16,12 +15,14 @@ class ImprovedSearchContainer extends StatefulWidget {
     this.showBackground = true,
     this.showBorder = true,
     this.padding = const EdgeInsets.symmetric(horizontal: TSizes.defaultSpace),
+    required this.focusNode,
   });
 
   final String text;
   final IconData? icon;
   final bool showBackground, showBorder;
   final EdgeInsetsGeometry padding;
+  final FocusNode focusNode;
 
   @override
   State<ImprovedSearchContainer> createState() =>
@@ -30,19 +31,21 @@ class ImprovedSearchContainer extends StatefulWidget {
 
 class _ImprovedSearchContainerState extends State<ImprovedSearchContainer> {
   final TextEditingController _searchController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
   final SearchPostController searchController =
       Get.find<SearchPostController>();
+  final controller = Get.put(SearchPostController());
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
+    widget.focusNode.addListener(() {
+      if (widget.focusNode.hasFocus) {
+        controller.isSearching.value = true;
         _showOverlay();
       } else {
+        controller.isSearching.value = false;
         _hideOverlay();
       }
     });
@@ -51,7 +54,6 @@ class _ImprovedSearchContainerState extends State<ImprovedSearchContainer> {
   @override
   void dispose() {
     _searchController.dispose();
-    _focusNode.dispose();
     _hideOverlay();
     super.dispose();
   }
@@ -87,7 +89,7 @@ class _ImprovedSearchContainerState extends State<ImprovedSearchContainer> {
                       searchController
                           .updateSearch(searchController.suggestions[index]);
                       _hideOverlay();
-                      _focusNode.unfocus();
+                      widget.focusNode.unfocus();
                     },
                   );
                 },
@@ -115,22 +117,12 @@ class _ImprovedSearchContainerState extends State<ImprovedSearchContainer> {
       child: Container(
         width: TDeviceUtils.getScreenWidth(context),
         padding: const EdgeInsets.all(0),
-        // decoration: BoxDecoration(
-        //   color: widget.showBackground
-        //       ? dark
-        //           ? TColors.black
-        //           : TColors.light
-        //       : TColors.transparent,
-        //   borderRadius: BorderRadius.circular(TSizes.cardRadiusLg),
-        //   border:
-        //       widget.showBorder ? Border.all(color: TColors.darkGrey) : null,
-        // ),
         child: Row(
           children: [
             Expanded(
               child: TextField(
                 controller: _searchController,
-                focusNode: _focusNode,
+                focusNode: widget.focusNode,
                 decoration: InputDecoration(
                   hintText: widget.text,
                   border: InputBorder.none,

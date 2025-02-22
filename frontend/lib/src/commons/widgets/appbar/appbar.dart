@@ -1,7 +1,12 @@
+import 'package:denta_koas/src/commons/widgets/notifications/notification_menu.dart';
+import 'package:denta_koas/src/features/appointment/controller/search_controller.dart';
+import 'package:denta_koas/src/features/appointment/screen/notifications/notification.dart';
+import 'package:denta_koas/src/utils/constants/colors.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:denta_koas/src/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? avatar;
@@ -27,8 +32,9 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final searchController = Get.put(SearchPostController());
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: TSizes.md),
+      padding: const EdgeInsets.symmetric(horizontal: TSizes.defaultSpace),
       child: AppBar(
         centerTitle: centerTitle,
         automaticallyImplyLeading: false,
@@ -57,7 +63,24 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
             if (title != null) title!, // Title jika ada
           ],
         ),
-        actions: actions,
+        actions: [
+          // 🔄 SWITCHER BUTTON
+          Obx(() => IconButton(
+                icon: Icon(
+                  searchController.isSearching.value
+                      ? Iconsax.close_circle
+                      : Iconsax.search_normal_14,
+                  color: TColors.black,
+                ),
+                onPressed: () {
+                  searchController.isSearching.toggle();
+                },
+              )),
+          // 🔔 NOTIFICATION BUTTON
+          NotificationCounterIcon(
+            onPressed: () => Get.to(() => const NotificationScreen()),
+          ),
+        ],
       ),
     );
   }

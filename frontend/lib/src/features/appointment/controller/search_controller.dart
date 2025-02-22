@@ -12,6 +12,9 @@ class SearchPostController extends GetxController {
   final RxList<Post> filteredPosts = <Post>[].obs;
   final PostController postController = Get.put(PostController());
 
+  final RxBool isSearching = false.obs;
+  void toggleSearch() => isSearching.toggle();
+
   @override
   void onInit() {
     super.onInit();
@@ -28,6 +31,7 @@ class SearchPostController extends GetxController {
 
   void updateSearch(String newQuery) {
     print('Updating search with query: $newQuery');
+    isSearching.value = true; // Set isSearching to true when search starts
     query.value = newQuery;
     if (newQuery.isEmpty) {
       suggestions.clear();
@@ -35,6 +39,10 @@ class SearchPostController extends GetxController {
       updateSuggestions(newQuery);
     }
     _updateFilteredPosts(); // Selalu panggil ini untuk update sorting
+  }
+
+  void onSearchFocusLost() {
+    isSearching.value = false; // Set isSearching to false when focus is lost
   }
 
   void _updateFilteredPosts() {
@@ -100,21 +108,21 @@ class SearchPostController extends GetxController {
     filteredPosts.assignAll(posts);
   }
 
-void updateSuggestions(String searchQuery) {
+  void updateSuggestions(String searchQuery) {
     final normalizedQuery = searchQuery.toLowerCase().trim();
     List<String> newSuggestions = [];
 
     if (normalizedQuery.isEmpty) {
       // Tampilkan semua data berdasarkan selectedSort
-    switch (selectedSort.value) {
+      switch (selectedSort.value) {
         case 'Name':
           newSuggestions =
               postController.posts.map((post) => post.user.fullName).toList();
-        break;
+          break;
         case 'Treatment':
           newSuggestions =
               postController.posts.map((post) => post.treatment.alias).toList();
-        break;
+          break;
         case 'University':
           newSuggestions = postController.posts
               .map((post) => post.user.koasProfile?.university ?? '')
@@ -124,8 +132,8 @@ void updateSuggestions(String searchQuery) {
         case 'Title':
           newSuggestions =
               postController.posts.map((post) => post.title).toList();
-        break;
-    }
+          break;
+      }
     } else {
       // Filter data jika query tidak kosong
       switch (selectedSort.value) {
@@ -146,7 +154,7 @@ void updateSuggestions(String searchQuery) {
         case 'University':
           newSuggestions = postController.posts
               .where((post) => (post.user.koasProfile?.university ?? '')
-                .toLowerCase()
+                  .toLowerCase()
                   .contains(normalizedQuery))
               .map((post) => post.user.koasProfile?.university ?? '')
               .where((uni) => uni.isNotEmpty)
