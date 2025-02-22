@@ -25,8 +25,12 @@ class HomeScreen extends StatelessWidget {
                   child: Column(children: [
                     const HomeAppBar(),
                     const SizedBox(height: TSizes.spaceBtwSections),
-                    SortablePostList(
-                      posts: controller.filteredPosts,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: TSizes.defaultSpace / 2),
+                      child: SortablePostList(
+                        posts: controller.filteredPosts,
+                      ),
                     ),
                   ]),
                 )

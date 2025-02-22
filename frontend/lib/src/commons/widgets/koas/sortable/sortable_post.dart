@@ -35,9 +35,7 @@ class SortablePostList extends StatelessWidget {
       showSearchBar: showSearchBar,
       itemBuilder: (_, index) {
         final post = searchController.filteredPosts[index];
-        return Obx(() {
-          if (searchController.isSearching.value) {
-            return PostCard(
+        return PostCard(
               postId: post.id,
               name: post.user.fullName,
               image: post.user.image ?? TImages.userProfileImage2,
@@ -59,11 +57,7 @@ class SortablePostList extends StatelessWidget {
               onTap: onPostTap != null ? () => onPostTap!(post) : null,
               onPressed:
                   onPostPressed != null ? () => onPostPressed!(post) : null,
-            );
-          } else {
-            return const SizedBox.shrink();
-          }
-        });
+        );
       },
     );
   }

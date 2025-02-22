@@ -1,4 +1,3 @@
-// search_post_controller.dart
 import 'package:denta_koas/src/features/appointment/controller/post.controller/posts_controller.dart';
 import 'package:denta_koas/src/features/appointment/data/model/tes.dart';
 import 'package:get/get.dart';
@@ -18,7 +17,16 @@ class SearchPostController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _updateFilteredPosts(); // Panggil ini untuk inisialisasi dengan sorting
+    // Initialize filteredPosts with all posts immediately
+    filteredPosts.assignAll(postController.posts);
+    // Set up listener for posts changes
+    ever(postController.posts, (_) {
+      if (query.value.isEmpty) {
+        filteredPosts.assignAll(postController.posts);
+      } else {
+        _updateFilteredPosts(showAll: false);
+      }
+    });
   }
 
   void setSort(String sort) {
@@ -26,30 +34,33 @@ class SearchPostController extends GetxController {
     selectedSort.value = sort;
     query.value = '';
     suggestions.clear();
-    _updateFilteredPosts();
+    _updateFilteredPosts(showAll: true);
   }
 
   void updateSearch(String newQuery) {
     print('Updating search with query: $newQuery');
-    isSearching.value = true; // Set isSearching to true when search starts
+    isSearching.value = true;
     query.value = newQuery;
     if (newQuery.isEmpty) {
       suggestions.clear();
+      filteredPosts.assignAll(
+          postController.posts); // Show all posts when query is empty
     } else {
       updateSuggestions(newQuery);
+      _updateFilteredPosts(showAll: false);
     }
-    _updateFilteredPosts(); // Selalu panggil ini untuk update sorting
   }
 
   void onSearchFocusLost() {
-    isSearching.value = false; // Set isSearching to false when focus is lost
+    isSearching.value = false;
   }
 
-  void _updateFilteredPosts() {
-    final normalizedQuery = query.value.toLowerCase().trim();
+  void _updateFilteredPosts({bool showAll = false}) {
     List<Post> posts = List.from(postController.posts);
+    final normalizedQuery = query.value.toLowerCase().trim();
 
-    if (normalizedQuery.isNotEmpty) {
+    // Apply filtering only if not showing all and query is not empty
+    if (!showAll && normalizedQuery.isNotEmpty) {
       posts = posts.where((post) {
         switch (selectedSort.value) {
           case 'Name':
@@ -68,52 +79,19 @@ class SearchPostController extends GetxController {
       }).toList();
     }
 
-    // Sorting sesuai selectedSort
-    switch (selectedSort.value) {
-      case 'Popularity':
-        posts.sort((a, b) => b.likes.length.compareTo(a.likes.length));
-        break;
-      case 'Newest':
-        posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        break;
-      case 'Oldest':
-        posts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-        break;
-      default:
-        posts.sort((a, b) {
-          String valueA = '';
-          String valueB = '';
-          switch (selectedSort.value) {
-            case 'Name':
-              valueA = a.user.fullName;
-              valueB = b.user.fullName;
-              break;
-            case 'Treatment':
-              valueA = a.treatment.alias;
-              valueB = b.treatment.alias;
-              break;
-            case 'University':
-              valueA = a.user.koasProfile?.university ?? '';
-              valueB = b.user.koasProfile?.university ?? '';
-              break;
-            case 'Title':
-              valueA = a.title;
-              valueB = b.title;
-              break;
-          }
-          return valueA.compareTo(valueB);
-        });
-    }
-
+    // Always apply sorting
+    _applySorting(posts);
+    
     filteredPosts.assignAll(posts);
   }
+
 
   void updateSuggestions(String searchQuery) {
     final normalizedQuery = searchQuery.toLowerCase().trim();
     List<String> newSuggestions = [];
 
     if (normalizedQuery.isEmpty) {
-      // Tampilkan semua data berdasarkan selectedSort
+      // Show all data based on selectedSort
       switch (selectedSort.value) {
         case 'Name':
           newSuggestions =
@@ -135,7 +113,7 @@ class SearchPostController extends GetxController {
           break;
       }
     } else {
-      // Filter data jika query tidak kosong
+      // Filter suggestions based on query
       switch (selectedSort.value) {
         case 'Name':
           newSuggestions = postController.posts
@@ -173,8 +151,46 @@ class SearchPostController extends GetxController {
     suggestions.value = newSuggestions.toSet().toList();
   }
 
-  // Getter untuk mendapatkan filtered posts
   List<Post> getSortedPosts() {
     return filteredPosts.toList();
+  }
+
+  
+  void _applySorting(List<Post> posts) {
+    switch (selectedSort.value) {
+      case 'Popularity':
+        posts.sort((a, b) => b.likes.length.compareTo(a.likes.length));
+        break;
+      case 'Newest':
+        posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case 'Oldest':
+        posts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      default:
+        posts.sort((a, b) {
+          String valueA = '';
+          String valueB = '';
+          switch (selectedSort.value) {
+            case 'Name':
+              valueA = a.user.fullName;
+              valueB = b.user.fullName;
+              break;
+            case 'Treatment':
+              valueA = a.treatment.alias;
+              valueB = b.treatment.alias;
+              break;
+            case 'University':
+              valueA = a.user.koasProfile?.university ?? '';
+              valueB = b.user.koasProfile?.university ?? '';
+              break;
+            case 'Title':
+              valueA = a.title;
+              valueB = b.title;
+              break;
+          }
+          return valueA.compareTo(valueB);
+        });
+    }
   }
 }
