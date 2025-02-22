@@ -8,6 +8,7 @@ class Post {
   final String treatmentId;
   final String title;
   final String desc;
+  final List<String>? postImages;
   final List<String> patientRequirement;
   final int requiredParticipant;
   final String status;
@@ -30,6 +31,7 @@ class Post {
     required this.treatmentId,
     required this.title,
     required this.desc,
+    this.postImages,
     required this.patientRequirement,
     required this.requiredParticipant,
     required this.status,
@@ -54,6 +56,9 @@ class Post {
       treatmentId: json['treatmentId'] ?? '',
       title: json['title'] ?? '',
       desc: json['desc'] ?? '',
+      postImages: json['images'] is List
+          ? (json['images'] as List).map((item) => item.toString()).toList()
+          : [],
       patientRequirement: (json['patientRequirement'] as List?)
               ?.map((item) => item.toString())
               .toList() ??

@@ -129,6 +129,15 @@ static GeneralInformationController get instance => Get.find();
         return;
       }
 
+      if (selectedImages.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Please upload at least one image',
+        );
+        TFullScreenLoader.stopLoading();
+        return;
+      }
+
       // final inputController = Get.put(InputController());
       // final values = inputController.getAllValues();
 

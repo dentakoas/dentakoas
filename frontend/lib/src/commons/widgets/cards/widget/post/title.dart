@@ -40,7 +40,7 @@ class TitleSection extends StatelessWidget {
         const SizedBox(height: TSizes.spaceBtwInputFields / 2),
         TitleText(
           title: description,
-          maxLines: 4,
+          maxLines: 3,
           textSizes: TextSizes.base,
           color: TColors.textSecondary,
           textAlign: TextAlign.justify,

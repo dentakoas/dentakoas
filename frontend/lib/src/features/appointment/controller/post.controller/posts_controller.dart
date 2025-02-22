@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:denta_koas/navigation_menu.dart';
 import 'package:denta_koas/src/commons/widgets/state_screeen/state_screen.dart';
@@ -17,6 +19,7 @@ import 'package:denta_koas/src/utils/constants/colors.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:denta_koas/src/utils/helpers/network_manager.dart';
+import 'package:denta_koas/src/utils/local_storage/image_cache_service%20.dart';
 import 'package:denta_koas/src/utils/popups/full_screen_loader.dart';
 import 'package:denta_koas/src/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +62,13 @@ class PostController extends GetxController {
   final treatmentType = TextEditingController();
   final patientRequirment = TextEditingController();
 
+  // Image cache
+  final imageCacheService = ImageCacheService();
+  final loadingImages = <String, bool>{}.obs;
+  final cachedImages = <String, List<File>>{}.obs;
+  bool isLoadingImages(String postId) => loadingImages[postId] ?? false;
+  List<File>? getCachedImages(String postId) => cachedImages[postId];
+
   @override
   void onInit() {
     super.onInit();
@@ -76,6 +86,18 @@ class PostController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  // Future<void> loadPostImages(String postId, List<String> imageUrls) async {
+  //   if (loadingImages[postId] == true) return;
+
+  //   try {
+  //     loadingImages[postId] = true;
+  //     final files = await imageCacheService.getOrDownloadImages(imageUrls);
+  //     cachedImages[postId] = files;
+  //   } finally {
+  //     loadingImages[postId] = false;
+  //   }
+  // }
 
   Future<void> fetchPosts() async {
     try {

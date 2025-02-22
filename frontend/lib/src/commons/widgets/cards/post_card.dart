@@ -2,8 +2,10 @@ import 'package:denta_koas/src/commons/widgets/cards/widget/post/footer.dart';
 import 'package:denta_koas/src/commons/widgets/cards/widget/post/header.dart';
 import 'package:denta_koas/src/commons/widgets/cards/widget/post/stat.dart';
 import 'package:denta_koas/src/commons/widgets/cards/widget/post/title.dart';
+import 'package:denta_koas/src/commons/widgets/images/rounded_image_container.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PostCard extends StatelessWidget {
  
@@ -17,6 +19,7 @@ class PostCard extends StatelessWidget {
       timePosted,
       dateStart,
       dateEnd;
+  final List<String>? postImages;
   final int requiredParticipant, participantCount, likesCount;
   final bool isNetworkImage;
   final void Function()? onPressed;
@@ -29,6 +32,7 @@ class PostCard extends StatelessWidget {
     required this.image,
     required this.university,
     required this.title,
+    this.postImages,
     required this.description,
     required this.category,
     required this.timePosted,
@@ -71,20 +75,60 @@ class PostCard extends StatelessWidget {
                 university: university,
               ),
               const SizedBox(height: TSizes.spaceBtwItems),
+              if (postImages != null) ...[
+                SizedBox(
+                  height: 300,
+                  width: double.infinity,
+                  child: PageView.builder(
+                    itemCount: postImages!.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Get.dialog(
+                            Dialog(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  RoundedImage(
+                                    padding: const EdgeInsets.all(0),
+                                    borderRadius: 6,
+                                    imageUrl: postImages![index],
+                                    isNetworkImage: true,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        child: RoundedImage(
+                          padding: const EdgeInsets.all(0),
+                          borderRadius: 6,
+                          imageUrl: postImages![index],
+                          isNetworkImage: true,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: TSizes.spaceBtwItems),
+              ],
               TitleSection(
                   timePosted: timePosted,
                   title: title,
                   description: description),
               const SizedBox(height: TSizes.spaceBtwSections),
+              
               StatsSection(
                 participantCount: participantCount,
                 requiredParticipant: requiredParticipant,
                 category: category,
                 likesCount: likesCount,
               ),
-              const SizedBox(height: TSizes.spaceBtwItems),
+              const SizedBox(height: TSizes.spaceBtwItems / 2),
               const Divider(),
-              const SizedBox(height: TSizes.spaceBtwItems),
+              const SizedBox(height: TSizes.spaceBtwItems / 2),
               FooterSection(
                   dateStart: dateStart,
                   dateEnd: dateEnd,

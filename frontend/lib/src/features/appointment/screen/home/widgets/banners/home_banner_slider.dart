@@ -11,9 +11,16 @@ class BannerSlider extends StatelessWidget {
   const BannerSlider({
     super.key,
     required this.banners,
+    this.indicatorWidth = 20.0,
+    this.indicatorHeight = 4.0,
+    this.viewportFraction = 1.05,
   });
 
   final List<String> banners;
+
+  final double indicatorWidth;
+  final double indicatorHeight;
+  final double viewportFraction;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +31,7 @@ class BannerSlider extends StatelessWidget {
         // Banner Image
         CarouselSlider(
           options: CarouselOptions(
-            viewportFraction: 1.05,
+            viewportFraction: viewportFraction,
             autoPlay: true,
             onPageChanged: (index, _) => controller.updatePageIndicator(index),
           ),
@@ -38,8 +45,8 @@ class BannerSlider extends StatelessWidget {
               children: [
                 for (int i = 0; i < banners.length; i++)
                   CircularContainer(
-                    width: 20,
-                    height: 4,
+                    width: indicatorWidth,
+                    height: indicatorHeight,
                     margin: const EdgeInsets.only(right: 10),
                     backgroundColor: controller.carouselCurrentIndex.value == i
                         ? TColors.primary

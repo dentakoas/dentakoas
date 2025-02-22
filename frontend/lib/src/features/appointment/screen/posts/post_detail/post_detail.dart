@@ -1,8 +1,8 @@
 import 'package:denta_koas/src/commons/widgets/appbar/appbar.dart';
+import 'package:denta_koas/src/commons/widgets/images/rounded_image_container.dart';
 import 'package:denta_koas/src/commons/widgets/shimmer/card_reviews.dart';
 import 'package:denta_koas/src/commons/widgets/text/section_heading.dart';
 import 'package:denta_koas/src/features/appointment/controller/post.controller/post_detail_controller.dart';
-import 'package:denta_koas/src/features/appointment/controller/post.controller/posts_controller.dart';
 import 'package:denta_koas/src/features/appointment/data/model/tes.dart';
 import 'package:denta_koas/src/features/appointment/screen/koas_reviews/koas_reviews.dart';
 import 'package:denta_koas/src/features/appointment/screen/koas_reviews/widgets/user_reviews_card.dart';
@@ -69,6 +69,53 @@ class PostDetailScreen extends StatelessWidget {
                     image: post.user.image ?? TImages.userProfileImage2,
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
+
+                  if (post.postImages != null) ...[
+                    SizedBox(
+                      height: 300,
+                      width: double.infinity,
+                      child: PageView.builder(
+                        itemCount: post.postImages!.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              Get.dialog(
+                                Dialog(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      RoundedImage(
+                                        padding: const EdgeInsets.all(0),
+                                        borderRadius: 6,
+                                        imageUrl: post.postImages![index],
+                                        isNetworkImage: true,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Obx(() {
+                              if (controller.isLoading.value) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return RoundedImage(
+                                padding: const EdgeInsets.all(0),
+                                borderRadius: 6,
+                                imageUrl: post.postImages![index],
+                                isNetworkImage: true,
+                                fit: BoxFit.cover,
+                              );
+                            }),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: TSizes.spaceBtwItems),
+                  ],
 
                   // Post Title
                   TitlePost(

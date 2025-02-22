@@ -65,14 +65,15 @@ class AllPostScreen extends StatelessWidget {
               }
               return SortableField(
                 crossAxisCount: 1,
-                mainAxisExtent: 400,
+                mainAxisExtent: 680,
                 showSearchBar: true,
-                itemBuilder: (_, index) {
+                itemBuilder: (_, index) { 
                   final post = searchController.filteredPosts[index];
                   return PostCard(
                     postId: post.id,
                     name: post.user.fullName,
                     image: post.user.image ?? TImages.userProfileImage2,
+                    postImages: post.postImages,
                     university: post.user.koasProfile!.university!,
                     title: post.title,
                     description: post.desc,

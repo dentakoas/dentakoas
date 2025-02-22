@@ -111,7 +111,7 @@ class TabPost extends StatelessWidget {
                     return DGridLayout(
                       itemCount: controller.featuredPosts.length < 2 ? 1 : 2,
                       crossAxisCount: 1,
-                      mainAxisExtent: 400,
+                      mainAxisExtent: 680,
                       itemBuilder: (_, index) {
                         final post = controller.featuredPosts[index];
                         return PostCard(
@@ -119,6 +119,7 @@ class TabPost extends StatelessWidget {
                           name: post.user.fullName,
                           university: post.user.koasProfile!.university!,
                           image: post.user.image ?? TImages.user,
+                          postImages: post.postImages,
                           timePosted: timeago.format(post.updateAt),
                           title: post.title,
                           description: post.desc,
