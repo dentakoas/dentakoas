@@ -44,12 +44,17 @@ class TImages {
   static const String verifyIllustration = "assets/images/animations/sammy-line-travel-backpack-with-passport-and-air-ticket.gif";
   static const String amongUsLoading =
       "assets/images/animations/amongus-loading.json";
+  static const String superToothLoading =
+      "assets/images/animations/loading_supertooth.json";
   static const String successfullySignedUp =
       "assets/images/animations/verify_succes.json";
   static const String emailVerificationSuccess =
       "assets/images/animations/loading-health.json";
   static const String successfullyResetPassword =
       "assets/images/animations/password-reset-2.json";
+  static const String characterExplore =
+      "assets/images/animations/char_explore.json";
+  
 
   static const String loadingHealth = "assets/images/animations/email.json";
   static const String setupProfileSuccess =

@@ -68,7 +68,7 @@ class KoasAddReviewScreen extends StatelessWidget {
                   Obx(() => controller.isLoading.value
                       ? const RatingBarShimmer()
                       : RatingBar(
-                          initialRating: controller.rating.value,
+                          initialRating: 0,
                           minRating: 0,
                           allowHalfRating: true,
                           itemCount: 5,
@@ -81,7 +81,7 @@ class KoasAddReviewScreen extends StatelessWidget {
                                 color: TColors.primary),
                           ),
                           onRatingUpdate: controller.updateRating,
-                          ignoreGestures: controller.userReview.isNotEmpty,
+                          // ignoreGestures: controller.userReview.isNotEmpty,
                         )),
                   const SizedBox(height: 20),
                   const Text('Your overall rating',

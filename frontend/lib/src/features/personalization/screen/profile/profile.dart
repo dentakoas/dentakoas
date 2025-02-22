@@ -27,6 +27,7 @@ class ProfileScreen extends StatelessWidget {
         showBackArrow: true,
         title: Text('Profile'),
         centerTitle: true,
+        showActions: false,
       ),
 
       // Body

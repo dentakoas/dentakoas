@@ -92,7 +92,6 @@ class AppointmentsController extends GetxController {
             .toList(),
       );
 
-
       // All ongoing appointments
       ongoingAppointments.assignAll(
         appointmentsByUserData
@@ -108,6 +107,18 @@ class AppointmentsController extends GetxController {
                 appointment.status == StatusAppointment.Completed)
             .toList(),
       );
+
+      // Sort all lists by date in descending order
+      appointments.sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+      appointmentsByUser.sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+      canceledAppointments.sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+      rejectedAppointments.sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+      pendingAppointments.sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+      confirmedAppointments
+          .sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+      ongoingAppointments.sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+      completedAppointments
+          .sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
 
     } catch (e) {
       Logger().e(['Failed to fetch appointments: $e']);
@@ -129,7 +140,7 @@ class AppointmentsController extends GetxController {
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.loadingHealth);
+          'Processing your action....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -203,7 +214,7 @@ class AppointmentsController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.loadingHealth);
+          'Processing your action....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -290,7 +301,7 @@ class AppointmentsController extends GetxController {
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.loadingHealth);
+          'Processing your action....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -364,7 +375,7 @@ class AppointmentsController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.loadingHealth);
+          'Processing your action....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -599,7 +610,7 @@ class AppointmentsController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.loadingHealth);
+          'Processing your action....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();

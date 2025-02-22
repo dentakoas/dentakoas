@@ -39,6 +39,7 @@ class PostDetailScreen extends StatelessWidget {
         ),
         centerTitle: true,
         showBackArrow: true,
+        showActions: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.favorite_border),

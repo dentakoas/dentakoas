@@ -30,6 +30,8 @@ export async function GET(
         timeslotId: true,
         date: true,
         status: true, // Status digunakan untuk filter
+        createdAt: true,
+        updatedAt: true,
         pasien: {
           select: {
             id: true,
@@ -45,6 +47,7 @@ export async function GET(
                 address: true,
                 phone: true,
                 image: true,
+                createdAt: true,
               },
             },
           },
@@ -58,6 +61,7 @@ export async function GET(
             age: true,
             university: true,
             departement: true,
+            createdAt: true,
             user: {
               select: {
                 id: true,
@@ -77,6 +81,7 @@ export async function GET(
             id: true,
             dateStart: true,
             dateEnd: true,
+            createdAt: true,
             post: {
               select: {
                 id: true,

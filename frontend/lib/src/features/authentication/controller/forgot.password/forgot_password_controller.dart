@@ -31,7 +31,7 @@ class ForgotPasswordController extends GetxController {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
         'Sending password reset email....',
-        TImages.loadingHealth,
+        TImages.superToothLoading,
       );
 
       // Check connection
@@ -79,7 +79,7 @@ class ForgotPasswordController extends GetxController {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
         'Sending password reset email....',
-        TImages.loadingHealth,
+        TImages.superToothLoading,
       );
 
       // Check connection
@@ -118,7 +118,7 @@ class ForgotPasswordController extends GetxController {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
         'Sending password reset email....',
-        TImages.loadingHealth,
+        TImages.superToothLoading,
       );
 
       // Check connection
@@ -173,7 +173,7 @@ class ForgotPasswordController extends GetxController {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
         'Sending password reset email....',
-        TImages.loadingHealth,
+        TImages.superToothLoading,
       );
 
       // Check connection
@@ -212,7 +212,7 @@ class ForgotPasswordController extends GetxController {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
         'Verifying OTP....',
-        TImages.loadingHealth,
+        TImages.superToothLoading,
       );
 
       // Check connection

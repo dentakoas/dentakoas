@@ -83,7 +83,7 @@ class UpdatePersonalInformationController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your information....', TImages.loadingHealth);
+          'Processing your information....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();

@@ -212,6 +212,7 @@ model TreatmentType {
   createdAt DateTime @default(now()) @map("created_at")
   updateAt  DateTime @updatedAt @map("updated_at")
   alias     String
+  image     String?
   Post      Post[]
 
   @@map("treatment_types")

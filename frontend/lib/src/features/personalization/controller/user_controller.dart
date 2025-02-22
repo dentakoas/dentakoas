@@ -15,7 +15,6 @@ import 'package:denta_koas/src/utils/popups/loaders.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -195,7 +194,7 @@ setStatusColor() {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Re-authenticating....', TImages.loadingHealth);
+          'Re-authenticating....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -257,7 +256,7 @@ setStatusColor() {
   void deleteUserAccount() async {
     try {
       TFullScreenLoader.openLoadingDialog(
-          'Proccecing....', TImages.loadingHealth);
+          'Proccecing....', TImages.superToothLoading);
 
       final auth = AuthenticationRepository.instance;
       final provider =
@@ -289,7 +288,7 @@ setStatusColor() {
 
   //     // Start loading
   //     TFullScreenLoader.openLoadingDialog(
-  //         'Uploading image...', TImages.loadingHealth);
+  //         'Uploading image...', TImages.superToothLoading);
 
   //     // Upload image to Supabase
   //     final File imageFile = File(image.path);
@@ -369,7 +368,7 @@ setStatusColor() {
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Uploading image...', TImages.loadingHealth);
+          'Uploading image...', TImages.superToothLoading);
 
       // Upload to Cloudinary
       final response = await uploadImageToCloudinary(File(image.path));

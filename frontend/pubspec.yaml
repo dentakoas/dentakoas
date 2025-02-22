@@ -62,6 +62,7 @@ dependencies:
   uuid: ^4.5.1
   path_provider: ^2.1.1
   crypto: ^3.0.3
+  flutter_launcher_icons: ^0.14.3
 
 
   # Icons
@@ -110,6 +111,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logos/super_dental.png" # Path ke icon kamu
 
   #--------------- LOCAL ASSETS ------------------#
   assets:

@@ -39,27 +39,27 @@ class UniversityController extends GetxController {
         print("No universities found.");
       }
 
-      universities.assignAll(fetchedUniversities);
-
-      universityWithImages.assignAll(
-        fetchedUniversities
-            .where((university) => university.image != '')
-            .toList(),
-      );
-
-      availableUniversity.assignAll(
+      universities.assignAll(
         fetchedUniversities
             .where(
                 (university) => university.name == "Universitas Negeri Jember")
             .toList(),
       );
-      
+
+      universityWithImages.assignAll(
+        universities
+            .where((university) => university.image != '')
+            .toList(),
+      );
+
+      availableUniversity.assignAll(universities);
+
       // Universitas terbaru berdasarkan `createdAt`
       newestUniversities.assignAll(universityWithImages
           .where((university) => university.createdAt != null)
           .toList()
         ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!))
-    );
+      );
 
       // Universitas populer berdasarkan jumlah `koasCount`
       popularUniversities.assignAll(
@@ -73,7 +73,6 @@ class UniversityController extends GetxController {
       // Featured universities (bisa diubah ke kriteria tertentu jika diperlukan)
       featuredUniversities.assignAll(universityWithImages.take(2).toList());
 
-      
     } catch (e) {
       print("Error fetching universities: ${e.toString()}");
     } finally {

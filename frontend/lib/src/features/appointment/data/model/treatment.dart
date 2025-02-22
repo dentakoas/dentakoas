@@ -3,18 +3,21 @@ class TreatmentModel {
   final String? name;
   final String? alias;
   final String? description;
+  final String? image;
 
   TreatmentModel({
     this.id,
     this.name,
     this.alias,
     this.description,
+    this.image,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'name': name,
       'alias': alias,
+      'image': image,
     };
   }
 
@@ -24,6 +27,7 @@ class TreatmentModel {
       name: json['name'] ?? '',
       alias: json['alias'] ?? '',
       description: json['description'] ?? '',
+      image: json['image'] ?? '',
     );
   }
 
@@ -31,6 +35,7 @@ class TreatmentModel {
     return TreatmentModel(
       name: map['name'] ?? '',
       alias: map['alias'] ?? '',
+      image: map['image'] ?? '',
       
     );
   }
@@ -38,10 +43,12 @@ class TreatmentModel {
   TreatmentModel copyWith({
     String? name,
     String? alias,
+    String? image
   }) {
     return TreatmentModel(
       name: name ?? this.name,
       alias: alias ?? this.alias,
+      image: image ?? this.image,
     );
   }
 
@@ -49,6 +56,7 @@ class TreatmentModel {
     return TreatmentModel(
       name: '',
       alias: '',
+      image: '',
     );
   }
 

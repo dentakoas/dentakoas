@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       {
         review,
       },
-      { status: 200 }
+      { status: 201 }
     );
   } catch (error) {
     if (error instanceof Error) {

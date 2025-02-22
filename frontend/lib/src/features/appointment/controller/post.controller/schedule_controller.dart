@@ -32,7 +32,7 @@ class SchedulePostController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.loadingHealth);
+          'Processing your action....', TImages.superToothLoading);
 
       // Check connection
       final isConnected = await NetworkManager.instance.isConnected();

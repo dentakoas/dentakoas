@@ -22,6 +22,7 @@ export async function GET(req: Request) {
             post: {
               include: {
                 treatment: true, // Mengambil semua field dari treatment
+                Review: true, // Mengambil semua field dari review
               },
             },
             timeslot: true, // Mengambil semua field dari timeslot

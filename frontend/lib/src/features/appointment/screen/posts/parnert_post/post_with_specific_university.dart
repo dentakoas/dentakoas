@@ -26,9 +26,7 @@ class PostWithSpecificUniversity extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(
-            TSizes.defaultSpace,
-          ),
+          padding: const EdgeInsets.all(TSizes.defaultSpace),
           child: Column(
             children: [
               TreatmentCard(
@@ -36,61 +34,61 @@ class PostWithSpecificUniversity extends StatelessWidget {
                 showVerifiyIcon: true,
                 subtitle: university.alias,
               ),
-              const SizedBox(
-                height: TSizes.spaceBtwSections,
-              ),
-              Obx(
-                () {
-                  if (controller.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  final filteredPosts = controller.posts
-                      .where((post) =>
-                          post.user.koasProfile!.university! == university.name)
-                      .toList();
-                  if (filteredPosts.isEmpty) {
-                    return const Center(child: Text('No data'));
-                  }
-                  return SortableField(
-                    itemCount: filteredPosts.length,
-                    crossAxisCount: 1,
-                    mainAxisExtent: 400,
-                    showDropdownMenu: false,
-                    itemBuilder: (_, index) {
-                      final post = filteredPosts[index];
-                      return PostCard(
-                        postId: post.id,
-                        name: post.user.fullName,
-                        image: post.user.image ?? TImages.user,
-                        university: post.user.koasProfile!.university!,
-                        title: post.title,
-                        description: post.desc,
-                        category: post.treatment.alias,
-                        timePosted: timeago.format(post.updateAt),
-                        participantCount: post.totalCurrentParticipants,
-                        requiredParticipant: post.requiredParticipant,
-                        dateStart: post.schedule.isNotEmpty
-                            ? DateFormat('dd')
-                                .format(post.schedule[0].dateStart)
-                            : 'N/A',
-                        dateEnd: post.schedule.isNotEmpty
-                            ? DateFormat('dd MMM yyyy')
-                                .format(post.schedule[0].dateEnd)
-                            : 'N/A',
-                        likesCount: post.likeCount ?? 0,
-                        onTap: () => Get.to(() => const PostDetailScreen(),
-                            arguments: post),
-                        onPressed: () => Get.to(() => const PostDetailScreen(),
-                            arguments: post),
-                      );
-                    },
-                  );
-                },
-              )
+              const SizedBox(height: TSizes.spaceBtwSections),
+              Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final filteredPosts = controller.posts
+                    .where((post) =>
+                        post.user.koasProfile?.university == university.name)
+                    .toList();
+                if (filteredPosts.isEmpty) {
+                  return const Center(child: Text('No data'));
+                }
+                return SortableField(
+                  itemCount: filteredPosts.length,
+                  crossAxisCount: 1,
+                  mainAxisExtent: 400,
+                  showDropdownMenu: false,
+                  itemBuilder: (_, index) {
+                    final post = filteredPosts[index];
+                    return PostCard(
+                      postId: post.id,
+                      name: post.user.fullName,
+                      image: post.user.image ?? TImages.user,
+                      university: post.user.koasProfile?.university ?? 'N/A',
+                      title: post.title,
+                      description: post.desc,
+                      category: post.treatment.alias,
+                      timePosted: timeago.format(post.updateAt),
+                      participantCount: post.totalCurrentParticipants,
+                      requiredParticipant: post.requiredParticipant,
+                      dateStart: _formatDate(post.schedule, true),
+                      dateEnd: _formatDate(post.schedule, false),
+                      likesCount: post.likeCount ?? 0,
+                      onTap: () => Get.to(() => const PostDetailScreen(),
+                          arguments: post),
+                      onPressed: () => Get.to(() => const PostDetailScreen(),
+                          arguments: post),
+                    );
+                  },
+                );
+              })
             ],
           ),
         ),
       ),
     );
   }
+
+  String _formatDate(List<dynamic> schedule, bool isStart) {
+    if (schedule.isEmpty || schedule[0] == null) return 'N/A';
+    final date = isStart ? schedule[0].dateStart : schedule[0].dateEnd;
+    if (date == null) return 'N/A';
+    return isStart
+        ? DateFormat('dd').format(date)
+        : DateFormat('dd MMM yyyy').format(date);
+  }
 }
+

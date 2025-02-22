@@ -14,15 +14,26 @@ class ReviewsRepository extends GetxController {
   Future<List<ReviewModel>> getReviews() async {
     try {
       final response = await DioClient().get(Endpoints.reviews);
+      print('Response Type: ${response.data.runtimeType}');
+      print('Response Data: ${response.data}');
 
       if (response.statusCode == 200) {
-        return ReviewModel.reviewsFromJson(response.data);
+        if (response.data is List) {
+          return [ReviewModel.reviewFromJson(response.data)];
+        } else if (response.data is Map<String, dynamic>) {
+          return [ReviewModel.reviewFromJson(response.data)];
+        } else {
+          throw 'Invalid response format';
+        }
+      } else {
+        throw 'Failed with status: ${response.statusCode}';
       }
     } catch (e) {
-      throw e.toString();
+      throw 'Error fetching reviews: $e';
     }
-    throw 'Failed to fetch treatment types.';
-  }
+}
+
+
 
   Future<ReviewModel> checkExistingReview(
       String postId, String pasienId) async {
@@ -35,14 +46,14 @@ class ReviewsRepository extends GetxController {
         },
       );
 
-      // Cek apakah ada data dan reviews array tidak kosong
+      // Cek apakah ada data dan Review array tidak kosong
       if (response.data != null &&
-          response.data['reviews'] != null &&
-          response.data['reviews'] is List &&
-          response.data['reviews'].isNotEmpty) {
+          response.data['Review'] != null &&
+          response.data['Review'] is List &&
+          response.data['Review'].isNotEmpty) {
         // Karena data dalam bentuk array, ambil review pertama
         // yang sesuai dengan postId dan pasienId
-        final reviewData = response.data['reviews'][0];
+        final reviewData = response.data['Review'][0];
         return ReviewModel.fromJson(reviewData);
       } else {
         return ReviewModel.empty();
@@ -81,7 +92,7 @@ class ReviewsRepository extends GetxController {
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
-      e.toString();
+      throw 'Failed to save user data.';
     }
   }
 }

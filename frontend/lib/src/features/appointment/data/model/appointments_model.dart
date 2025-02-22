@@ -56,6 +56,12 @@ factory AppointmentsModel.fromJson(Map<String, dynamic> json) {
           json['koas'] != null ? KoasProfileModel.fromJson(json['koas']) : null,
       schedule:
           json['schedule'] != null ? Schedule.fromJson(json['schedule']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
     );
   }
 

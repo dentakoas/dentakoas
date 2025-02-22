@@ -95,7 +95,9 @@ class ReviewsController extends GetxController {
       final fetchedReview = await reviewsRepository.getReviewById(id);
       review.assignAll([fetchedReview]);
     } catch (e) {
-      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
+      // TLoaders.errorSnackBar(title: 'Error', message: e.toString());
+      TLoaders.errorSnackBar(
+          title: 'Error', message: 'Failed to fetch review data.');
     } finally {
       isLoading.value = false;
     }
@@ -103,21 +105,25 @@ class ReviewsController extends GetxController {
 
   Future<void> addReview(String postId, String koasId) async {
     try {
+      Logger().i('Starting addReview process');
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.loadingHealth);
+          'Processing your action....', TImages.superToothLoading);
 
       if (!await NetworkManager.instance.isConnected()) {
+        Logger().w('No internet connection');
         TFullScreenLoader.stopLoading();
         return;
       }
 
       if (rating.value == 0.0) {
+        Logger().w('Rating is zero');
         TLoaders.errorSnackBar(title: 'Error', message: 'Please give a rating');
         TFullScreenLoader.stopLoading();
         return;
       }
 
       if (!reviewsFormKey.currentState!.validate()) {
+        Logger().w('Form validation failed');
         TFullScreenLoader.stopLoading();
         return;
       }
@@ -130,7 +136,10 @@ class ReviewsController extends GetxController {
         comment: comment.text.trim(),
       );
 
+      Logger().i('Adding review: $newReview');
       await reviewsRepository.addReview(newReview);
+
+      Logger().i('Review added successfully');
 
       TFullScreenLoader.stopLoading();
       TLoaders.successSnackBar(
@@ -142,16 +151,18 @@ class ReviewsController extends GetxController {
       await fetchReviews();
       await UserController.instance.fetchUserDetail();
 
+      Logger().i('Navigating to success screen');
       Get.to(() => StateScreen(
             image: TImages.successAddReview,
             isLottie: true,
-            title: "Thank you for your review",
+            title: "Thanks for your review",
             subtitle: "Your review has been submitted successfully",
             showButton: true,
             primaryButtonTitle: 'Back to Home',
             onPressed: () => Get.offAll(() => const NavigationMenu()),
           ));
     } catch (e) {
+      Logger().e('Error adding review: $e');
       TFullScreenLoader.stopLoading();
       TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }

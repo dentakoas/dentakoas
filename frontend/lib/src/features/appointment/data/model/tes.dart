@@ -78,7 +78,7 @@ class Post {
       likes: json['likes'] is List ? json['likes'] : [],
       likeCount: json['likeCount'] ?? 0,
       totalCurrentParticipants: json['totalCurrentParticipants'] ?? 0,
-      reviews: (json['ReviewModel'] as List?)
+      reviews: (json['Review'] as List?)
               ?.map((item) => ReviewModel.fromJson(item))
               .toList() ??
           [],
@@ -154,6 +154,7 @@ class Schedule {
           : (json['timeslot'] != null
               ? [Timeslot.fromJson(json['timeslot'])]
               : []),
+      
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updateAt: DateTime.tryParse(json['updateAt'] ?? '') ?? DateTime.now(),
     );

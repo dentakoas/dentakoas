@@ -17,6 +17,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBack;
   final bool showBackArrow;
   final bool centerTitle;
+  final bool showActions;
 
   const DAppBar({
     super.key,
@@ -28,6 +29,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackArrow = false,
     this.centerTitle = false,
     this.onBack,
+    this.showActions = true,
   });
 
   @override
@@ -63,24 +65,26 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
             if (title != null) title!, // Title jika ada
           ],
         ),
-        actions: [
-          // 🔄 SWITCHER BUTTON
-          Obx(() => IconButton(
-                icon: Icon(
-                  searchController.isSearching.value
-                      ? Iconsax.close_circle
-                      : Iconsax.search_normal_14,
-                  color: TColors.black,
+        actions: showActions
+            ? [
+                // 🔄 SWITCHER BUTTON
+                Obx(() => IconButton(
+                      icon: Icon(
+                        searchController.isSearching.value
+                            ? Iconsax.close_circle
+                            : Iconsax.search_normal_14,
+                        color: TColors.black,
+                      ),
+                      onPressed: () {
+                        searchController.isSearching.toggle();
+                      },
+                    )),
+                // 🔔 NOTIFICATION BUTTON
+                NotificationCounterIcon(
+                  onPressed: () => Get.to(() => const NotificationScreen()),
                 ),
-                onPressed: () {
-                  searchController.isSearching.toggle();
-                },
-              )),
-          // 🔔 NOTIFICATION BUTTON
-          NotificationCounterIcon(
-            onPressed: () => Get.to(() => const NotificationScreen()),
-          ),
-        ],
+              ]
+            : null,
       ),
     );
   }

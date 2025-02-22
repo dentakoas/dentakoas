@@ -68,7 +68,7 @@ class UpdateGeneralInformationController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Proceccing your action....', TImages.loadingHealth);
+          'Proceccing your action....', TImages.superToothLoading);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();

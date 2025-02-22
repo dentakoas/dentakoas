@@ -65,12 +65,9 @@ class ReviewModel {
     );
   }
 
-  static List<ReviewModel> reviewsFromJson(dynamic data) {
-    if (data is Map<String, dynamic> && data.containsKey("Review")) {
-      final reviews = data["Review"] as List;
-      return reviews.map((item) => ReviewModel.fromJson(item)).toList();
-    }
-    throw Exception('Invalid data format for reviews');
+  static ReviewModel reviewFromJson(Map<String, dynamic> json) {
+    return ReviewModel.fromJson(json);
   }
+
   
 }

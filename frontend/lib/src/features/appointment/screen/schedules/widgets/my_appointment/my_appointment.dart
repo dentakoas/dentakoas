@@ -143,7 +143,8 @@ class MyAppointmentScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: appointment.status != StatusAppointment.Pending
+      bottomNavigationBar: appointment.status == StatusAppointment.Confirmed ||
+              appointment.status == StatusAppointment.Ongoing
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               color: Colors.white,

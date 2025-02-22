@@ -74,8 +74,8 @@ class TabCompletedAppointments extends StatelessWidget {
                         secondaryBtnText: 'Review',
                         showSecondaryBtn:
                             appointment.schedule!.post.reviews!.isEmpty
-                                ? false
-                                : true,
+                                ? true
+                                : false,
                         onPrimaryBtnPressed: () {
                           Get.to(
                             () => const MyAppointmentScreen(),
