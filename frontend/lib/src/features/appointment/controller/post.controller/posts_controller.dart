@@ -165,7 +165,7 @@ class PostController extends GetxController {
     
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
       Logger().i('Opened loading dialog');
 
       // Check connection
@@ -334,7 +334,7 @@ class PostController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConnected = await NetworkManager.instance.isConnected();

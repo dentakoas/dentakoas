@@ -22,6 +22,7 @@ import 'package:logger/logger.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
+  
 
   final profileLoading = false.obs;
   Rx<UserModel> user = UserModel.empty().obs;
@@ -194,7 +195,7 @@ setStatusColor() {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Re-authenticating....', TImages.superToothLoading);
+          'Re-authenticating....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -256,7 +257,7 @@ setStatusColor() {
   void deleteUserAccount() async {
     try {
       TFullScreenLoader.openLoadingDialog(
-          'Proccecing....', TImages.superToothLoading);
+          'Proccecing....', TImages.loadingHealth);
 
       final auth = AuthenticationRepository.instance;
       final provider =
@@ -288,7 +289,7 @@ setStatusColor() {
 
   //     // Start loading
   //     TFullScreenLoader.openLoadingDialog(
-  //         'Uploading image...', TImages.superToothLoading);
+  //         'Uploading image...', TImages.loadingHealth);
 
   //     // Upload image to Supabase
   //     final File imageFile = File(image.path);
@@ -368,7 +369,7 @@ setStatusColor() {
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Uploading image...', TImages.superToothLoading);
+          'Uploading image...', TImages.loadingHealth);
 
       // Upload to Cloudinary
       final response = await uploadImageToCloudinary(File(image.path));

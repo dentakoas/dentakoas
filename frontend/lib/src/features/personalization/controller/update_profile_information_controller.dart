@@ -39,7 +39,7 @@ class UpdateProfileInformationController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your information....', TImages.superToothLoading);
+          'Processing your information....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();

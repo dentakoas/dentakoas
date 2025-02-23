@@ -112,10 +112,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-flutter_icons:
-  android: true
-  ios: true
-  image_path: "assets/logos/super_dental.png" # Path ke icon kamu
+# flutter_icons:
+#   android: true
+#   ios: true
+#   image_path: "assets/logos/super_dental.png" # Path ke icon kamu
 
   #--------------- LOCAL ASSETS ------------------#
   assets:

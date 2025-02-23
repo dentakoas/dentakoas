@@ -107,7 +107,7 @@ class ReviewsController extends GetxController {
     try {
       Logger().i('Starting addReview process');
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
 
       if (!await NetworkManager.instance.isConnected()) {
         Logger().w('No internet connection');

@@ -45,7 +45,7 @@ class TImages {
   static const String amongUsLoading =
       "assets/images/animations/amongus-loading.json";
   static const String superToothLoading =
-      "assets/images/animations/loading_supertooth.json";
+      "assets/images/animations/email.json";
   static const String successfullySignedUp =
       "assets/images/animations/verify_succes.json";
   static const String emailVerificationSuccess =
@@ -54,6 +54,7 @@ class TImages {
       "assets/images/animations/password-reset-2.json";
   static const String characterExplore =
       "assets/images/animations/char_explore.json";
+  static const String superDental = "assets/logos/super_dental.png";
   
 
   static const String loadingHealth = "assets/images/animations/email.json";
@@ -243,6 +244,21 @@ class TImages {
 
   // Treatment
   static const String treatmentImage1 = "assets/images/products/tooth.png";
+  static const String treatmentImage2 = "assets/icons/categories/tooth-2.png";
+  static const String treatmentImage3 = "assets/icons/categories/tooth-3.png";
+  static const String treatmentImage4 = "assets/icons/categories/tooth-4.png";
+  static const String treatmentImage5 = "assets/icons/categories/tooth-5.png";
+  static const String treatmentImage6 = "assets/icons/categories/tooth-6.png";
+  static const String treatmentImage7 = "assets/icons/categories/tooth-7.png";
+  static const String treatmentImage8 = "assets/icons/categories/tooth-8.png";
+  static const String treatmentImage9 = "assets/icons/categories/tooth-9.png";
+  static const String treatmentImage10 = "assets/icons/categories/tooth-10.png";
+  static const String treatmentImage11 = "assets/icons/categories/tooth-11.png";
+  static const String treatmentImage12 = "assets/icons/categories/tooth-12.png";
+  static const String treatmentImage13 = "assets/icons/categories/tooth-13.png";
+  static const String treatmentImage14 = "assets/icons/categories/tooth-14.png";
+  static const String treatmentImage15 = "assets/icons/categories/tooth-15.png";
+  static const String treatmentImage16 = "assets/icons/categories/tooth-16.png";
+  
 }
-
 

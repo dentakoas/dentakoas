@@ -140,7 +140,7 @@ class AppointmentsController extends GetxController {
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -214,7 +214,7 @@ class AppointmentsController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -301,7 +301,7 @@ class AppointmentsController extends GetxController {
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -375,7 +375,7 @@ class AppointmentsController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -610,7 +610,7 @@ class AppointmentsController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Processing your action....', TImages.superToothLoading);
+          'Processing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();

@@ -3,6 +3,7 @@ import 'package:denta_koas/src/commons/widgets/shimmer/treatment_shimmer.dart';
 import 'package:denta_koas/src/features/appointment/controller/treatment_controller.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/category_post/post_with_specific_category.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
+import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,7 +39,7 @@ class HomeCategories extends StatelessWidget {
             itemBuilder: (context, index) {
               final treatment = controller.featuredTreatments[index];
               return VerticalImageText(
-                image: treatment.image!,
+                image: TImages.treatmentImage1,
                 title: treatment.alias!,
                 textColor: TColors.textPrimary,
                 onTap: () => Get.to(

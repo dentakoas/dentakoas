@@ -4,7 +4,7 @@ class Endpoints {
   static const String prodUrl = 'https://dentakoas-production.up.railway.app';
 
   static const String baseUrl =
-      '$devUrl/api';
+      '$prodUrl/api';
 
   static const String baseAuthUrl = '$baseUrl/auth';
   static const String baseAuthSignin = '$baseAuthUrl/signin';

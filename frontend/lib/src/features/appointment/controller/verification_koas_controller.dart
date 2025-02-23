@@ -81,7 +81,7 @@ class VerificationKoasController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Proceccing your action....', TImages.superToothLoading);
+          'Proceccing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
@@ -142,7 +142,7 @@ class VerificationKoasController extends GetxController {
     try {
       // Start loading
       TFullScreenLoader.openLoadingDialog(
-          'Proceccing your action....', TImages.superToothLoading);
+          'Proceccing your action....', TImages.loadingHealth);
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();

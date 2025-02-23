@@ -37,17 +37,11 @@ class VerticalImageText extends StatelessWidget {
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Center(
-                child: image.startsWith("https")
-                    ? Image.network(
-                        image,
-                        fit: BoxFit.cover,
-                        color: TColors.primary,
-                      )
-                    : Image.asset(
-                        image,
-                        fit: BoxFit.cover,
-                        color: TColors.primary,
-                      ),
+                child: Image(
+                  image: AssetImage(image),
+                  fit: BoxFit.cover,
+                  color: TColors.primary,
+                ),
               ),
             ),
             const SizedBox(height: TSizes.spaceBtwItems / 2),
