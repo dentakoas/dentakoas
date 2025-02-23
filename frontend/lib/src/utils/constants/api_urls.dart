@@ -1,6 +1,6 @@
 class Endpoints {
   // Base URL
-  static const devUrl = "http://172.16.0.2:3000";
+  static const devUrl = "http://172.28.160.1:3000";
   static const String prodUrl = 'https://dentakoas-production.up.railway.app';
 
   static const String baseUrl =

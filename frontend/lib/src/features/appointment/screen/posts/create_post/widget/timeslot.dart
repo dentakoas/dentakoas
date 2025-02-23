@@ -176,7 +176,7 @@ class _TimeSlotSelectionState extends State<TimeSlotSelection> {
             title: title,
             isSuffixIcon: true,
             suffixIcon: Icons.add,
-            color: isAvailable ? TColors.black : TColors.grey,
+            color: isAvailable ? TColors.textPrimary : TColors.grey,
             onPressed: isAvailable ? () => _showTimePicker(title) : () {},
           ),
         ),
@@ -269,21 +269,26 @@ class _TimeSlotSelectionState extends State<TimeSlotSelection> {
   }
 
   Future<void> _showTimePicker(String section) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: Get.context!,
-      initialTime: section == 'Pagi'
-          ? const TimeOfDay(hour: 6, minute: 0)
-          : section == 'Siang'
-              ? const TimeOfDay(hour: 12, minute: 0)
-              : const TimeOfDay(hour: 18, minute: 0),
+    final TimeOfDay? pickedTime = await showDialog<TimeOfDay>(
+      context: context,
+      builder: (BuildContext context) {
+        return ModernTimePicker(
+          section: section,
+          onTimeSelected: (TimeOfDay time) {
+            Navigator.of(context).pop(time);
+          },
+        );
+      },
     );
 
     if (pickedTime != null) {
+      // Handle the selected time
       controller.addTimeSlot(section, pickedTime);
       if (controller.tooltipShown == false) {
         await _showAndCloseTooltip();
         controller.tooltipShown = true;
       }
+      // print('Selected time: ${pickedTime.format(context)}');
     }
   }
 
@@ -294,5 +299,208 @@ class _TimeSlotSelectionState extends State<TimeSlotSelection> {
     tooltip?.ensureTooltipVisible();
     await Future.delayed(const Duration(seconds: 4));
     tooltip?.deactivate();
+  }
+}
+
+
+
+
+class ModernTimePicker extends StatefulWidget {
+  final Function(TimeOfDay) onTimeSelected;
+  final String section;
+
+  const ModernTimePicker({
+    super.key,
+    required this.onTimeSelected,
+    required this.section,
+  });
+
+  @override
+  _ModernTimePickerState createState() => _ModernTimePickerState();
+}
+
+class _ModernTimePickerState extends State<ModernTimePicker> {
+  late TimeOfDay _selectedTime;
+  late FixedExtentScrollController _hourController;
+  late FixedExtentScrollController _minuteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTime = _getInitialTime(widget.section);
+    _hourController =
+        FixedExtentScrollController(initialItem: _selectedTime.hour);
+    _minuteController =
+        FixedExtentScrollController(initialItem: _selectedTime.minute);
+  }
+
+  TimeOfDay _getInitialTime(String section) {
+    switch (section) {
+      case 'Pagi':
+        return const TimeOfDay(hour: 6, minute: 0);
+      case 'Siang':
+        return const TimeOfDay(hour: 12, minute: 0);
+      case 'Malam':
+        return const TimeOfDay(hour: 17, minute: 0);
+      default:
+        return const TimeOfDay(hour: 12, minute: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _hourController.dispose();
+    _minuteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              TColors.primary.withOpacity(0.1),
+              TColors.secondary.withOpacity(0.1),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Select Time for ${widget.section}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: TColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildTimePicker(context, true), // For hours
+                  const SizedBox(width: 8),
+                  _buildTimePicker(context, false), // For minutes
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: TColors.primary.withOpacity(0.1),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: TColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: TColors.primary.withOpacity(0.1),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        widget.onTimeSelected(_selectedTime);
+                      },
+                      child: const Text(
+                        'Confirm',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: TColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimePicker(BuildContext context, bool isHour) {
+    return Container(
+      height: 180,
+      width: 80,
+      decoration: BoxDecoration(
+        color: TColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: TColors.primary.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ListWheelScrollView.useDelegate(
+        controller: isHour ? _hourController : _minuteController,
+        itemExtent: 40,
+        perspective: 0.005,
+        diameterRatio: 1.2,
+        physics: const FixedExtentScrollPhysics(),
+        childDelegate: ListWheelChildBuilderDelegate(
+          childCount: isHour ? 24 : 60,
+          builder: (context, index) {
+            return _buildTimeItem(context, index, isHour);
+          },
+        ),
+        onSelectedItemChanged: (index) {
+          setState(() {
+            if (isHour) {
+              _selectedTime =
+                  TimeOfDay(hour: index, minute: _selectedTime.minute);
+            } else {
+              _selectedTime =
+                  TimeOfDay(hour: _selectedTime.hour, minute: index);
+            }
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildTimeItem(BuildContext context, int index, bool isHour) {
+    final isSelected =
+        isHour ? index == _selectedTime.hour : index == _selectedTime.minute;
+
+    return Center(
+      child: Text(
+        isHour ? '$index'.padLeft(2, '0') : '$index'.padLeft(2, '0'),
+        style: TextStyle(
+          fontSize: isSelected ? 24 : 16,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? TColors.primary : TColors.textSecondary,
+        ),
+      ),
+    );
   }
 }

@@ -187,6 +187,8 @@ class _BrutalGlitchGreetingTextState extends State<BrutalGlitchGreetingText> {
   }
 }
 
+
+
 class GlitchGreetingCard extends StatefulWidget {
   const GlitchGreetingCard({super.key});
 
@@ -206,7 +208,7 @@ class _GlitchGreetingCardState extends State<GlitchGreetingCard>
     '欢迎',
     'ようこそ',
     '환영합니다',
-    'Добро по��аловать',
+    'Добро пожаловать',
     'مرحبا',
     'स्वागत हे',
     'Selamat datang',
@@ -217,6 +219,7 @@ class _GlitchGreetingCardState extends State<GlitchGreetingCard>
   int _currentGreetingIndex = 0;
   bool _isGlitching = false;
   final Random _random = Random();
+  Timer? _glitchTimer;
 
   @override
   void initState() {
@@ -230,21 +233,26 @@ class _GlitchGreetingCardState extends State<GlitchGreetingCard>
   }
 
   void _startGlitchTimer() {
-    Timer.periodic(const Duration(milliseconds: 3000), (timer) {
-      setState(() {
-        _isGlitching = true;
-      });
-      _controller.forward(from: 0).then((_) {
+    _glitchTimer = Timer.periodic(const Duration(milliseconds: 3000), (timer) {
+      if (mounted) {
         setState(() {
-          _currentGreetingIndex = _random.nextInt(greetings.length);
-          _isGlitching = false;
+          _isGlitching = true;
         });
-      });
+        _controller.forward(from: 0).then((_) {
+          if (mounted) {
+            setState(() {
+              _currentGreetingIndex = _random.nextInt(greetings.length);
+              _isGlitching = false;
+            });
+          }
+        });
+      }
     });
   }
 
   @override
   void dispose() {
+    _glitchTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -299,6 +307,8 @@ class _GlitchGreetingCardState extends State<GlitchGreetingCard>
     );
   }
 }
+
+
 
 // class GlitchGreetingCard extends StatefulWidget {
 //   const GlitchGreetingCard({super.key});

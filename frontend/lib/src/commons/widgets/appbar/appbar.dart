@@ -84,7 +84,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: () => Get.to(() => const NotificationScreen()),
                 ),
               ]
-            : null,
+            : actions,
       ),
     );
   }

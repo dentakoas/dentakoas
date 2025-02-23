@@ -150,7 +150,7 @@ class ImageUploadWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Upload Image (Optional)',
+          'Upload Image',
           style: Theme.of(context)
               .textTheme
               .headlineSmall!
@@ -158,7 +158,7 @@ class ImageUploadWidget extends StatelessWidget {
         ),
         const SizedBox(height: TSizes.spaceBtwItems / 4),
         const Text(
-          'Upload up to 4 images. Maximum file size is 2MB per image.',
+          'Upload up to 4 images. Maximum file size is 2MB per image. Consider uploading images that are related to the post (dental, medical, etc.)',
           style: TextStyle(
             color: TColors.textSecondary,
             fontSize: 12,
@@ -186,18 +186,34 @@ class ImageUploadWidget extends StatelessWidget {
                                 context, controller.selectedImages[index]),
                             child: Row(
                               children: [
+                                // Show loading indicator during analysis
+                                if (controller.analyzingIndex.value == index)
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    margin: const EdgeInsets.only(right: 8),
+                                    child: const CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          TColors.primary),
+                                    ),
+                                  ),
                                 Expanded(
                                   child: Text(
                                     controller.fileNames[index],
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: TSizes.fontSizeMd,
                                       fontWeight: FontWeight.w600,
-                                      color: TColors.darkGrey,
+                                      color: controller.analyzingIndex.value ==
+                                              index
+                                          ? TColors.primary
+                                          : TColors.darkGrey,
                                     ),
                                   ),
                                 ),
-                                if (index < controller.uploadedUrls.length)
+                                if (index < controller.uploadedUrls.length &&
+                                    controller.analyzingIndex.value != index)
                                   const Icon(Icons.check_circle,
                                       color: Colors.green, size: 16)
                               ],
@@ -206,7 +222,9 @@ class ImageUploadWidget extends StatelessWidget {
                         ),
                         IconButton(
                           icon: const Icon(Iconsax.trash, color: TColors.error),
-                          onPressed: () => controller.removeImage(index),
+                          onPressed: controller.analyzingIndex.value == index
+                              ? null
+                              : () => controller.removeImage(index),
                         ),
                       ],
                     ),
@@ -218,9 +236,15 @@ class ImageUploadWidget extends StatelessWidget {
         Obx(() {
           if (controller.selectedImages.length < 4) {
             return GestureDetector(
-              onTap: controller.isUploading.value ? null : controller.pickImage,
+              onTap: controller.isUploading.value ||
+                      controller.analyzingIndex.value != -1
+                  ? null
+                  : controller.pickImage,
               child: DottedBorder(
-                color: TColors.primary,
+                color: controller.isUploading.value ||
+                        controller.analyzingIndex.value != -1
+                    ? TColors.grey
+                    : TColors.primary,
                 strokeWidth: 2,
                 dashPattern: const [6, 3],
                 borderType: BorderType.RRect,
@@ -231,13 +255,32 @@ class ImageUploadWidget extends StatelessWidget {
                   alignment: Alignment.center,
                   child: controller.isUploading.value
                       ? const CircularProgressIndicator()
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, size: 40, color: TColors.primary),
-                            SizedBox(width: 8),
-                          ],
-                        ),
+                      : controller.analyzingIndex.value != -1
+                          ? const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      TColors.primary),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Analyzing image...',
+                                  style: TextStyle(
+                                    color: TColors.primary,
+                                    fontSize: TSizes.fontSizeSm,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add,
+                                    size: 40, color: TColors.primary),
+                                SizedBox(width: 8),
+                              ],
+                            ),
                 ),
               ),
             );

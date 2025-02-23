@@ -382,5 +382,8 @@ void _updateAllTimeSlots() {
     return {'timeSlots': timeSlots};
   }
 
+  bool isSectionAvailable(String section) {
+    return timeSlots[section]?.isNotEmpty ?? false;
+  }
 
 }

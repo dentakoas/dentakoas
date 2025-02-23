@@ -10,10 +10,8 @@ class DynamicInputForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(InputController());
-
-    // Initialize inputs with 3 default fields
-    controller.initializeInputs(3);
-
+    controller.initializeInputs(1);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -34,7 +32,7 @@ class DynamicInputForm extends StatelessWidget {
                     controller: controller.patientRequirements[index],
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.checklist),
-                      suffixIcon: controller.patientRequirements.length > 1
+                      suffixIcon: index > 0
                           ? IconButton(
                               icon: const Icon(Icons.remove),
                               onPressed: () =>
@@ -43,6 +41,19 @@ class DynamicInputForm extends StatelessWidget {
                           : null,
                       labelText: 'Requirement ${index + 1}',
                     ),
+                    // Validator khusus untuk field pertama
+                    validator: index == 0
+                        ? (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'First requirement must not be empty';
+                            }
+                            return null;
+                          }
+                        : null,
+                    // Optional: style khusus untuk field pertama
+                    style: index == 0
+                        ? const TextStyle(fontWeight: FontWeight.w500)
+                        : null,
                   ),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
                 ],
@@ -50,16 +61,7 @@ class DynamicInputForm extends StatelessWidget {
             ),
           ),
         ),
-        // ElevatedButton(
-        //   onPressed: () {
-        //     final values = controller.getAllValues();
-        //     Logger().i(values);
-
-        //   },
-        //   child: const Text('Submit'),
-        // ),
       ],
     );
   }
 }
-

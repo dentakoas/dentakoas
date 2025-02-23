@@ -43,9 +43,20 @@ class SchedulePostController extends GetxController {
       }
 
       // Validate the form
-      if (!schedulePostFormKey.currentState!.validate()) {
-        Logger().e('Form validation failed');
+      // if (!schedulePostFormKey.currentState!.validate()) {
+      //   Logger().e('Form validation failed');
+      //   TFullScreenLoader.stopLoading();
+      //   return;
+      // }
+
+      // Check if date range is valid
+      if (!isDateRangeValid()) {
+        Logger().e('Date range validation failed');
         TFullScreenLoader.stopLoading();
+        TLoaders.errorSnackBar(
+          title: 'Validation Error',
+          message: 'Date range cannot be empty',
+        );
         return;
       }
 
@@ -97,11 +108,11 @@ class SchedulePostController extends GetxController {
     } catch (e) {
       // Stop loading
       TFullScreenLoader.stopLoading();
-
+      Logger().e('Error: $e');
       // Error message
       TLoaders.errorSnackBar(
         title: 'Error',
-        message: 'Failed to create post schedule',
+        message: 'Failed to create post schedule ',
       );
     }
   }
@@ -127,5 +138,11 @@ class SchedulePostController extends GetxController {
       selectedDateRange.isNotEmpty ? selectedDateRange.first : null;
   DateTime? get dateEndValue =>
       selectedDateRange.length > 1 ? selectedDateRange.last : null;
+
+  bool isDateRangeValid() {
+    return selectedDateRange.isNotEmpty &&
+        selectedDateRange[0] != null &&
+        (selectedDateRange.length > 1 && selectedDateRange[1] != null);
+  }
 
 }

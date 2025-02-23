@@ -1,8 +1,12 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:denta_koas/src/features/appointment/controller/post.controller/schedule_controller.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
+import 'package:denta_koas/src/utils/constants/image_strings.dart';
+import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 
 class DateRangePicker extends StatelessWidget {
   const DateRangePicker({super.key});
@@ -10,11 +14,96 @@ class DateRangePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SchedulePostController());
-    final rangeDatePickerValueWithDefaultValue =
-        controller.selectedDateRange;
 
+    return Padding(
+      padding: const EdgeInsets.all(0),
+      child: Obx(() {
+        final selectedRange = controller.selectedDateRange;
+        final startDate = selectedRange.isNotEmpty && selectedRange[0] != null
+            ? DateFormat('MMM dd, yyyy').format(selectedRange[0]!)
+            : 'Start Date';
+        final endDate = selectedRange.length > 1 && selectedRange[1] != null
+            ? DateFormat('MMM dd, yyyy').format(selectedRange[1]!)
+            : 'End Date';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [TColors.white, TColors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: TColors.primary.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => _showDateRangePicker(context, controller),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.date_range, color: TColors.primary),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                startDate,
+                                style: const TextStyle(
+                                  color: TColors.textPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                endDate,
+                                style: const TextStyle(
+                                  color: TColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios,
+                            color: TColors.primary, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (controller.selectedDateRange.isEmpty ||
+                controller.selectedDateRange[0] == null ||
+                (controller.selectedDateRange.length > 1 &&
+                    controller.selectedDateRange[1] == null))
+              const Text(
+                'Please select a date range',
+                style: TextStyle(color: TColors.error, fontSize: 12),
+              ),
+          ],
+        );
+      }),
+    );
+  }
+
+  void _showDateRangePicker(
+      BuildContext context, SchedulePostController controller) async {
     final config = CalendarDatePicker2Config(
-      centerAlignModePicker: true,
       calendarType: CalendarDatePicker2Type.range,
       selectedDayHighlightColor: TColors.primary,
       weekdayLabelTextStyle: const TextStyle(
@@ -22,120 +111,92 @@ class DateRangePicker extends StatelessWidget {
         fontWeight: FontWeight.bold,
       ),
       controlsTextStyle: const TextStyle(
-        color: Colors.black,
+        color: TColors.textPrimary,
         fontSize: 15,
         fontWeight: FontWeight.bold,
       ),
-      dynamicCalendarRows: true,
-      daySplashColor: TColors.primary.withOpacity(0.2),
-      disableVibration: true,
-      dayMaxWidth: 64,
-      modePickerBuilder: ({
-        required viewMode,
-        required monthDate,
-        isMonthPicker,
-      }) {
-        return Center(
-          child: Container(
-            padding: const EdgeInsets.all(0),
-            margin: const EdgeInsets.symmetric(horizontal: 0),
-            child: Text(
-              isMonthPicker == true
-                  ? getLocaleFullMonthFormat(const Locale('en'))
-                      .format(monthDate)
-                  : monthDate.year.toString(),
-              style: const TextStyle(
-                color: TColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+      dayTextStyle: const TextStyle(
+        color: TColors.textPrimary,
+        fontWeight: FontWeight.w600,
+      ),
+      selectedDayTextStyle: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+      ),
+      yearTextStyle: const TextStyle(
+        color: TColors.primary,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+      selectedYearTextStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+      dayBorderRadius: BorderRadius.circular(24),
+      selectableDayPredicate: (day) => !day.isBefore(DateTime.now()),
+    );
+
+    final selectedDates = await showModalBottomSheet<List<DateTime?>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: const BoxDecoration(
+            color: TColors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+        children: [
+              Container(
+                height: 4,
+                width: 40,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
+              Expanded(
+                child: CalendarDatePicker2(
+                  config: config,
+                  value: controller.selectedDateRange,
+                  onValueChanged: (dates) {
+                    controller.selectedDateRange.value = dates;
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 150,
+                child: Lottie.asset(TImages.characterExplore),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(TSizes.defaultSpace / 2),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                  child: const Text('Confirm'),
+                ),
+              ),
+            ],
           ),
         );
       },
-      weekdayLabelBuilder: ({required weekday, isScrollViewTopHeader}) {
-        if (weekday == DateTime.sunday) {
-          return const Center(
-            child: Text(
-              'M',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
-        }
-        return null;
-      },
-      disabledDayTextStyle:
-          const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
-      selectableDayPredicate: (day) => !day.isBefore(
-        DateUtils.dateOnly(
-          DateTime.now(),
-        ),
-      ),
     );
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: Column(
-        children: [
-          Obx(() {
-            final selectedRange =
-                controller.selectedDateRange;
-            final startDate =
-                selectedRange.isNotEmpty && selectedRange[0] != null
-                    ? selectedRange[0]!.toLocal().toString().split(' ')[0]
-                    : '';
-            final endDate = selectedRange.length > 1 && selectedRange[1] != null
-                ? selectedRange[1]!.toLocal().toString().split(' ')[0]
-                : '';
-            final dateRange = startDate.isNotEmpty && endDate.isNotEmpty
-                ? '$startDate - $endDate'
-                : 'Select Date Range';
 
-            return Form(
-              key: controller.schedulePostFormKey,
-              child: TextFormField(
-                readOnly: true,
-                controller: TextEditingController(
-                  text: dateRange,
-                ),
-                validator: (value) {
-                  if (controller.selectedDateRange.isEmpty ||
-                      controller.selectedDateRange[0] == null ||
-                      (controller.selectedDateRange.length > 1 &&
-                          controller.selectedDateRange[1] == null)) {
-                    return 'Date range cannot be empty';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.calendar_today),
-                  hintText: dateRange,
-                ),
-                onTap: () async {
-                  final selectedDates = await showDialog<List<DateTime?>>(
-                    context: context,
-                    builder: (context) => Dialog(
-                      child: CalendarDatePicker2(
-                        config: config,
-                        value: controller.selectedDateRange,
-                        onValueChanged: (dates) {
-                          controller.selectedDateRange.value = dates;
-                        },
-                      ),
-                    ),
-                  );
-                  if (selectedDates != null) {
-                    controller.selectedDateRange.value = selectedDates;
-                  }
-                },
-              ),
-            );
-          }),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
+    if (selectedDates != null) {
+      controller.selectedDateRange.value = selectedDates;
+    }
   }
 }
+
+
+
