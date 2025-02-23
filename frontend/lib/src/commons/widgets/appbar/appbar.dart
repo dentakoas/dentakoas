@@ -29,7 +29,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackArrow = false,
     this.centerTitle = false,
     this.onBack,
-    this.showActions = true,
+    this.showActions = false,
   });
 
   @override

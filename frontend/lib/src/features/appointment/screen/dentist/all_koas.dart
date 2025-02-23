@@ -21,6 +21,7 @@ class AllKoasScreen extends StatelessWidget {
         title: Text('All Koas'),
         showBackArrow: true,
         centerTitle: true,
+        showActions: false,
         // actions: [
         //   IconButton(
         //     icon: const Icon(Icons.filter_list),

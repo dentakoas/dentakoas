@@ -1,15 +1,12 @@
 import 'package:denta_koas/src/commons/widgets/appbar/appbar.dart';
 import 'package:denta_koas/src/commons/widgets/images/circular_image.dart';
-import 'package:denta_koas/src/commons/widgets/notifications/notification_menu.dart';
 import 'package:denta_koas/src/commons/widgets/shimmer/home_appbar_shimmer.dart';
 import 'package:denta_koas/src/features/appointment/controller/search_controller.dart';
-import 'package:denta_koas/src/features/appointment/screen/notifications/notification.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({
@@ -55,24 +52,25 @@ class HomeAppBar extends StatelessWidget {
               ),
             ],
           ),
-          actions: [
-            // 🔄 SWITCHER BUTTON
-            IconButton(
-              icon: Icon(
-                searchController.isSearching.value
-                    ? Iconsax.close_circle
-                    : Iconsax.search_normal_14,
-                color: TColors.black,
-              ),
-              onPressed: () {
-                searchController.isSearching.toggle();
-              },
-            ),
-            // 🔔 NOTIFICATION BUTTON
-            NotificationCounterIcon(
-              onPressed: () => Get.to(() => const NotificationScreen()),
-            ),
-          ],
+          showActions: true,
+          // actions: [
+          //   // 🔄 SWITCHER BUTTON
+          //   IconButton(
+          //     icon: Icon(
+          //       searchController.isSearching.value
+          //           ? Iconsax.close_circle
+          //           : Iconsax.search_normal_14,
+          //       color: TColors.black,
+          //     ),
+          //     onPressed: () {
+          //       searchController.isSearching.toggle();
+          //     },
+          //   ),
+          //   // 🔔 NOTIFICATION BUTTON
+          //   NotificationCounterIcon(
+          //     onPressed: () => Get.to(() => const NotificationScreen()),
+          //   ),
+          // ],
         );
       }
     });

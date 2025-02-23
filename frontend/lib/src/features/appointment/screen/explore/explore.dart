@@ -35,6 +35,7 @@ class ExploreScreen extends StatelessWidget {
         appBar: DAppBar(
           title: Text('Explore',
               style: Theme.of(context).textTheme.headlineMedium),
+          showActions: true,
         ),
         body: Obx(
           () => AnimatedSwitcher(
@@ -75,40 +76,9 @@ class ExploreScreen extends StatelessWidget {
                                 //   showBackground: false,
                                 //   padding: EdgeInsets.zero,
                                 // ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 80,
-                                  child: PageView.builder(
-                                    itemCount: koasController.allKoas.length,
-                                    itemBuilder: (context, index) {
-                                      final List<String> greetingMsg = [
-                                        'Welcome',
-                                        'Bienvenido',
-                                        'Bienvenue',
-                                        'Willkommen',
-                                        'Benvenuto',
-                                        'Bem-vindo',
-                                        '欢迎',
-                                        'ようこそ',
-                                        '환영합니다',
-                                        'Добро пожаловать',
-                                        'مرحبا',
-                                        'स्वागत हे',
-                                        'Selamat datang',
-                                      ];
-                                      return Card(
-                                        color: TColors.white,
-                                        elevation: 0,
-                                        child: Center(
-                                          child: GlitchGreetingText(
-                                            greetings: greetingMsg,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headlineMedium!,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                  child: GlitchGreetingCard()
                                 ),
 
                                 const SizedBox(height: TSizes.spaceBtwSections),
