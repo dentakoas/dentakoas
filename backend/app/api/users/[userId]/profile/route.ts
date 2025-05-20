@@ -452,54 +452,54 @@ export async function POST(
         } as Prisma.KoasProfileCreateInput,
       });
 
-      // Send welcome notification to the Koas
-      await db.notification.create({
-        data: {
-          koasId: profile.id,
-          senderId: null,
-          userId: userId,
-          title: 'Welcome to DentaKoas!',
-          message: `Hello ${
-            existingUser.name || existingUser.givenName || ''
-          }! Welcome to DentaKoas. Your profile has been created and is pending approval.`,
-          status: 'Unread',
-        },
-      });
+      // // Send welcome notification to the Koas
+      // await db.notification.create({
+      //   data: {
+      //     koasId: profile.id,
+      //     senderId: null,
+      //     userId: userId,
+      //     title: 'Welcome to DentaKoas!',
+      //     message: `Hello ${
+      //       existingUser.name || existingUser.givenName || ''
+      //     }! Welcome to DentaKoas. Your profile has been created and is pending approval.`,
+      //     status: 'Unread',
+      //   },
+      // });
 
-      // Send pending approval notification to the Koas
-      await db.notification.create({
-        data: {
-          koasId: profile.id,
-          senderId: null,
-          userId: userId,
-          title: 'Profile Pending Approval',
-          message:
-            "Your profile is currently under review. You'll be notified once approved.",
-          status: 'Unread',
-        },
-      });
+      // // Send pending approval notification to the Koas
+      // await db.notification.create({
+      //   data: {
+      //     koasId: profile.id,
+      //     senderId: null,
+      //     userId: userId,
+      //     title: 'Profile Pending Approval',
+      //     message:
+      //       "Your profile is currently under review. You'll be notified once approved.",
+      //     status: 'Unread',
+      //   },
+      // });
 
-      // Send notification to all Fasilitators
-      const fasilitators = await db.user.findMany({
-        where: { role: 'Fasilitator' },
-        select: { id: true },
-      });
+      // // Send notification to all Fasilitators
+      // const fasilitators = await db.user.findMany({
+      //   where: { role: 'Fasilitator' },
+      //   select: { id: true },
+      // });
 
-      // Create notifications for each fasilitator
-      if (fasilitators.length > 0) {
-        await db.notification.createMany({
-          data: fasilitators.map((fasilitator) => ({
-            senderId: userId,
-            userId: fasilitator.id,
-            koasId: profile.id,
-            title: 'New Koas Registration',
-            message: `${
-              existingUser.givenName || existingUser.name || 'A new Koas'
-            } has registered and is pending approval.`,
-            status: 'Unread',
-          })),
-        });
-      }
+      // // Create notifications for each fasilitator
+      // if (fasilitators.length > 0) {
+      //   await db.notification.createMany({
+      //     data: fasilitators.map((fasilitator) => ({
+      //       senderId: userId,
+      //       userId: fasilitator.id,
+      //       koasId: profile.id,
+      //       title: 'New Koas Registration',
+      //       message: `${
+      //         existingUser.givenName || existingUser.name || 'A new Koas'
+      //       } has registered and is pending approval.`,
+      //       status: 'Unread',
+      //     })),
+      //   });
+      // }
     } else if (existingUser.role === Role.Pasien) {
       profile = await db.pasienProfile.create({
         data: {
@@ -510,46 +510,46 @@ export async function POST(
         } as Prisma.PasienProfileCreateInput,
       });
 
-      // Send welcome notification to the Pasien
-      await db.notification.create({
-        data: {
-          userId: userId,
-          title: 'Welcome to DentaKoas!',
-          message: `Hello ${
-            existingUser.name || existingUser.givenName || ''
-          }! Welcome to DentaKoas. You can now search for dental treatments.`,
-          status: 'Unread',
-        },
-      });
-    } else if (existingUser.role === Role.Fasilitator) {
-      profile = await db.fasilitatorProfile.create({
-        data: {
-          user: { connect: { id: userId } },
-          university: university,
-        } as Prisma.FasilitatorProfileCreateInput,
-      });
+    //   // Send welcome notification to the Pasien
+    //   await db.notification.create({
+    //     data: {
+    //       userId: userId,
+    //       title: 'Welcome to DentaKoas!',
+    //       message: `Hello ${
+    //         existingUser.name || existingUser.givenName || ''
+    //       }! Welcome to DentaKoas. You can now search for dental treatments.`,
+    //       status: 'Unread',
+    //     },
+    //   });
+    // } else if (existingUser.role === Role.Fasilitator) {
+    //   profile = await db.fasilitatorProfile.create({
+    //     data: {
+    //       user: { connect: { id: userId } },
+    //       university: university,
+    //     } as Prisma.FasilitatorProfileCreateInput,
+    //   });
 
-      // Send welcome notification to the Fasilitator
-      await db.notification.create({
-        data: {
-          userId: userId,
-          title: 'Welcome to DentaKoas!',
-          message: `Hello ${
-            existingUser.name || existingUser.givenName || ''
-          }! Welcome to DentaKoas. You can now manage and approve Koas profiles.`,
-          status: 'Unread',
-        },
-      });
-    } else if (existingUser.role === Role.Admin) {
-      // Send welcome notification to the Admin
-      await db.notification.create({
-        data: {
-          userId: userId,
-          title: 'Welcome to DentaKoas!',
-          message: `Hello Admin! Welcome to DentaKoas administrative panel.`,
-          status: 'Unread',
-        },
-      });
+    //   // Send welcome notification to the Fasilitator
+    //   await db.notification.create({
+    //     data: {
+    //       userId: userId,
+    //       title: 'Welcome to DentaKoas!',
+    //       message: `Hello ${
+    //         existingUser.name || existingUser.givenName || ''
+    //       }! Welcome to DentaKoas. You can now manage and approve Koas profiles.`,
+    //       status: 'Unread',
+    //     },
+    //   });
+    // } else if (existingUser.role === Role.Admin) {
+    //   // Send welcome notification to the Admin
+    //   await db.notification.create({
+    //     data: {
+    //       userId: userId,
+    //       title: 'Welcome to DentaKoas!',
+    //       message: `Hello Admin! Welcome to DentaKoas administrative panel.`,
+    //       status: 'Unread',
+    //     },
+    //   });
 
       return NextResponse.json({ error: 'Invalid user role' }, { status: 400 });
     } else {
