@@ -416,7 +416,7 @@ class AppointmentsController extends GetxController {
       await fetchAppointments();
 
       // Close the dialog
-      Navigator.of(Get.overlayContext!).pop();
+      // Navigator.of(Get.overlayContext!).pop();
 
     } catch (e) {
       TFullScreenLoader.stopLoading();
@@ -485,7 +485,7 @@ class AppointmentsController extends GetxController {
       await fetchAppointments();
 
       // Close the dialog
-      Navigator.of(Get.overlayContext!).pop();
+      // Navigator.of(Get.overlayContext!).pop();
     } catch (e) {
       TFullScreenLoader.stopLoading();
       Logger().e(['Failed to confirm appointment: $e']);

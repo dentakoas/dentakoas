@@ -133,7 +133,7 @@ class VerificationKoasController extends GetxController {
       // Refresh the data
       initializeVerificationKoas();
 
-      Navigator.of(Get.overlayContext!).pop();
+      // Navigator.of(Get.overlayContext!).pop();
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoaders.errorSnackBar(
