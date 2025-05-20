@@ -1,6 +1,5 @@
 import 'package:denta_koas/src/cores/data/repositories/authentication.repository/authentication_repository.dart';
 import 'package:denta_koas/src/cores/data/repositories/user.repository/user_repository.dart';
-import 'package:denta_koas/src/features/authentication/screen/signup/verify_email.dart';
 import 'package:denta_koas/src/features/personalization/model/user_model.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/helpers/network_manager.dart';
@@ -134,7 +133,8 @@ class SignUpController extends GetxController {
 
       // Move to verification screen
       Logger().i('Navigating to VerifyEmailScreen');
-      Get.to(() => VerifyEmailScreen(email: email.text.trim()));
+      // Get.to(() => VerifyEmailScreen(email: email.text.trim()));
+      AuthenticationRepository.instance.screenRedirect();
       // Get.to(() => const ProfileSetupScreen());
     } catch (e) {
       // Remove loading

@@ -56,7 +56,11 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating notification:", error);
+    if (error instanceof Error) {
+      console.error('Error creating notification:', error.stack);
+    } else {
+      console.error('Error creating notification:', error);
+    }
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

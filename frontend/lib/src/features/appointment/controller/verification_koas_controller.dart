@@ -13,6 +13,7 @@ import 'package:denta_koas/src/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 class VerificationKoasController extends GetxController {
   static VerificationKoasController get instance => Get.find();
@@ -99,8 +100,8 @@ class VerificationKoasController extends GetxController {
 
       final newNotification = NotificationsModel(
         senderId: UserController.instance.user.value.id,
-        userId: userKoasId,
-        koasId: koasId,
+        userId: koasId,
+        koasId: userKoasId,
         title: 'Koas Application Rejected',
         message:
             'Your Koas application has been rejected. Please contact the facilitator for more information',
@@ -109,7 +110,7 @@ class VerificationKoasController extends GetxController {
 
       // Update the status of koas
       await UserRepository.instance.updateKoasProfile(
-        userKoasId,
+        koasId,
         updateKoasProfile,
       );
 
@@ -160,17 +161,20 @@ class VerificationKoasController extends GetxController {
 
       final updateNotification = NotificationsModel(
         senderId: UserController.instance.user.value.id,
-        userId: userKoasId,
-        koasId: koasId,
+        userId: koasId,
+        koasId: userKoasId,
         title: 'Welcome to Denta Koas',
         message:
             'Your Koas application has been approved. You can now start your Post Event',
         status: StatusNotification.Read,
       );
 
+      Logger().i('Koas ID: $koasId');
+      Logger().i('User Koas ID: $userKoasId');
+
       // Update the status of koas
       await UserRepository.instance.updateKoasProfile(
-        userKoasId,
+        koasId,
         updateKoasProfile,
       );
 

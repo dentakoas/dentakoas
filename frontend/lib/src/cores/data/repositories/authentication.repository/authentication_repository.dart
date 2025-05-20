@@ -3,7 +3,6 @@ import 'package:denta_koas/src/cores/data/repositories/user.repository/user_repo
 import 'package:denta_koas/src/features/authentication/screen/signin/signin.dart';
 import 'package:denta_koas/src/features/authentication/screen/signup/profile-setup.dart';
 import 'package:denta_koas/src/features/authentication/screen/signup/role_option.dart';
-import 'package:denta_koas/src/features/authentication/screen/signup/verify_email.dart';
 import 'package:denta_koas/src/features/onboarding/screen/onboarding/onboarding.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/features/personalization/model/user_model.dart';
@@ -30,9 +29,8 @@ class AuthenticationRepository extends GetxController {
   final storage = GetStorage();
   final _auth = FirebaseAuth.instance;
 
-  // Get Auth user 
+  // Get Auth user
   User? get authUser => _auth.currentUser;
-
 
   @override
   void onReady() {
@@ -41,83 +39,73 @@ class AuthenticationRepository extends GetxController {
     // storage.remove('TEMP_ROLE');
   }
 
-screenRedirect() async {
+  screenRedirect() async {
     try {
-    final user = _auth.currentUser;
-    if (user != null) {
-      final uid = user.uid;
-      
-      // Check if UserRepository is registered, if not register it
-      if (!Get.isRegistered<UserRepository>()) {
-        Get.put(UserRepository());
-      }
-      final userRepository = Get.find<UserRepository>();
+      final user = _auth.currentUser;
+      if (user != null) {
+        final uid = user.uid;
 
-      // Check if UserController is registered, if not register it
-      if (!Get.isRegistered<UserController>()) {
-        Get.put(UserController());
-      }
-      final userController = Get.find<UserController>();
+        // Check if UserRepository is registered, if not register it
+        if (!Get.isRegistered<UserRepository>()) {
+          Get.put(UserRepository());
+        }
+        final userRepository = Get.find<UserRepository>();
 
-      try {
+        // Check if UserController is registered, if not register it
+        if (!Get.isRegistered<UserController>()) {
+          Get.put(UserController());
+        }
+        final userController = Get.find<UserController>();
+
+        try {
           // Check for profile data consistency
-        final userDetail = await userRepository.getUserProfile(uid);
-        
-        final userMap = userDetail.toJson();
+          final userDetail = await userRepository.getUserProfile(uid);
+
+          final userMap = userDetail.toJson();
           final profiles = filterProfileByRole(userMap);
           final hasNullField = userController.hasEmptyFields(profiles);
 
           Logger().i('User Profile: $profiles');
           Logger().i('Has Null Field: $hasNullField');
 
-        if (user.emailVerified) {
-            // Check for complete user data
-            if (userDetail.role == null || userDetail.role!.isEmpty) {
+          // Removed email verification check
+          if (userDetail.role == null || userDetail.role!.isEmpty) {
             Get.offAll(() => const ChooseRolePage());
-            } else if (hasNullField) {
-              // Save role for profile setup
+          } else if (hasNullField) {
+            // Save role for profile setup
             storage.write("TEMP_ROLE", userDetail.role);
             Get.offAll(() => const ProfileSetupScreen());
-            } else {
-              Get.off(() => const NavigationMenu());
+          } else {
+            Get.offAll(() => const NavigationMenu());
           }
-        } else {
-            // Email not verified
-            Get.offAll(() => VerifyEmailScreen(email: user.email ?? ""));
-        }
-      } catch (e) {
-        Logger().e("Error during screen redirect: $e");
-        
+        } catch (e) {
+          Logger().e("Error during screen redirect: $e");
+
           // Determine if this is a 404 error (user not found)
           if (e.toString().contains("404")) {
             // User exists in Firebase but not in backend database
-            // Handle as a special case - if email verified, go to role selection
-            if (user.emailVerified) {
-              Get.offAll(() => const ChooseRolePage());
-            } else {
-              Get.offAll(() => VerifyEmailScreen(email: user.email ?? ""));
-            }
+            // Go directly to role selection without email verification check
+            Get.offAll(() => const ChooseRolePage());
           } else {
             // For other errors, go to sign in screen
             storage.writeIfNull('isFirstTime', true);
             Get.offAll(() => const SigninScreen());
           }
-      }
-    } else {
+        }
+      } else {
         // No user signed in
         storage.writeIfNull('isFirstTime', true);
-      storage.read('isFirstTime') != true
-          ? Get.offAll(() => const SigninScreen())
-          : Get.offAll(() => const OnBoardingScreen());
-    }
+        storage.read('isFirstTime') != true
+            ? Get.offAll(() => const SigninScreen())
+            : Get.offAll(() => const OnBoardingScreen());
+      }
     } catch (e) {
       // Global error handler
       Logger().e("Critical error in screenRedirect: $e");
       storage.writeIfNull('isFirstTime', true);
       Get.offAll(() => const SigninScreen());
     }
-}
-
+  }
 
   // ----------------- Check if user is exist by email -----------------
   Future<bool> checkEmailForResetPassword(String email) async {
@@ -160,8 +148,6 @@ screenRedirect() async {
     }
   }
 
-
-
   // ----------------- Get CSRF -----------------
   Future<String> tokenCsrf() async {
     try {
@@ -183,16 +169,13 @@ screenRedirect() async {
     required String password,
   }) async {
     try {
-   
       await DioClient().post(
         Endpoints.signinWithCredentials,
         data: {
           'email': email,
           'password': password,
-           
         },
       );
-
     } on FirebaseAuthException catch (e) {
       throw TFirebaseAuthException(e.code).message;
     } on FirebaseException catch (e) {
