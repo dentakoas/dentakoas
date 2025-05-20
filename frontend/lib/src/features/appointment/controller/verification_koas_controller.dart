@@ -27,6 +27,10 @@ class VerificationKoasController extends GetxController {
 
   final isLoading = false.obs;
 
+  // Add reactive variables for loading states
+  RxBool isApproving = false.obs;
+  RxBool isRejecting = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -38,7 +42,7 @@ class VerificationKoasController extends GetxController {
       if (UserController.instance.user.value.role != Role.Fasilitator.name) {
         return;
       }
-      
+
       isLoading.value = true;
       final fetchedKoas =
           await UserRepository.instance.fetchUsersByRole(Role.Koas.name);
@@ -213,7 +217,7 @@ class VerificationKoasController extends GetxController {
     return DateFormat('EEEE, d MMMM').format(dateTime);
   }
 
-String formatKoasTimestamp(DateTime? dateTime) {
+  String formatKoasTimestamp(DateTime? dateTime) {
     if (dateTime == null) {
       return 'Unknown';
     }
@@ -230,7 +234,6 @@ String formatKoasTimestamp(DateTime? dateTime) {
 
     return '$hour:$minute $period';
   }
-
 
   // Pop up confirmation
   void approveConfirmation(String userKoasId, String koasId) {

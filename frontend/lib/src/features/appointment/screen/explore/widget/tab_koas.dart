@@ -102,23 +102,30 @@ class TabKoas extends StatelessWidget {
                   );
                 }
                 return DGridLayout(
-                  itemCount: 2,
+                  itemCount: controller.koas
+                      .length, // Use actual list length instead of hardcoded value
                   mainAxisExtent: 205,
                   crossAxisCount: 1,
                   itemBuilder: (_, index) {
-                    final koas = controller.koas[index];
-                    return KoasCard(
-                      name: koas.fullName,
-                      university: koas.koasProfile!.university!,
-                      distance: '1.2 km',
-                      rating: koas.koasProfile!.stats!.averageRating,
-                      totalReviews: koas.koasProfile!.stats!.totalReviews,
-                      image: koas.image ?? TImages.user,
-                      onTap: () => Get.to(
-                        () => const KoasDetailScreen(),
-                        arguments: koas,
-                      ),
-                    );
+                    if (index < controller.koas.length) {
+                      // Add safety check
+                      final koas = controller.koas[index];
+                      return KoasCard(
+                        name: koas.fullName,
+                        university: koas.koasProfile!.university!,
+                        distance: '1.2 km',
+                        rating: koas.koasProfile!.stats!.averageRating,
+                        totalReviews: koas.koasProfile!.stats!.totalReviews,
+                        image: koas.image ?? TImages.user,
+                        onTap: () => Get.to(
+                          () => const KoasDetailScreen(),
+                          arguments: koas,
+                        ),
+                      );
+                    } else {
+                      return const SizedBox
+                          .shrink(); // Fallback in case index is out of bounds
+                    }
                   },
                 );
               }),

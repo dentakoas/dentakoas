@@ -77,6 +77,7 @@ class TabUpcomingAppointments extends StatelessWidget {
                           controller.cancelAppointmentConfirmation(
                             appointment.id!,
                             appointment.pasien?.id ?? '',
+                            appointment.koas?.user?.id ?? '',
                             appointment.koas?.id ?? '',
                             appointment.schedule!.id,
                             appointment.schedule!.timeslot.first.id,

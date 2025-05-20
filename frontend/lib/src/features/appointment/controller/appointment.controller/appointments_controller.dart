@@ -128,7 +128,8 @@ class AppointmentsController extends GetxController {
   }
 
   createAppointment(
-    String koasId,
+    String koasId, // ID of the koas
+    String koasProfileId, // ID of koasProfile - to be used for notifications
     String scheduleId,
     String timeslotId,
     String date,
@@ -170,6 +171,21 @@ class AppointmentsController extends GetxController {
       await appointmentRepository.createAppointment(newAppointment);
       Logger().d('Appointment created successfully');
 
+      // Create and send notification to koas
+      final newNotification = NotificationsModel(
+        senderId: UserController.instance.user.value.id,
+        userId:
+            koasId, // This should be the user ID of the koas, not the koasProfileId
+        koasId: koasId,
+        title: 'New Appointment Request',
+        message:
+            '${UserController.instance.user.value.fullName} has requested an appointment with you for $date. Please check your schedule.',
+        status: StatusNotification.Unread,
+      );
+
+      await NotificationRepository.instance.createNotification(newNotification);
+      Logger().d('Notification sent to koas successfully');
+
       // Stop loading
       TFullScreenLoader.stopLoading();
 
@@ -208,6 +224,7 @@ class AppointmentsController extends GetxController {
     String appointmentId,
     String pasienId,
     String koasId,
+    String koasProfileId,
     scheduleId,
     timeslotId,
   ) async {
@@ -238,7 +255,7 @@ class AppointmentsController extends GetxController {
       if (userRole == 'Pasien') {
         newNotification = NotificationsModel(
           senderId: UserController.instance.user.value.id,
-          userId: koasId,
+          userId: koasProfileId,
           koasId: koasId,
           title: 'Appointment Canceled',
           message:
@@ -434,7 +451,8 @@ class AppointmentsController extends GetxController {
 
   // Pop up the dialog to confirm the appointment
   void createAppointmentConfirmation(
-    String koasId,
+    String koasId, // ID of the koas
+    String koasProfileId, // ID of koasProfile - for notifications
     String scheduleId,
     String timeslotId,
     String date,
@@ -447,7 +465,13 @@ class AppointmentsController extends GetxController {
       confirm: ElevatedButton(
         onPressed: () {
           Get.back();
-          createAppointment(koasId, scheduleId, timeslotId, date);
+          createAppointment(
+            koasId,
+            koasProfileId,
+            scheduleId,
+            timeslotId,
+            date,
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: TColors.primary,
@@ -470,6 +494,7 @@ class AppointmentsController extends GetxController {
     String appointmentId,
     String pasienId,
     String koasId,
+    String koasProfileId,
     scheduleId,
     timeslotId,
   ) {
@@ -481,7 +506,13 @@ class AppointmentsController extends GetxController {
       confirm: ElevatedButton(
         onPressed: () =>
             cancelAppointment(
-            appointmentId, pasienId, koasId, scheduleId, timeslotId),
+          appointmentId,
+          pasienId,
+          koasId,
+          koasProfileId,
+          scheduleId,
+          timeslotId,
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: TColors.primary,
           side: const BorderSide(color: TColors.primary),

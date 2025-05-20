@@ -69,10 +69,10 @@ class TabPendingKoas extends StatelessWidget {
                         showSecondaryBtn: true,
                         onPrimaryBtnPressed: () =>
                             controller.approveConfirmation(
-                                koas.id!, koas.koasProfile!.id!),
+                                koas.koasProfile!.id!, koas.id!),
                         onSecondaryBtnPressed: () =>
                             controller.rejectConfirmation(
-                                koas.id!, koas.koasProfile!.id!),
+                                koas.koasProfile!.id!, koas.id!),
                         onTap: () => Get.to(
                           () => const KoasDetailScreen(),
                           arguments: koas,

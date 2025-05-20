@@ -14,12 +14,38 @@ class KoasReviewsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mengambil arguments dalam bentuk list
-    final List<dynamic> args = Get.arguments;
+    // Handle null or invalid arguments with safe defaults
+    List<ReviewModel> reviews = [];
+    double averageRating = 0.0;
 
-    // Memisahkan arguments
-    final List<ReviewModel> reviews = args[0];
-    final double averageRating = args[1];
+    // Safely extract arguments with null checking
+    try {
+      final args = Get.arguments;
+
+      if (args != null && args is List && args.isNotEmpty) {
+        // Extract the first argument as reviews list
+        if (args[0] != null && args[0] is List<ReviewModel>) {
+          reviews = args[0] as List<ReviewModel>;
+        } else if (args[0] != null && args[0] is List) {
+          // Try to cast each item as ReviewModel if possible
+          reviews = (args[0] as List).whereType<ReviewModel>().toList();
+        }
+        
+        // Extract the second argument as average rating
+        if (args.length > 1 && args[1] != null) {
+          if (args[1] is double) {
+            averageRating = args[1];
+          } else if (args[1] is int) {
+            averageRating = (args[1] as int).toDouble();
+          } else if (args[1] is String) {
+            averageRating = double.tryParse(args[1] as String) ?? 0.0;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error extracting arguments: $e');
+      // Keep default values if an error occurs
+    }
 
     return Scaffold(
       appBar: const DAppBar(

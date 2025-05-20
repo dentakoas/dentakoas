@@ -713,7 +713,6 @@ class KoasUpcomingEvent extends StatelessWidget {
               title: 'You might interest',
               onPressed: () => Get.to(() => const PostWithSpecificKoas())),
           const SizedBox(height: TSizes.spaceBtwItems),
-
           Obx(() {
             if (controller.isLoading.value) {
               return const CardShowcaseShimmer();
@@ -758,7 +757,6 @@ class KoasUpcomingEvent extends StatelessWidget {
               },
             );
           }),
-           
         ],
       ),
     );
@@ -782,28 +780,25 @@ class FooterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(VerificationKoasController());
+    final userController = UserController.instance;
+    final fasilitatorUniversity =
+        userController.user.value.fasilitatorProfile?.university ?? '';
+
+    // Show approve/reject buttons if:
+    // 1. User is Fasilitator
+    // 2. Status is pending
+    // 3. Fasilitator and Koas have the same university
+    final isSameUniversity = koasUniversity.isNotEmpty &&
+        fasilitatorUniversity.isNotEmpty &&
+        koasUniversity == fasilitatorUniversity;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Obx(
         () {
-          final userController = UserController.instance;
-          final fasilitatorUniversity =
-              userController.user.value.fasilitatorProfile?.university ?? '';
-
-          // Show approve/reject buttons if:
-          // 1. User is Fasilitator
-          // 2. Status is pending
-          // 3. Fasilitator and Koas have the same university
-          final isSameUniversity = koasUniversity.isNotEmpty &&
-              fasilitatorUniversity.isNotEmpty &&
-              koasUniversity == fasilitatorUniversity;
-
           if (userController.user.value.role == 'Fasilitator' &&
               status.toLowerCase() == 'pending' &&
               isSameUniversity) {
-            Logger().i(
-                'Showing approve/reject buttons. Universities match: $koasUniversity');
-            
             return Row(
               children: [
                 Expanded(
@@ -857,7 +852,7 @@ class FooterButton extends StatelessWidget {
               ],
             );
           }
-          
+
           // For non-fasilitator users or non-matching conditions, show appropriate button
           if (userController.user.value.role != 'Fasilitator') {
             return SizedBox(

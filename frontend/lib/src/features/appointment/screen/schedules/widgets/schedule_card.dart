@@ -30,6 +30,8 @@ class ScheduleCard extends StatelessWidget {
     this.secondaryBtnText = 'Add Review',
     this.onPrimaryBtnPressed,
     this.onSecondaryBtnPressed,
+    this.isPrimaryBtnLoading = false,
+    this.isSecondaryBtnLoading = false,
   });
 
   final String imgUrl;
@@ -54,6 +56,8 @@ class ScheduleCard extends StatelessWidget {
   final void Function()? onPrimaryBtnPressed;
   final void Function()? onSecondaryBtnPressed;
   final double padding;
+  final bool isPrimaryBtnLoading;
+  final bool isSecondaryBtnLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +171,9 @@ class ScheduleCard extends StatelessWidget {
                       if (showSecondaryBtn!)
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: onSecondaryBtnPressed,
+                            onPressed: isSecondaryBtnLoading
+                                ? null
+                                : onSecondaryBtnPressed,
                             style: ElevatedButton.styleFrom(
                               overlayColor: TColors.primary.withOpacity(0.1),
                               side: BorderSide(color: Colors.blue.shade50),
@@ -178,14 +184,23 @@ class ScheduleCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(100),
                               ),
                             ),
-                            child: Text(
-                              secondaryBtnText,
-                              style: const TextStyle(
-                                fontSize: TSizes.fontSizeMd,
-                                fontWeight: FontWeight.bold,
-                                color: TColors.primary,
-                              ),
-                            ),
+                            child: isSecondaryBtnLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    secondaryBtnText,
+                                    style: const TextStyle(
+                                      fontSize: TSizes.fontSizeMd,
+                                      fontWeight: FontWeight.bold,
+                                      color: TColors.primary,
+                                    ),
+                                  ),
                           ),
                         ),
                       if (showPrimaryBtn! && showSecondaryBtn!)
@@ -193,7 +208,9 @@ class ScheduleCard extends StatelessWidget {
                       if (showPrimaryBtn!)
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: onPrimaryBtnPressed,
+                            onPressed: isPrimaryBtnLoading
+                                ? null
+                                : onPrimaryBtnPressed,
                             style: ElevatedButton.styleFrom(
                               side: const BorderSide(color: TColors.primary),
                               backgroundColor: TColors.primary,
@@ -203,14 +220,23 @@ class ScheduleCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(100),
                               ),
                             ),
-                            child: Text(
-                              primaryBtnText,
-                              style: const TextStyle(
-                                fontSize: TSizes.fontSizeMd,
-                                fontWeight: FontWeight.bold,
-                                color: TColors.white,
-                              ),
-                            ),
+                            child: isPrimaryBtnLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    primaryBtnText,
+                                    style: const TextStyle(
+                                      fontSize: TSizes.fontSizeMd,
+                                      fontWeight: FontWeight.bold,
+                                      color: TColors.white,
+                                    ),
+                                  ),
                           ),
                         ),
                     ],

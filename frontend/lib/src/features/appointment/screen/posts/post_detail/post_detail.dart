@@ -28,8 +28,31 @@ class PostDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(PostDetailController());
-
     final Post post = Get.arguments;
+
+    // Add debug logging to identify the issue
+    print("DEBUG - Post user ID: ${post.user.id}");
+    print("DEBUG - Post koasProfile: ${post.user.koasProfile != null}");
+    if (post.user.koasProfile != null) {
+      print("DEBUG - KoasProfile ID: ${post.user.koasProfile!.id}");
+      print("DEBUG - KoasProfile user: ${post.user.koasProfile!.user != null}");
+      if (post.user.koasProfile!.user != null) {
+        print(
+            "DEBUG - KoasProfile user ID: ${post.user.koasProfile!.user!.id}");
+      }
+    }
+    print("DEBUG - Has schedules: ${post.schedule.isNotEmpty}");
+    if (post.schedule.isNotEmpty) {
+      print("DEBUG - Has timeslots: ${post.schedule[0].timeslot.isNotEmpty}");
+    }
+
+    // Simplify null checks to ensure the bottom navigation appears
+    final hasKoasProfile = post.user.koasProfile != null;
+    final hasSchedules = post.schedule.isNotEmpty;
+    final hasTimeslots = hasSchedules && post.schedule[0].timeslot.isNotEmpty;
+    
+    // Always show bottom navigation if we have the minimum required data
+    final showBottomNav = hasKoasProfile && hasSchedules && hasTimeslots;
     
     return Scaffold(
       appBar: DAppBar(
@@ -47,12 +70,18 @@ class PostDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomBookAppointment(
-        name: post.user.fullName,
-        koasId: post.user.koasProfile!.id!,
-        scheduleId: post.schedule[0].id,
-        timeslotId: post.schedule[0].timeslot[0].id,
-      ),
+      // Modified bottom navigation to ensure it appears, using safe access to properties
+      bottomNavigationBar: showBottomNav
+          ? BottomBookAppointment(
+              name: post.user.fullName,
+              // Use the user's ID directly, with fallback to empty string
+              koasId: post.user.id ?? '',
+              // Use the koasProfile ID with fallback
+              koasProfileId: post.user.koasProfile!.id ?? '',
+              scheduleId: post.schedule[0].id,
+              timeslotId: post.schedule[0].timeslot[0].id,
+            )
+          : null,
       body: SingleChildScrollView(
         child: Column(
           children: [

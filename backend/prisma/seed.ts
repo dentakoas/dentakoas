@@ -1,119 +1,60 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import { createSeedClient } from "@snaplet/seed";
-import { Role } from "@/config/enum";
-import { users } from "@/data/users";
-import { TreatmentTypes } from "@/data/treatment-type";
+import { seedUsers } from './seeds/users';
+import { seedUniversities } from './seeds/universities';
+import { seedTreatments } from './seeds/treatments';
+import { seedPosts } from './seeds/posts';
+import { seedSchedules } from './seeds/schedules';
+import { seedAppointments } from './seeds/appointments';
+import { seedReviews } from './seeds/reviews';
+import { seedNotifications } from './seeds/notifications';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Truncate all tables in the database
-  // const seed = await createSeedClient();
-  // await seed.$resetDatabase()
+  console.log('🌱 Starting database seeding...');
 
-  // for (const user of users) {
-  //   const hash = await bcrypt.hash(user.password, 10);
+  try {
+    // Seed in order to respect foreign key constraints
+    console.log('🧑‍💼 Seeding users...');
+    const users = await seedUsers(prisma);
 
-  //   // Create user
-  //   const createdUser = await prisma.user.create({
-  //     data: {
-  //       ...user,
-  //       name: `${user.givenName}.${user.familyName}`,
-  //       password: hash,
-  //     },
-  //   });
+    console.log('🏫 Seeding universities...');
+    const universities = await seedUniversities(prisma);
 
-  //   if (user.role === Role.Koas) {
-  //     // Create koas
-  //     await prisma.koasProfile.create({
-  //       data: {
-  //         userId: createdUser.id,
-  //       },
-  //     });
-  //   } else if (user.role === Role.Pasien) {
-  //     // Create pasien
-  //     await prisma.pasienProfile.create({
-  //       data: {
-  //         userId: createdUser.id,
-  //       },
-  //     });
-  //   }
-  // }
+    console.log('🦷 Seeding treatment types...');
+    const treatments = await seedTreatments(prisma);
 
-  // for (const treatmentType of TreatmentTypes) {
-  //   const createdTreatmentType = await prisma.treatmentType.create({
-  //     data: {
-  //       ...treatmentType,
-  //       name: treatmentType.name,
-  //     },
-  //   });
-  // }
+    console.log('📝 Seeding posts...');
+    const posts = await seedPosts(prisma, users, treatments);
 
-  const existingUniversities = await prisma.university.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-  });
+    console.log('📅 Seeding schedules and timeslots...');
+    const schedules = await seedSchedules(prisma, posts);
 
-  const universityCoordinates = [
-    { name: "Universitas Indonesia", latitude: -6.3628, longitude: 106.826 },
-    {
-      name: "Institut Teknologi Bandung",
-      latitude: -6.8915,
-      longitude: 107.6107,
-    },
-    { name: "Universitas Gadjah Mada", latitude: -7.7749, longitude: 110.374 },
-    { name: "Institut Pertanian Bogor", latitude: -6.595, longitude: 106.8063 },
-    { name: "Universitas Airlangga", latitude: -7.2697, longitude: 112.7585 },
-    { name: "Universitas Brawijaya", latitude: -7.9557, longitude: 112.6133 },
-    { name: "Universitas Diponegoro", latitude: -7.0544, longitude: 110.4381 },
-    { name: "Universitas Padjadjaran", latitude: -6.926, longitude: 107.772 },
-    { name: "Universitas Sebelas Maret", latitude: -7.558, longitude: 110.856 },
-    {
-      name: "Universitas Sumatera Utara",
-      latitude: 3.5655,
-      longitude: 98.6564,
-    },
-    {
-      name: "Politeknik Negeri Jember",
-      latitude: -8.1703,
-      longitude: 113.7021,
-    },
-    {
-      name: "Universitas Negeri Jember",
-      latitude: -8.1703,
-      longitude: 113.7021,
-    },
-  ];
+    console.log('🤝 Seeding appointments...');
+    await seedAppointments(prisma, users, schedules);
 
-  for (const university of universityCoordinates) {
-    const existingUniversity = existingUniversities.find(
-      (u) => u.name === university.name
-    );
-    if (existingUniversity) {
-      await prisma.university.update({
-        where: {
-          id: existingUniversity.id,
-        },
-        data: {
-          latitude: university.latitude,
-          longitude: university.longitude,
-        },
-      });
-    }
-  }
+    console.log('⭐ Seeding reviews...');
+    await seedReviews(prisma, users, posts);
 
-  console.log("Updated universities successfully.");
-}
+    console.log('🔔 Seeding notifications...');
+    await seedNotifications(prisma, users);
 
-
-main()
-  .catch((e) => {
+    console.log('✅ Seeding complete!');
+  } catch (e) {
+    console.error('❌ Seeding failed:');
     console.error(e);
     process.exit(1);
-  })
-  .finally(async () => {
+  } finally {
     await prisma.$disconnect();
+  }
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
   });
