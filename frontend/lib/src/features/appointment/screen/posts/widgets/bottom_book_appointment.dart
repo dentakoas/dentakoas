@@ -12,153 +12,140 @@ class BottomBookAppointment extends StatelessWidget {
   const BottomBookAppointment({
     super.key,
     required this.name,
-    required this.koasId, // This should be the userId of the koas
-    required this.koasProfileId, // This is the koasProfile id
+    required this.koasId, // This is actually the user ID of the koas
+    required this.koasProfileId, // This is the koasProfile ID
     required this.scheduleId,
     required this.timeslotId,
   });
 
   final String name;
-  final String koasId;
-  final String koasProfileId;
+  final String koasId; // User ID of the koas
+  final String koasProfileId; // Profile ID of the koas
   final String scheduleId;
   final String timeslotId;
 
   @override
   Widget build(BuildContext context) {
-    // Debug logging to see if the widget is being built with all parameters
-    print("DEBUG - BottomBookAppointment built with:");
-    print("DEBUG - Name: $name");
-    print("DEBUG - KoasId: $koasId");
-    print("DEBUG - KoasProfileId: $koasProfileId");
-    print("DEBUG - ScheduleId: $scheduleId");
-    print("DEBUG - TimeslotId: $timeslotId");
-
-    // Check if we have all required IDs before showing the actual booking button
-    final hasValidIds = koasId.isNotEmpty &&
-        koasProfileId.isNotEmpty &&
-        scheduleId.isNotEmpty &&
-        timeslotId.isNotEmpty;
-
-    // Get current date for the appointment
-    final DateTime now = DateTime.now();
-    final String formattedDate =
-        "${now.day} ${_getMonthName(now.month)} ${now.year}";
+    // Debug logging with more clarity
+    Logger().d("BottomBookAppointment parameters:");
+    Logger().d("Name: $name");
+    Logger().d("Koas User ID (koasId): $koasId");
+    Logger().d("Koas Profile ID (koasProfileId): $koasProfileId");
+    Logger().d("Schedule ID: $scheduleId");
+    Logger().d("Timeslot ID: $timeslotId");
 
     final dark = THelperFunctions.isDarkMode(context);
     final controller = Get.put(PostController());
     final appointmentController = Get.put(AppointmentsController());
-    return Obx(
-      () {
-        if (UserController.instance.user.value.role != 'Pasien') {
-          return const SizedBox.shrink();
-        }
-        return controller.selectedDate.value != '' &&
-                controller.selectedTime.value != ''
-            ? Container(
-                height: 130,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: TSizes.defaultSpace,
-                  vertical: TSizes.defaultSpace,
-                ),
-                decoration: BoxDecoration(
-                  color: dark ? TColors.darkerGrey : TColors.lightGrey,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(TSizes.cardRadiusLg),
-                    topRight: Radius.circular(TSizes.cardRadiusLg),
+    
+    return Obx(() {
+      // If user is not a patient, don't show the booking UI
+      if (UserController.instance.user.value.role != 'Pasien') {
+        return const SizedBox.shrink();
+      }
+      
+      // Only show when date and time are selected
+      if (controller.selectedDate.value.isEmpty ||
+          controller.selectedTime.value.isEmpty) {
+        // Show a message to select date and time
+        return Container(
+          height: 80,
+          padding: const EdgeInsets.all(TSizes.defaultSpace),
+          decoration: BoxDecoration(
+            color: dark ? TColors.darkerGrey : TColors.lightGrey,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(TSizes.cardRadiusLg),
+              topRight: Radius.circular(TSizes.cardRadiusLg),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              'Please select date and time to book appointment',
+              style: Theme.of(context).textTheme.bodyMedium!.apply(
+                    color: dark ? TColors.white : TColors.textPrimary,
                   ),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .apply(
-                                    color: dark
-                                        ? TColors.white
-                                        : TColors.textPrimary,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: TSizes.defaultSpace),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              '${controller.selectedDate.value} | ${controller.selectedTime.value}',
-                              style:
-                                  Theme.of(context).textTheme.labelLarge!.apply(
-                                        color: dark
-                                            ? TColors.white
-                                            : TColors.textPrimary,
-                                      ),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Logger().i([
-                              'Book Appointment: $koasId, $scheduleId, $timeslotId, $controller.selectedDate.value'
-                            ]);
-                            appointmentController.createAppointmentConfirmation(
-                              koasId, // This is the userId of the koas - for notification
-                              koasProfileId, // This is the ID of koasProfile record
-                              scheduleId,
-                              timeslotId,
-                              controller.selectedDate.value,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: TColors.primary,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(TSizes.cardRadiusSm),
-                            ),
-                          ),
-                          child: const Text('Book Appointment'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              )
-            : const SizedBox.shrink();
-      },
-    );
-  }
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
 
-  // Helper method to convert month number to name
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return months[month - 1];
+      // Return the booking UI
+      return Container(
+        height: 130,
+        padding: const EdgeInsets.symmetric(
+          horizontal: TSizes.defaultSpace,
+          vertical: TSizes.defaultSpace,
+        ),
+        decoration: BoxDecoration(
+          color: dark ? TColors.darkerGrey : TColors.lightGrey,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(TSizes.cardRadiusLg),
+            topRight: Radius.circular(TSizes.cardRadiusLg),
+          ),
+        ),
+        child: Column(
+          children: [
+            // Doctor name row
+            Row(
+              children: [
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.titleMedium!.apply(
+                        color: dark ? TColors.white : TColors.textPrimary,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Date, time and booking button row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${controller.selectedDate.value} | ${controller.selectedTime.value}',
+                  style: Theme.of(context).textTheme.labelLarge!.apply(
+                        color: dark ? TColors.white : TColors.textPrimary,
+                      ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Log the parameters being passed for debugging
+                    Logger().i('Creating appointment with params:');
+                    Logger().i('koasUserId: $koasId'); // User ID of the koas
+                    Logger().i(
+                        'koasProfileId: $koasProfileId'); // Profile ID of the koas
+                    Logger().i('scheduleId: $scheduleId');
+                    Logger().i('timeslotId: $timeslotId');
+                    Logger().i('date: ${controller.selectedDate.value}');
+
+                    // Fix: Ensure we're passing the RIGHT IDs in the RIGHT ORDER
+                    // This should pass the koasProfileId as the koasId parameter in the API
+                    appointmentController.createAppointmentConfirmation(
+                      koasProfileId, // CHANGED: This should be the koasId for the API
+                      koasId, // CHANGED: This is the user ID of the koas
+                      scheduleId,
+                      timeslotId,
+                      controller.selectedDate.value,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(TSizes.cardRadiusSm),
+                    ),
+                  ),
+                  child: const Text('Book Appointment'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

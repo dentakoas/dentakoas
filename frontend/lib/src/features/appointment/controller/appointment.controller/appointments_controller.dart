@@ -127,17 +127,21 @@ class AppointmentsController extends GetxController {
     }
   }
 
+  // Modified createAppointment method to correctly handle the parameters
   createAppointment(
-    String koasId, // ID of the koas
-    String koasProfileId, // ID of koasProfile - to be used for notifications
+    String koasId, // This should be the koasProfile ID for the API
+    String koasUserId, // This is the user ID of the koas (for notifications)
     String scheduleId,
     String timeslotId,
     String date,
   ) async {
     try {
-      Logger().d('Starting createAppointment process');
-      Logger().d(
-          'Parameters: koasId=$koasId, scheduleId=$scheduleId, timeslotId=$timeslotId, date=$date');
+      Logger().d('Starting createAppointment process with:');
+      Logger().d('koasId (koasProfile ID): $koasId');
+      Logger().d('koasUserId (User ID): $koasUserId');
+      Logger().d('scheduleId: $scheduleId');
+      Logger().d('timeslotId: $timeslotId');
+      Logger().d('date: $date');
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
@@ -145,44 +149,82 @@ class AppointmentsController extends GetxController {
 
       // Check connection
       final isConected = await NetworkManager.instance.isConnected();
-      Logger().d('Network connection status: $isConected');
       if (!isConected) {
         TFullScreenLoader.stopLoading();
+        TLoaders.errorSnackBar(
+          title: 'No internet connection',
+          message: 'Please check your internet connection and try again',
+        );
         return;
       }
 
-      final pasienDetail = await UserRepository.instance.getUserDetailById();
-      Logger().d('Fetched pasienDetail: $pasienDetail');
-      final pasienId = pasienDetail.pasienProfile!.id;
+      // Validate all required parameters
+      if (koasId.isEmpty ||
+          scheduleId.isEmpty ||
+          timeslotId.isEmpty ||
+          date.isEmpty) {
+        TFullScreenLoader.stopLoading();
+        TLoaders.errorSnackBar(
+          title: 'Missing information',
+          message: 'Some required appointment details are missing',
+        );
+        return;
+      }
 
-      // Initiate the request
+      // Get pasienDetail
+      final pasienDetail = await UserRepository.instance.getUserDetailById();
+      if (pasienDetail.pasienProfile == null ||
+          pasienDetail.pasienProfile!.id == null) {
+        TFullScreenLoader.stopLoading();
+        TLoaders.errorSnackBar(
+          title: 'Profile error',
+          message:
+              'Could not retrieve your patient profile. Please complete your profile first',
+        );
+        return;
+      }
+      
+      final pasienId = pasienDetail.pasienProfile!.id;
+      Logger().d('Fetched pasienId: $pasienId');
+      Logger().d('Creating appointment with:');
+      Logger().d('pasienId: $pasienId');
+      Logger().d('koasId: $koasId'); // Should be koasProfile ID
+      Logger().d('scheduleId: $scheduleId');
+      Logger().d('timeslotId: $timeslotId');
+
+      // Initiate the request - Fix by using the right ID for koasId
       final newAppointment = AppointmentsModel(
         pasienId: pasienId!,
-        koasId: koasId,
+        koasId: koasId, // IMPORTANT: This should be the koasProfile ID
         scheduleId: scheduleId,
         timeslotId: timeslotId,
         date: date,
         status: StatusAppointment.Pending,
       );
-      Logger().d('Created newAppointment: $newAppointment');
+      
+      // Print the full appointment model for debugging
+      Logger().d('Created appointment data:');
+      Logger().d('pasienId: ${newAppointment.pasienId}');
+      Logger().d('koasId: ${newAppointment.koasId}');
+      Logger().d('scheduleId: ${newAppointment.scheduleId}');
+      Logger().d('timeslotId: ${newAppointment.timeslotId}');
+      Logger().d('date: ${newAppointment.date}');
+      Logger().d('status: ${newAppointment.status}');
 
       // Save the appointment
-      final appointmentRepository = Get.put(AppointmentsRepository());
       await appointmentRepository.createAppointment(newAppointment);
-      Logger().d('Appointment created successfully');
 
-      // Create and send notification to koas
+      // Create and send notification to koas - Fix by using koasUserId
       final newNotification = NotificationsModel(
         senderId: UserController.instance.user.value.id,
-        userId:
-            koasId, // This should be the user ID of the koas, not the koasProfileId
-        koasId: koasId,
+        userId: koasUserId, // Send to koas user ID for notification
+        koasId: koasId, // Reference the koasId for the appointment
         title: 'New Appointment Request',
         message:
             '${UserController.instance.user.value.fullName} has requested an appointment with you for $date. Please check your schedule.',
         status: StatusNotification.Unread,
       );
-
+      
       await NotificationRepository.instance.createNotification(newNotification);
       Logger().d('Notification sent to koas successfully');
 
@@ -212,10 +254,14 @@ class AppointmentsController extends GetxController {
       );
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      Logger().e('Failed to create appointment: $e');
+      // Log detailed error information
+      Logger().e('Error during appointment creation: $e');
+
+      // Show user-friendly error message
       TLoaders.errorSnackBar(
           title: 'Failed to create appointment',
-          message: 'Something went wrong. Please try again later.');
+          message:
+              'There was an error processing your request. Please try again later.');
     }
   }
 
@@ -255,8 +301,8 @@ class AppointmentsController extends GetxController {
       if (userRole == 'Pasien') {
         newNotification = NotificationsModel(
           senderId: UserController.instance.user.value.id,
-          userId: koasProfileId,
-          koasId: koasId,
+          userId: koasId,
+          koasId: koasProfileId,
           title: 'Appointment Canceled',
           message:
               'Your appointment has been canceled by user. Please check your schedule for more details',
@@ -451,23 +497,31 @@ class AppointmentsController extends GetxController {
 
   // Pop up the dialog to confirm the appointment
   void createAppointmentConfirmation(
-    String koasId, // ID of the koas
-    String koasProfileId, // ID of koasProfile - for notifications
+    String koasId, // This should be the koasProfile ID for the API
+    String koasUserId, // This is the user ID of the koas (for notifications)
     String scheduleId,
     String timeslotId,
     String date,
   ) {
+    // Log parameters for debugging
+    Logger().d('Confirming appointment with:');
+    Logger().d('koasId: $koasId');
+    Logger().d('koasUserId: $koasUserId');
+    Logger().d('scheduleId: $scheduleId');
+    Logger().d('timeslotId: $timeslotId');
+    Logger().d('date: $date');
+    
     Get.defaultDialog(
       backgroundColor: TColors.white,
       contentPadding: const EdgeInsets.all(TSizes.lg),
       title: 'Confirm Appointment',
-      middleText: 'Are you sure want to choose this appointment?',
+      middleText: 'Are you sure you want to book this appointment for $date?',
       confirm: ElevatedButton(
         onPressed: () {
           Get.back();
           createAppointment(
-            koasId,
-            koasProfileId,
+            koasId, // koasProfile ID
+            koasUserId, // User ID of koas
             scheduleId,
             timeslotId,
             date,

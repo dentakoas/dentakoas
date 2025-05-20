@@ -51,6 +51,14 @@ class PostDetailScreen extends StatelessWidget {
     final hasSchedules = post.schedule.isNotEmpty;
     final hasTimeslots = hasSchedules && post.schedule[0].timeslot.isNotEmpty;
     
+    // Debug the post data - especially koas-related fields
+    print("DEBUG - Post info:");
+    print("DEBUG - Post ID: ${post.id}");
+    print(
+        "DEBUG - Post koasId: ${post.koasId}"); // This should be the koasProfile ID
+    print(
+        "DEBUG - Post userId: ${post.userId}"); // This should be the user ID of the koas
+    
     // Always show bottom navigation if we have the minimum required data
     final showBottomNav = hasKoasProfile && hasSchedules && hasTimeslots;
     
@@ -75,9 +83,13 @@ class PostDetailScreen extends StatelessWidget {
           ? BottomBookAppointment(
               name: post.user.fullName,
               // Use the user's ID directly, with fallback to empty string
-              koasId: post.user.id ?? '',
+              koasId: post.userId ??
+                  post.user.id ??
+                  '', // FIXED: User ID of the koas
               // Use the koasProfile ID with fallback
-              koasProfileId: post.user.koasProfile!.id ?? '',
+              koasProfileId: post.koasId ??
+                  post.user.koasProfile!.id ??
+                  '', // FIXED: koasProfile ID 
               scheduleId: post.schedule[0].id,
               timeslotId: post.schedule[0].timeslot[0].id,
             )

@@ -2,228 +2,229 @@ import db from "@/lib/db";
 import { getFieldById } from "@/utils/common";
 import { NextResponse } from "next/server";
 
-export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: Request,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id") || params.id;
+  const id = searchParams.get('id') || params.id;
 
   const body = await req.json();
   const { status, scheduleId, pasienId, koasId, timeslotId } = body;
 
+  console.log('Updating appointment with data:', body);
+  console.log('Appointment ID:', id);
+
   try {
-    // Cek apakah schedule, pasien, dan koas valid
-    const schedule = await db.schedule.findUnique({
-      where: { id: scheduleId },
-      include: {
-        post: true, // Mengambil data post terkait untuk validasi requiredParticipant
-        timeslot: true, // Mengambil semua timeslot terkait schedule
-      },
-    });
-
-    const pasien = await db.pasienProfile.findUnique({
-      where: { id: pasienId },
-    });
-
-    const koas = await db.koasProfile.findUnique({
-      where: { id: koasId },
-    });
-
-    if (!schedule || !pasien || !koas) {
-      return NextResponse.json(
-        { error: "Invalid schedule, pasien or koas" },
-        { status: 404 }
-      );
-    }
-
-    // Cek apakah timeslotId yang dipilih ada dalam schedule
-    const selectedTimeslot = schedule.timeslot.find(
-      (slot) => slot.id === timeslotId
-    );
-
-    if (!selectedTimeslot) {
-      return NextResponse.json(
-        { error: "Timeslot not found for the given schedule" },
-        { status: 404 }
-      );
-    }
-
+    // First, check if the appointment exists
     const existingAppointment = await db.appointment.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     if (!existingAppointment) {
+      console.error(`Appointment with ID ${id} not found in the database`);
       return NextResponse.json(
-        { error: "Appointment not found" },
+        { error: 'Appointment not found' },
         { status: 404 }
       );
     }
 
-    if (
-      (!selectedTimeslot.isAvailable && status === "Pending") ||
-      status === "Canceled"
-    ) {
-      const updateTimeslot = await db.timeslot.update({
-        where: { id: timeslotId },
-        data: {
-          currentParticipants: selectedTimeslot.currentParticipants - 1,
-        },
-      });
+    console.log('Found existing appointment:', existingAppointment);
 
-      if (
-        updateTimeslot.maxParticipants !== null &&
-        updateTimeslot.currentParticipants < updateTimeslot.maxParticipants
-      ) {
-        await db.timeslot.update({
-          where: { id: timeslotId },
-          data: {
-            isAvailable: true,
-          },
-        });
-      }
-    }
+    // Use the data from the existing appointment if not provided in the body
+    const effectiveScheduleId = scheduleId || existingAppointment.scheduleId;
+    const effectivePasienId = pasienId || existingAppointment.pasienId;
+    const effectiveKoasId = koasId || existingAppointment.koasId;
+    const effectiveTimeslotId = timeslotId || existingAppointment.timeslotId;
 
-    if (!selectedTimeslot.isAvailable && status === "Confirmed") {
-      return NextResponse.json(
-        { error: "Timeslot is fully booked or unavailable." },
-        { status: 400 }
-      );
-    }
+    console.log('Using effective IDs:', {
+      scheduleId: effectiveScheduleId,
+      pasienId: effectivePasienId,
+      koasId: effectiveKoasId,
+      timeslotId: effectiveTimeslotId,
+    });
 
+    // Update the appointment status directly without additional checks to simplify
     const appointment = await db.appointment.update({
       where: { id },
-      data: {
-        status,
+      data: { status },
+      include: {
+        schedule: {
+          include: {
+            post: true,
+            timeslot: {
+              where: { id: effectiveTimeslotId },
+            },
+          },
+        },
       },
     });
 
-    if (appointment.status === "Confirmed") {
-      // Update jumlah peserta dalam timeslot
-      const updatedTimeslot = await db.timeslot.update({
-        where: { id: timeslotId },
-        data: {
-          currentParticipants: selectedTimeslot.currentParticipants + 1,
-        },
+    console.log('Updated appointment successfully with status:', status);
+
+    // Handle timeslot participant count updates based on status change
+    if (status === 'Canceled' || status === 'Rejected') {
+      // If canceling, decrease participant count
+      if (existingAppointment.status === 'Confirmed') {
+        // Only decrement if it was previously confirmed
+        const timeslot = await db.timeslot.findUnique({
+          where: { id: effectiveTimeslotId },
+        });
+
+        if (timeslot) {
+          console.log('Updating timeslot participant count for cancellation');
+          await db.timeslot.update({
+            where: { id: effectiveTimeslotId },
+            data: {
+              currentParticipants: Math.max(
+                0,
+                timeslot.currentParticipants - 1
+              ),
+              isAvailable: true,
+            },
+          });
+        }
+      }
+    } else if (
+      status === 'Confirmed' &&
+      existingAppointment.status !== 'Confirmed'
+    ) {
+      // If confirming a previously unconfirmed appointment
+      const timeslot = await db.timeslot.findUnique({
+        where: { id: effectiveTimeslotId },
       });
 
-      if (updatedTimeslot.maxParticipants === null) return;
+      if (timeslot) {
+        if (!timeslot.isAvailable) {
+          console.error(
+            'Cannot confirm appointment: timeslot is not available'
+          );
+          // Rollback the status change
+          await db.appointment.update({
+            where: { id },
+            data: { status: existingAppointment.status },
+          });
 
-      if (
-        updatedTimeslot.currentParticipants >= updatedTimeslot.maxParticipants
-      ) {
-        await db.timeslot.update({
-          where: { id: timeslotId },
+          return NextResponse.json(
+            { error: 'Timeslot is fully booked or unavailable.' },
+            { status: 400 }
+          );
+        }
+
+        console.log('Updating timeslot participant count for confirmation');
+        const updatedTimeslot = await db.timeslot.update({
+          where: { id: effectiveTimeslotId },
           data: {
-            isAvailable: false,
+            currentParticipants: timeslot.currentParticipants + 1,
           },
         });
+
+        if (
+          updatedTimeslot.maxParticipants !== null &&
+          updatedTimeslot.currentParticipants >= updatedTimeslot.maxParticipants
+        ) {
+          await db.timeslot.update({
+            where: { id: effectiveTimeslotId },
+            data: { isAvailable: false },
+          });
+        }
       }
     }
 
-    // if (appointment.status != "Confirmed") {
-    //   const updatedTimeslot = await db.timeslot.update({
-    //     where: { id: timeslotId },
-    //     data: {
-    //       currentParticipants: selectedTimeslot.currentParticipants - 1,
-    //     },
-    //   });
-
-    //   if (updatedTimeslot.maxParticipants === null) return;
-
-    //   if (
-    //     updatedTimeslot.currentParticipants < updatedTimeslot.maxParticipants
-    //   ) {
-    //     await db.timeslot.update({
-    //       where: { id: timeslotId },
-    //       data: {
-    //         isAvailable: true,
-    //       },
-    //     });
-    //   }
-    // }
-
-    // Validasi apakah jumlah total peserta sudah mencapai requiredParticipant di post
-    const totalParticipants = await db.appointment.count({
-      where: {
-        scheduleId: schedule.id,
-        status: "Confirmed", // Cek hanya yang sudah dikonfirmasi
-      },
+    // Check if post requirements are met and update post status accordingly
+    const schedule = await db.schedule.findUnique({
+      where: { id: effectiveScheduleId },
+      include: { post: true },
     });
 
-    if (totalParticipants >= schedule.post.requiredParticipant) {
-      await db.post.update({
-        where: { id: schedule.post.id },
-        data: { status: "Closed" },
-      });
-
-      await db.appointment.updateMany({
+    if (schedule && schedule.post) {
+      const totalParticipants = await db.appointment.count({
         where: {
-          scheduleId: schedule.id,
-          status: "Pending",
-        },
-        data: {
-          status: "Rejected",
+          scheduleId: effectiveScheduleId,
+          status: 'Confirmed',
         },
       });
 
-      return NextResponse.json(
-        { success: "Required participants for the post have been met." },
-        { status: 200 }
+      console.log(
+        'Total confirmed participants:',
+        totalParticipants,
+        'Required:',
+        schedule.post.requiredParticipant
       );
-    }
 
-    if (totalParticipants < schedule.post.requiredParticipant) {
-      await db.post.update({
-        where: { id: schedule.post.id },
-        data: { status: "Open" },
-      });
+      if (totalParticipants >= schedule.post.requiredParticipant) {
+        await db.post.update({
+          where: { id: schedule.post.id },
+          data: { status: 'Closed' },
+        });
+
+        // Reject all pending appointments
+        await db.appointment.updateMany({
+          where: {
+            scheduleId: effectiveScheduleId,
+            status: 'Pending',
+          },
+          data: { status: 'Rejected' },
+        });
+      } else {
+        await db.post.update({
+          where: { id: schedule.post.id },
+          data: { status: 'Open' },
+        });
+      }
     }
 
     return NextResponse.json(
       {
-        status: "Success",
-        message: "Appointment updated successfully",
+        status: 'Success',
+        message: 'Appointment updated successfully',
         data: { appointment },
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating appointment", error);
+    console.error('Error updating appointment:', error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: 'Internal Server Error', details: (error as Error).message },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  req: Request,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id") || params.id;
+  const id = searchParams.get('id') || params.id;
 
   const body = await req.json();
   const { scheduleId, pasienId, koasId, timeslotId, status, date } = body;
 
   try {
   } catch (error) {
-    console.error("Error updating appointment", error);
+    console.error('Error updating appointment', error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id") || params.id;
+  const id = searchParams.get('id') || params.id;
 
   try {
     if (!id) {
       return NextResponse.json(
-        { error: "Appoid is required" },
+        { error: 'Appoid is required' },
         { status: 400 }
       );
     }
@@ -233,13 +234,80 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
     });
 
     return NextResponse.json(
-      { message: "Appointment deleted successfully" },
+      { message: 'Appointment deleted successfully' },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error deleting appointment", error);
+    console.error('Error deleting appointment', error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(
+  req: Request,
+  props: { params: Promise<{ id: string }> }
+) {
+  const params = await props.params;
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get('id') || params.id;
+
+  try {
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Appointment ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const appointment = await db.appointment.findUnique({
+      where: { id },
+      include: {
+        pasien: {
+          include: {
+            user: true,
+          },
+        },
+        koas: {
+          include: {
+            user: true,
+          },
+        },
+        schedule: {
+          include: {
+            post: {
+              include: {
+                treatment: true,
+                Review: true,
+              },
+            },
+            timeslot: true,
+          },
+        },
+      },
+    });
+
+    if (!appointment) {
+      return NextResponse.json(
+        { error: 'Appointment not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        status: 'Success',
+        message: 'Appointment retrieved successfully',
+        data: appointment,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error retrieving appointment', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }

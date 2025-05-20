@@ -105,6 +105,12 @@ export async function POST(req: Request) {
       where: { id: koasId },
     });
 
+    console.log('Schedule, pasien, and koas found:', {
+      schedule,
+      pasien,
+      koas,
+    });
+
     if (!schedule || !pasien || !koas) {
       console.log("Invalid schedule, pasien or koas");
       return NextResponse.json(
