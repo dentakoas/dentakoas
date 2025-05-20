@@ -343,12 +343,12 @@ export async function DELETE(
 ) {
   const params = await props.params;
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || params.userId;
+  const userId = searchParams.get('userId') || params.userId;
 
   try {
     if (!userId) {
       return NextResponse.json(
-        { error: "user Id is required" },
+        { error: 'user Id is required' },
         { status: 400 }
       );
     }
@@ -358,13 +358,26 @@ export async function DELETE(
     });
 
     return NextResponse.json(
-      { message: "User deleted successfully" },
+      {
+        status: 'Success',
+        message: 'User deleted successfully',
+      },
       { status: 200 }
     );
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.stack);
-      console.error("Failed to create content interaction:", error);
+      console.error('Failed to delete user:', error.stack);
+      return NextResponse.json(
+        { error: 'Internal Server Error', message: error.message },
+        { status: 500 }
+      );
     }
+
+    // Handle case where error is not an Error instance
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }

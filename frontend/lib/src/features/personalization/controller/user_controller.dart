@@ -221,6 +221,9 @@ setStatusColor() {
 
       // Close loading
       TFullScreenLoader.stopLoading();
+
+      // Show success message
+      AuthenticationRepository.instance.screenRedirect();
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoaders.errorSnackBar(

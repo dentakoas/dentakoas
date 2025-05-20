@@ -45,35 +45,52 @@ screenRedirect() async {
     final user = _auth.currentUser;
     if (user != null) {
       final uid = user.uid;
-      final userRepository = Get.put(UserRepository());
-      final userController = Get.put(UserController());
+      
+      // Check if UserRepository is registered, if not register it
+      if (!Get.isRegistered<UserRepository>()) {
+        Get.put(UserRepository());
+      }
+      final userRepository = Get.find<UserRepository>();
 
-      final userDetail = await userRepository.getUserProfile(uid);
-      final userMap = userDetail.toJson();
+      // Check if UserController is registered, if not register it
+      if (!Get.isRegistered<UserController>()) {
+        Get.put(UserController());
+      }
+      final userController = Get.find<UserController>();
 
-      final users = filterProfileByRole(userMap);
-      final hasNullField = userController.hasEmptyFields(users);
+      try {
+        final userDetail = await userRepository.getUserProfile(uid);
+        final userMap = userDetail.toJson();
 
-      Logger().i(['User Profile: $users']);
-      Logger().i(['Has Null Field: $hasNullField']);
+        final users = filterProfileByRole(userMap);
+        final hasNullField = userController.hasEmptyFields(users);
 
-      final isOauth =
-          userDetail.password!.isEmpty || userDetail.password == null;
-        
-      if (user.emailVerified) {
-        if (userDetail.role == null ||
-            userDetail.role == '' ||
-            isOauth && userDetail.role == null ||
-            userDetail.role == '') {
-          Get.offAll(() => const ChooseRolePage());
-        } else if (userDetail.role != null && hasNullField) {
-          storage.write("TEMP_ROLE", userDetail.role);
-          Get.offAll(() => const ProfileSetupScreen());
-        } else if (userDetail.role != null && !hasNullField) {
-        Get.offAll(() => const NavigationMenu());
+        Logger().i(['User Profile: $users']);
+        Logger().i(['Has Null Field: $hasNullField']);
+
+        final isOauth =
+            userDetail.password!.isEmpty || userDetail.password == null;
+
+        if (user.emailVerified) {
+          if (userDetail.role == null ||
+              userDetail.role == '' ||
+              isOauth && userDetail.role == null ||
+              userDetail.role == '') {
+            Get.offAll(() => const ChooseRolePage());
+          } else if (userDetail.role != null && hasNullField) {
+            storage.write("TEMP_ROLE", userDetail.role);
+            Get.offAll(() => const ProfileSetupScreen());
+          } else if (userDetail.role != null && !hasNullField) {
+            Get.offAll(() => const NavigationMenu());
+          }
+        } else {
+          Get.offAll(() => const VerifyEmailScreen());
         }
-      } else {
-        Get.offAll(() => const VerifyEmailScreen());
+      } catch (e) {
+        Logger().e("Error during screen redirect: $e");
+        // Handle error gracefully
+        storage.writeIfNull('isFirstTime', true);
+        Get.offAll(() => const SigninScreen());
       }
     } else {
       // local storage

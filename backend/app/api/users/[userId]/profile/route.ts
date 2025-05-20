@@ -10,15 +10,15 @@ export async function GET(
 ) {
   const params = await props.params;
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || params.userId;
+  const userId = searchParams.get('userId') || params.userId;
 
-  let profile;
+  let profile: any;
 
-  console.log("Received userId", userId);
+  console.log('Received userId', userId);
 
   if (!userId) {
-    console.log("User ID is required");
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    console.log('User ID is required');
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
   try {
@@ -32,12 +32,12 @@ export async function GET(
     const isOauth =
       existingUser?.password === null ||
       existingUser?.password === undefined ||
-      existingUser?.password === "";
+      existingUser?.password === '';
 
-    console.log("Existing user", existingUser);
+    console.log('Existing user', existingUser);
 
     if (!existingUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Check user role and respond with the appropriate profile
@@ -48,7 +48,7 @@ export async function GET(
 
       if (!profile) {
         return NextResponse.json(
-          { error: "Profile not found" },
+          { error: 'Profile not found' },
           { status: 404 }
         );
       }
@@ -62,7 +62,7 @@ export async function GET(
       const patientCount = await db.appointment.count({
         where: {
           koasId: userId,
-          status: "Completed",
+          status: 'Completed',
         },
       });
 
@@ -107,9 +107,9 @@ export async function GET(
     }
 
     if (!profile) {
-      console.log("Existing role : " + existingUser.role);
-      console.log("Profile not found : " + profile);
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      console.log('Existing role : ' + existingUser.role);
+      console.log('Profile not found : ' + profile);
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
     const filteredProfile = (() => {
@@ -121,7 +121,7 @@ export async function GET(
         case Role.Pasien:
           return { PasienProfile: profile };
         default:
-          return { message: "No profile available for this role" };
+          return { message: 'No profile available for this role' };
       }
     })();
 
@@ -134,7 +134,7 @@ export async function GET(
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.stack);
-      console.error("Failed to create content interaction:", error);
+      console.error('Failed to create content interaction:', error);
     }
   }
 }
@@ -145,7 +145,7 @@ export async function PATCH(
 ) {
   const params = await props.params;
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || params.userId;
+  const userId = searchParams.get('userId') || params.userId;
   const body = await req.json();
 
   const {
@@ -159,17 +159,17 @@ export async function PATCH(
     status,
   } = body;
 
-  console.log("Received body", body);
-  console.log("Received userId", userId);
+  console.log('Received body', body);
+  console.log('Received userId', userId);
 
-  if (typeof age === "string") {
+  if (typeof age === 'string') {
     body.age = parseInt(age, 10);
   }
 
   let profile;
 
   if (!userId) {
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
   try {
@@ -181,26 +181,40 @@ export async function PATCH(
     });
 
     if (!existingUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-
-    // Get the existing profile from the database
-    // let existingProfile;
-    // if (existingUser.role === Role.Koas) {
-    //   existingProfile = await db.koasProfile.findUnique({
-    //     where: { userId },
-    //   });
-    // } else if (existingUser.role === Role.Pasien) {
-    //   existingProfile = await db.pasienProfile.findUnique({
-    //     where: { userId },
-    //   });
-    // }
 
     // Create the profile based on the user role
     if (existingUser.role === Role.Koas) {
       const existingKoas = await db.koasProfile.findUnique({
         where: { userId },
       });
+
+      // Check if status is changing from a previous value
+      if (status && existingKoas?.status !== status) {
+        // Status has changed, create appropriate notification
+        if (status === 'Approved') {
+          await db.notification.create({
+            data: {
+              userId: userId,
+              title: 'Profile Approved',
+              message:
+                'Congratulations! Your profile has been approved. You can now create posts and appointments.',
+              status: 'Unread',
+            },
+          });
+        } else if (status === 'Rejected') {
+          await db.notification.create({
+            data: {
+              userId: userId,
+              title: 'Profile Rejected',
+              message:
+                'Your profile was not approved. Please update your information and try again.',
+              status: 'Unread',
+            },
+          });
+        }
+      }
 
       profile = await db.koasProfile.update({
         where: { userId },
@@ -209,7 +223,7 @@ export async function PATCH(
           age: age ?? existingKoas?.age,
           gender: gender ?? existingKoas?.gender,
           departement: departement ?? existingKoas?.departement,
-          university: university ?? existingKoas?.university, // Relasi ke universitas
+          university: university ?? existingKoas?.university,
           bio: bio ?? existingKoas?.bio,
           whatsappLink: whatsappLink ?? existingKoas?.whatsappLink,
           status: status ?? existingKoas?.status,
@@ -217,24 +231,27 @@ export async function PATCH(
         } as Prisma.KoasProfileUpdateInput,
       });
 
-      // Send notification to Fasilitators with the same university
-      const fasilitators = await db.fasilitatorProfile.findMany({
-        where: { university: profile.university },
-        include: { user: true },
-      });
-
-      for (const fasilitator of fasilitators) {
-        const newNotif = await db.notification.createMany({
-          data: {
-            senderId: existingUser!.id,
-            userId: fasilitator.user.id,
-            koasId: profile.id,
-            title: "Koas Registration Pending Approval",
-            message: `${existingUser.givenName} ${existingUser.familyName} has registered as Koas and is pending approval. Please review their profile.`,
-            createdAt: new Date(),
-          },
+      // If university has changed, notify appropriate fasilitators
+      if (university && existingKoas?.university !== university) {
+        const fasilitators = await db.fasilitatorProfile.findMany({
+          where: { university: university },
+          include: { user: true },
         });
-        console.log("New notif for fasilitator:", newNotif);
+
+        for (const fasilitator of fasilitators) {
+          await db.notification.create({
+            data: {
+              senderId: existingUser.id,
+              userId: fasilitator.user.id,
+              koasId: profile.id,
+              title: 'Koas Registration Pending Approval',
+              message: `${existingUser.givenName || ''} ${
+                existingUser.familyName || ''
+              } has updated their Koas profile and needs approval.`,
+              createdAt: new Date(),
+            },
+          });
+        }
       }
     } else if (existingUser.role === Role.Pasien) {
       const existingPasien = await db.pasienProfile.findUnique({
@@ -262,7 +279,7 @@ export async function PATCH(
         } as Prisma.FasilitatorProfileUpdateInput,
       });
     } else {
-      return NextResponse.json({ error: "Invalid user role" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid user role' }, { status: 400 });
     }
 
     const user = {
@@ -272,8 +289,8 @@ export async function PATCH(
 
     return NextResponse.json(
       {
-        status: "Success",
-        message: "Profile updated successfully",
+        status: 'Success',
+        message: 'Profile updated successfully',
         data: { user },
       },
       { status: 201 }
@@ -281,7 +298,7 @@ export async function PATCH(
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.stack);
-      console.error("Failed to create content interaction:", error);
+      console.error('Failed to create content interaction:', error);
     }
   }
 }
@@ -295,10 +312,10 @@ export async function DELETE(
   const userId = params.userId;
   let profile;
 
-  const reset = searchParams.get("reset") === "true";
+  const reset = searchParams.get('reset') === 'true';
 
   if (!userId) {
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
   try {
@@ -309,7 +326,7 @@ export async function DELETE(
     });
 
     if (!existingUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     if (reset) {
@@ -324,7 +341,7 @@ export async function DELETE(
             university: { disconnect: true },
             bio: null,
             whatsappLink: null,
-            status: "Pending",
+            status: 'Pending',
             createdAt: new Date(),
             updateAt: new Date(),
           } as Prisma.KoasProfileUpdateInput,
@@ -355,7 +372,7 @@ export async function DELETE(
         });
       } else {
         return NextResponse.json(
-          { error: "Invalid user role" },
+          { error: 'Invalid user role' },
           { status: 400 }
         );
       }
@@ -368,10 +385,10 @@ export async function DELETE(
 
     return NextResponse.json(
       {
-        status: "Success",
+        status: 'Success',
         message: reset
-          ? "Profile reset successfully"
-          : "Profile delete successfully",
+          ? 'Profile reset successfully'
+          : 'Profile delete successfully',
         data: { user },
       },
       { status: 200 }
@@ -379,7 +396,7 @@ export async function DELETE(
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.stack);
-      console.error("Failed to create content interaction:", error);
+      console.error('Failed to create content interaction:', error);
     }
   }
 }
@@ -401,20 +418,23 @@ export async function POST(
     age,
     gender,
   } = body;
-  let profile;
+  let profile: any;
 
   if (!userId) {
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
   try {
     const existingUser = await getUserById(userId, undefined, {
       id: true,
       role: true,
+      name: true,
+      givenName: true,
+      familyName: true,
     });
 
     if (!existingUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Create the profile based on the user role
@@ -431,6 +451,55 @@ export async function POST(
           whatsappLink: whatsappLink,
         } as Prisma.KoasProfileCreateInput,
       });
+
+      // Send welcome notification to the Koas
+      await db.notification.create({
+        data: {
+          koasId: profile.id,
+          senderId: null,
+          userId: userId,
+          title: 'Welcome to DentaKoas!',
+          message: `Hello ${
+            existingUser.name || existingUser.givenName || ''
+          }! Welcome to DentaKoas. Your profile has been created and is pending approval.`,
+          status: 'Unread',
+        },
+      });
+
+      // Send pending approval notification to the Koas
+      await db.notification.create({
+        data: {
+          koasId: profile.id,
+          senderId: null,
+          userId: userId,
+          title: 'Profile Pending Approval',
+          message:
+            "Your profile is currently under review. You'll be notified once approved.",
+          status: 'Unread',
+        },
+      });
+
+      // Send notification to all Fasilitators
+      const fasilitators = await db.user.findMany({
+        where: { role: 'Fasilitator' },
+        select: { id: true },
+      });
+
+      // Create notifications for each fasilitator
+      if (fasilitators.length > 0) {
+        await db.notification.createMany({
+          data: fasilitators.map((fasilitator) => ({
+            senderId: userId,
+            userId: fasilitator.id,
+            koasId: profile.id,
+            title: 'New Koas Registration',
+            message: `${
+              existingUser.givenName || existingUser.name || 'A new Koas'
+            } has registered and is pending approval.`,
+            status: 'Unread',
+          })),
+        });
+      }
     } else if (existingUser.role === Role.Pasien) {
       profile = await db.pasienProfile.create({
         data: {
@@ -440,8 +509,51 @@ export async function POST(
           bio: bio,
         } as Prisma.PasienProfileCreateInput,
       });
+
+      // Send welcome notification to the Pasien
+      await db.notification.create({
+        data: {
+          userId: userId,
+          title: 'Welcome to DentaKoas!',
+          message: `Hello ${
+            existingUser.name || existingUser.givenName || ''
+          }! Welcome to DentaKoas. You can now search for dental treatments.`,
+          status: 'Unread',
+        },
+      });
+    } else if (existingUser.role === Role.Fasilitator) {
+      profile = await db.fasilitatorProfile.create({
+        data: {
+          user: { connect: { id: userId } },
+          university: university,
+        } as Prisma.FasilitatorProfileCreateInput,
+      });
+
+      // Send welcome notification to the Fasilitator
+      await db.notification.create({
+        data: {
+          userId: userId,
+          title: 'Welcome to DentaKoas!',
+          message: `Hello ${
+            existingUser.name || existingUser.givenName || ''
+          }! Welcome to DentaKoas. You can now manage and approve Koas profiles.`,
+          status: 'Unread',
+        },
+      });
+    } else if (existingUser.role === Role.Admin) {
+      // Send welcome notification to the Admin
+      await db.notification.create({
+        data: {
+          userId: userId,
+          title: 'Welcome to DentaKoas!',
+          message: `Hello Admin! Welcome to DentaKoas administrative panel.`,
+          status: 'Unread',
+        },
+      });
+
+      return NextResponse.json({ error: 'Invalid user role' }, { status: 400 });
     } else {
-      return NextResponse.json({ error: "Invalid user role" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid user role' }, { status: 400 });
     }
 
     const user = {
@@ -451,8 +563,8 @@ export async function POST(
 
     return NextResponse.json(
       {
-        status: "Success",
-        message: "Profile created successfully",
+        status: 'Success',
+        message: 'Profile created successfully',
         data: { user },
       },
       { status: 201 }
@@ -460,7 +572,11 @@ export async function POST(
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.stack);
-      console.error("Failed to create content interaction:", error);
+      console.error('Failed to create profile:', error);
+      return NextResponse.json(
+        { error: 'Failed to create profile' },
+        { status: 500 }
+      );
     }
   }
 }

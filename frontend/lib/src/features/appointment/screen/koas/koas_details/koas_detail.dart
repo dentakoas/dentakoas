@@ -53,12 +53,6 @@ class KoasDetailScreen extends StatelessWidget {
         showActions: false,
         centerTitle: true,
         title: Text('Koas Profile'),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.more_vert),
-        //     onPressed: () {},
-        //   ),
-        // ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -120,6 +114,8 @@ class KoasDetailScreen extends StatelessWidget {
             FooterButton(
               userKoasId: koas.koasProfile?.id,
               koasId: koas.id,
+              status: koas.koasProfile?.status ?? 'N/A',
+              koasUniversity: koas.koasProfile?.university ?? '',
             ),
           ],
         ),
@@ -770,10 +766,18 @@ class KoasUpcomingEvent extends StatelessWidget {
 }
 
 class FooterButton extends StatelessWidget {
-  const FooterButton({super.key, this.userKoasId, this.koasId});
+  const FooterButton({
+    super.key,
+    this.userKoasId,
+    this.koasId,
+    required this.status,
+    required this.koasUniversity,
+  });
 
   final String? userKoasId;
   final String? koasId;
+  final String status;
+  final String koasUniversity;
 
   @override
   Widget build(BuildContext context) {
@@ -782,7 +786,24 @@ class FooterButton extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Obx(
         () {
-          if (UserController.instance.user.value.role == 'Fasilitator') {
+          final userController = UserController.instance;
+          final fasilitatorUniversity =
+              userController.user.value.fasilitatorProfile?.university ?? '';
+
+          // Show approve/reject buttons if:
+          // 1. User is Fasilitator
+          // 2. Status is pending
+          // 3. Fasilitator and Koas have the same university
+          final isSameUniversity = koasUniversity.isNotEmpty &&
+              fasilitatorUniversity.isNotEmpty &&
+              koasUniversity == fasilitatorUniversity;
+
+          if (userController.user.value.role == 'Fasilitator' &&
+              status.toLowerCase() == 'pending' &&
+              isSameUniversity) {
+            Logger().i(
+                'Showing approve/reject buttons. Universities match: $koasUniversity');
+            
             return Row(
               children: [
                 Expanded(
@@ -836,23 +857,30 @@ class FooterButton extends StatelessWidget {
               ],
             );
           }
-          return SizedBox( 
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TColors.primary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          
+          // For non-fasilitator users or non-matching conditions, show appropriate button
+          if (userController.user.value.role != 'Fasilitator') {
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: TColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () => Get.to(() => const PostWithSpecificKoas()),
+                child: const Text(
+                  'Book Appointment',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
-              onPressed: () => Get.to(() => const PostWithSpecificKoas()),
-              child: const Text(
-                'Book Appointment',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          );
+            );
+          } else {
+            // For fasilitator but not matching university or not pending
+            return const SizedBox.shrink();
+          }
         },
       ),
     );

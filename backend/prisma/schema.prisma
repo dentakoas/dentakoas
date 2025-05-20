@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL_DEV")
 }
 
 model User {
@@ -98,7 +98,7 @@ model KoasProfile {
   universityId String?
   experience   Int?           @default(0)
   Appointment  Appointment[]
-  University   University?    @relation(fields: [universityId], references: [id])
+  University   University?    @relation(fields: [universityId], references: [id], onDelete: SetNull)
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   Notification Notification[]
   Post         Post[]
@@ -179,7 +179,7 @@ model Like {
   userId    String   @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
   Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([postId], map: "post_id")
   @@index([userId], map: "user_id")
@@ -256,9 +256,9 @@ model Review {
   comment     String?      @db.VarChar(500)
   createdAt   DateTime     @default(now()) @map("created_at")
   koasId      String?      @map("koas_id")
-  KoasProfile KoasProfile? @relation(fields: [koasId], references: [userId])
+  KoasProfile KoasProfile? @relation(fields: [koasId], references: [userId], onDelete: SetNull)
   post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user        User         @relation(fields: [pasienId], references: [id])
+  user        User         @relation(fields: [pasienId], references: [id], onDelete: Cascade)
 
   @@index([postId], map: "post_id")
   @@index([pasienId], map: "pasien_Id")
@@ -276,10 +276,10 @@ model Appointment {
   status     StatusAppointment @default(Pending)
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
-  koas       KoasProfile       @relation(fields: [koasId], references: [id])
-  pasien     PasienProfile     @relation(fields: [pasienId], references: [id])
-  schedule   Schedule          @relation(fields: [scheduleId], references: [id])
-  timeslot   Timeslot          @relation(fields: [timeslotId], references: [id])
+  koas       KoasProfile       @relation(fields: [koasId], references: [id], onDelete: Cascade)
+  pasien     PasienProfile     @relation(fields: [pasienId], references: [id], onDelete: Cascade)
+  schedule   Schedule          @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  timeslot   Timeslot          @relation(fields: [timeslotId], references: [id], onDelete: Cascade)
 
   @@index([koasId], map: "appointment_koas_id_fkey")
   @@index([pasienId], map: "appointment_pasien_id_fkey")

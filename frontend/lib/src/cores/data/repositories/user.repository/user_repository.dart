@@ -239,13 +239,29 @@ class UserRepository extends GetxController {
         if (data is Map<String, dynamic>) {
           return UserModel.fromJson(data);
         } else {
-          throw 'Unexpected data format';
+          Logger().e('Unexpected data format when fetching user profile');
+          // Return empty model instead of throwing to prevent cascading failures
+          return UserModel.empty();
         }
       } else {
-        throw 'Failed to fetch user data with status code ${response.statusCode}';
+        Logger().e(
+            'Failed to fetch user data with status code ${response.statusCode}');
+        // Return empty model instead of throwing
+        return UserModel.empty();
       }
     } catch (e) {
-      throw e.toString();
+      Logger().e('Error fetching user profile: $e');
+
+      // Don't delete the Firebase user - this creates more problems
+      // Instead, return an empty user model that can be safely used by the app
+      return UserModel.empty();
+
+      // Previously problematic code:
+      // if (AuthenticationRepository.instance.authUser != null) {
+      //   await AuthenticationRepository.instance.authUser!.delete();
+      // }
+      // AuthenticationRepository.instance.screenRedirect();
+      // throw e.toString();
     }
   }
 

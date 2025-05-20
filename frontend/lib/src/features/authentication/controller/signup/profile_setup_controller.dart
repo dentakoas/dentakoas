@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:denta_koas/src/commons/widgets/state_screeen/state_screen.dart';
 import 'package:denta_koas/src/cores/data/repositories/authentication.repository/authentication_repository.dart';
+import 'package:denta_koas/src/cores/data/repositories/notifications.repository/notification_repository.dart';
 import 'package:denta_koas/src/cores/data/repositories/university.repository/universities_repository.dart';
 import 'package:denta_koas/src/cores/data/repositories/user.repository/user_repository.dart';
 import 'package:denta_koas/src/features/appointment/controller/university.controller/university_controller.dart';
+import 'package:denta_koas/src/features/appointment/data/model/notifications_model.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/features/personalization/model/fasilitator_profile.dart';
 import 'package:denta_koas/src/features/personalization/model/koas_profile.dart';
@@ -91,13 +93,29 @@ class ProfileSetupController extends GetxController {
         return;
       }
 
-      if (existingRole == 'Koas' || existingTempRole == 'Koas') {
+      String userRole = existingRole;
+      if (existingRole.isEmpty && existingTempRole != null) {
+        userRole = existingTempRole;
+      }
+
+      if (userRole == 'Koas' || existingTempRole == 'Koas') {
         updateNewKoasProfile(userId);
-      } else if (existingRole == 'Pasien' || existingTempRole == 'Pasien') {
+        
+        // For Koas, create both welcome and pending approval notifications
+        await _createWelcomeNotification(userId, userRole);
+        await _createPendingApprovalNotification(userId);
+      } else if (userRole == 'Pasien' || existingTempRole == 'Pasien') {
         updateNewPasienProfile(userId);
-      } else if (existingRole == 'Fasilitator' ||
+        
+        // For Pasien, just create welcome notification
+        await _createWelcomeNotification(userId, userRole);
+      } else if (userRole == 'Fasilitator' ||
           existingTempRole == 'Fasilitator') {
         updateNewFasilitatorProfile(userId);
+        
+        // For Fasilitator, just create welcome notification
+        await _createWelcomeNotification(userId, userRole);
+        
       } else {
         TLoaders.errorSnackBar(
           title: 'Error',
@@ -118,18 +136,26 @@ class ProfileSetupController extends GetxController {
       // Hapus temp role
       localStorage.remove('TEMP_ROLE');
 
-      // refresh user data 
-      await UserController.instance.fetchUserDetail();
+      // refresh user data - make sure not to delete instances
+      if (Get.isRegistered<UserController>()) {
+        await UserController.instance.fetchUserDetail();
+      }
 
-      // Get.off(() => AuthenticationRepository.instance.screenRedirect());
-      Get.off(() => StateScreen(
+      // Use a safer way to navigate to the success screen and then redirect
+      Get.to(() => StateScreen(
             image: TImages.successfullySignedUp,
             title: TTexts.yourAccountCreatedTitle,
             subtitle: TTexts.yourAccountCreatedSubTitle,
             showButton: true,
             isLottie: true,
             primaryButtonTitle: TTexts.tContinue,
-            onPressed: () => AuthenticationRepository.instance.screenRedirect(),
+            onPressed: () {
+              // Ensure we have the necessary instances before redirecting
+              if (!Get.isRegistered<AuthenticationRepository>()) {
+                Get.put(AuthenticationRepository());
+              }
+              AuthenticationRepository.instance.screenRedirect();
+            },
           ));
     } catch (e) {
       // Stop Loading
@@ -140,6 +166,86 @@ class ProfileSetupController extends GetxController {
         title: 'Error',
         message: e.toString(),
       );
+    }
+  }
+  
+  // Create role-specific welcome notification
+  Future<void> _createWelcomeNotification(String userId, String role) async {
+    try {
+      // Register notification repository if not registered
+      if (!Get.isRegistered<NotificationRepository>()) {
+        Get.put(NotificationRepository());
+      }
+
+      // Define role-specific welcome messages
+      String title = 'Welcome to DentaKoas!';
+      String message;
+
+      switch (role) {
+        case 'Koas':
+          message =
+              'Thank you for completing your profile! As a Koas, you can now create posts and help dental patients.';
+          break;
+        case 'Pasien':
+          message =
+              'Thank you for completing your profile! As a Pasien, you can now browse and book dental appointments.';
+          break;
+        case 'Fasilitator':
+          message =
+              'Welcome! As a Fasilitator, you can now approve Koas profiles and manage the platform.';
+          break;
+        default:
+          message =
+              'Thank you for completing your profile setup. We\'re excited to have you join us!';
+      }
+
+      // Create welcome notification model
+      final notificationData = NotificationsModel(
+        userId: userId,
+        title: title,
+        message: message,
+        status: StatusNotification.Unread,
+        createdAt: DateTime.now(),
+      );
+
+      // Send notification using repository
+      await NotificationRepository.instance
+          .createNotification(notificationData);
+
+      Logger()
+          .i('Welcome notification created for user: $userId with role: $role');
+    } catch (e) {
+      // Log error but don't interrupt the main flow
+      Logger().e('Failed to create welcome notification: $e');
+    }
+  }
+
+  // Create pending approval notification specifically for Koas
+  Future<void> _createPendingApprovalNotification(String userId) async {
+    try {
+      // Register notification repository if not registered
+      if (!Get.isRegistered<NotificationRepository>()) {
+        Get.put(NotificationRepository());
+      }
+
+      // Create pending approval notification model
+      final notificationData = NotificationsModel(
+        userId: userId,
+        title: 'Profile Verification Required',
+        message:
+            'Your Koas profile has been submitted and is pending approval from a Fasilitator. You will be notified once your profile is approved.',
+        status: StatusNotification.Unread,
+        createdAt: DateTime.now(),
+      );
+
+      // Send notification using repository
+      await NotificationRepository.instance
+          .createNotification(notificationData);
+
+      Logger().i('Pending approval notification created for Koas: $userId');
+    } catch (e) {
+      // Log error but don't interrupt the main flow
+      Logger().e('Failed to create pending approval notification: $e');
     }
   }
 
@@ -155,7 +261,13 @@ class ProfileSetupController extends GetxController {
           showButton: true,
           isLottie: true,
           primaryButtonTitle: TTexts.tContinue,
-          onPressed: () => AuthenticationRepository.instance.screenRedirect(),
+          onPressed: () {
+            // Ensure we have the necessary instances before redirecting
+            if (!Get.isRegistered<AuthenticationRepository>()) {
+              Get.put(AuthenticationRepository());
+            }
+            AuthenticationRepository.instance.screenRedirect();
+          },
         ),
       );
     }
@@ -179,8 +291,13 @@ class ProfileSetupController extends GetxController {
               showButton: true,
               isLottie: true,
               primaryButtonTitle: TTexts.tContinue,
-              onPressed: () =>
-                  AuthenticationRepository.instance.screenRedirect(),
+              onPressed: () {
+                // Ensure we have the necessary instances before redirecting
+                if (!Get.isRegistered<AuthenticationRepository>()) {
+                  Get.put(AuthenticationRepository());
+                }
+                AuthenticationRepository.instance.screenRedirect();
+              },
             ),
           );
         }
