@@ -56,7 +56,7 @@ class HomePopularKoasSection extends StatelessWidget {
                 // return const KoasCardShimmer();
               }
               return DGridLayout(
-                itemCount: 2,
+                itemCount: controller.popularKoas.length,
                 crossAxisCount: 1,
                 itemBuilder: (_, index) {
                   final popularKoas = controller.popularKoas[index];

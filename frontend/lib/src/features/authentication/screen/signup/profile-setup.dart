@@ -50,22 +50,30 @@ class ProfileSetupScreen extends StatelessWidget {
                           // Koas-specific fields
                           TextFormField(
                             controller: controller.koasNumber,
-                            validator: (value) => TValidator.validateEmptyText(
-                                "Koas Number", value),
+                            validator: (value) => TValidator.validateNIM(value),
                             decoration: const InputDecoration(
-                              labelText: 'Koas Number',
+                              labelText: 'NIM',
                               prefixIcon: Icon(Iconsax.personalcard),
                             ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            onChanged: (value) {
+                              controller.updateEntryYearFromNIM(value);
+                            },
                           ),
                           const SizedBox(height: TSizes.spaceBtwInputFields),
                           TextFormField(
-                            controller: controller.departement,
+                            initialValue: controller.departement.text,
                             validator: (value) => TValidator.validateEmptyText(
                                 "Departement", value),
                             decoration: const InputDecoration(
+                              enabled: false,
                               labelText: 'Departement',
                               prefixIcon: Icon(Iconsax.book),
                             ),
+                            readOnly: true,
                           ),
                           const SizedBox(height: TSizes.spaceBtwInputFields),
                           DDropdownMenu(
@@ -81,18 +89,25 @@ class ProfileSetupScreen extends StatelessWidget {
                         ],
                         if (role == 'Koas' || role == 'Pasien') ...[
                           // Fields shared by Koas and Pasien
-                          TextFormField(
+                          if (role == 'Koas') ...[
+                            TextFormField(
                             controller: controller.age,
                             validator: (value) =>
-                                TValidator.validateEmptyText("Age", value),
+                                  TValidator.validateEmptyText(
+                                      "Entry year", value),
                             decoration: const InputDecoration(
-                              labelText: 'Age',
-                              prefixIcon: Icon(Iconsax.cake),
+                                enabled: false,
+                                labelText: 'Entry year',
+                                prefixIcon: Icon(Iconsax.teacher),
                             ),
+                              readOnly:
+                                  false, // Make it read-only since it's auto-populated
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ],
-                          ),
+                            ),
+                          ],
+
                           const SizedBox(height: TSizes.spaceBtwInputFields),
                           DDropdownMenu(
                             hintText: 'Select Gender',
@@ -121,8 +136,6 @@ class ProfileSetupScreen extends StatelessWidget {
                         if (role == 'Koas' || role == 'Pasien') ...[
                           TextFormField(
                             controller: controller.bio,
-                            validator: (value) =>
-                                TValidator.validateEmptyText("Bio", value),
                             decoration: const InputDecoration(
                               labelText: 'Please tell us about yourself',
                               alignLabelWithHint: true,

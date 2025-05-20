@@ -98,4 +98,39 @@ class KoasProfileModel {
           json['updateAt'] != null ? DateTime.tryParse(json['updateAt']) : null,
     );
   }
+
+  /// Mendapatkan tahun masuk dari NIM
+  /// Contoh: 231611101055 -> 2023
+  String getTahunMasuk() {
+    return '20${koasNumber!.substring(0, 2)}';
+  }
+
+  /// Mendapatkan kode fakultas dari NIM
+  /// Contoh: 231611101055 -> 16
+  String getKodeFakultas() {
+    return koasNumber!.substring(2, 4);
+  }
+
+  /// Mendapatkan kode jurusan dari NIM
+  /// Contoh: 231611101055 -> 11
+  String getKodeJurusan() {
+    return koasNumber!.substring(4, 6);
+  }
+
+  /// Mendapatkan nomor identitas dari NIM
+  /// Contoh: 231611101055 -> 101055
+  String getNomorIdentitas() {
+    return koasNumber!.substring(6);
+  }
+
+  /// Menampilkan informasi lengkap NIM
+  Map<String, String> getInfoLengkap() {
+    return {
+      'koasNumber': koasNumber!,
+      'tahunMasuk': getTahunMasuk(),
+      'kodeFakultas': getKodeFakultas(),
+      'kodeJurusan': getKodeJurusan(),
+      'nomorIdentitas': getNomorIdentitas(),
+    };
+  }
 }

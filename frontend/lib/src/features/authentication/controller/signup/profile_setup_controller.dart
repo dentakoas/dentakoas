@@ -30,11 +30,11 @@ class ProfileSetupController extends GetxController {
 
   TextEditingController koasNumber = TextEditingController();
   TextEditingController age = TextEditingController();
+  TextEditingController generation = TextEditingController();
   TextEditingController departement = TextEditingController();
   TextEditingController university = TextEditingController();
   TextEditingController whatsappLink = TextEditingController();
   TextEditingController bio = TextEditingController();
-
 
   final universitiesRepository = Get.put(UniversitiesRepository());
   final userRepository = Get.put(UserRepository());
@@ -53,6 +53,13 @@ class ProfileSetupController extends GetxController {
   final localStorage = GetStorage();
 
   final GlobalKey<FormState> profileSetupFormKey = GlobalKey<FormState>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Initialize department with default value
+    departement = TextEditingController(text: "Profesi Dokter Gigi");
+  }
 
   @override
   void onReady() {
@@ -317,7 +324,7 @@ class ProfileSetupController extends GetxController {
         gender: selectedGender,
         departement: departement.text.trim(),
         university: selectedUniversity,
-        bio: bio.text.trim(),
+        bio: bio.text.trim() == '' ? 'No bio' : bio.text.trim(),
         whatsappLink: 'https://wa.me/$waPhone',
       ),
     );
@@ -329,9 +336,9 @@ class ProfileSetupController extends GetxController {
   void updateNewPasienProfile(String userId) async {
     final updateUser = UserModel(
       pasienProfile: PasienProfileModel(
-        age: age.text,
+        age: '',
         gender: selectedGender,
-        bio: bio.text.trim(),
+        bio: bio.text.trim() == '' ? 'No bio' : bio.text.trim(),
         userId: userId,
       ),
     );
@@ -372,7 +379,18 @@ class ProfileSetupController extends GetxController {
     }
   }
 
+  // Extract entry year from NIM
+  String getTahunMasuk(String nim) {
+    if (nim.length >= 2) {
+      return '20${nim.substring(0, 2)}';
+    }
+    return '';
+  }
 
-
-
+  // Auto-populate the entry year field when NIM is entered
+  void updateEntryYearFromNIM(String nim) {
+    if (nim.length >= 2) {
+      age.text = getTahunMasuk(nim);
+    }
+  }
 }

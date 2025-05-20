@@ -183,11 +183,11 @@ class ProfileScreen extends StatelessWidget {
                               'User Id', controller.user.value.id!),
                         ),
                         ProfileMenu(
-                          title: 'Koas Number',
+                          title: 'NIM',
                           value: controller.user.value.profile!.koasNumber!,
                           icon: Iconsax.copy,
                           onTap: () => THelperFunctions.copyToClipboard(
-                              'Koas Number',
+                              'NIM',
                               controller.user.value.profile!.koasNumber!),
                         ),
                         ProfileMenu(
@@ -201,7 +201,7 @@ class ProfileScreen extends StatelessWidget {
                           onTap: () {},
                         ),
                         ProfileMenu(
-                          title: 'Age',
+                          title: 'Generation',
                           value: controller.user.value.profile!.age!,
                           onTap: () {},
                         ),
@@ -228,7 +228,7 @@ class ProfileScreen extends StatelessWidget {
                           onTap: () {},
                         ),
                         ProfileMenu(
-                          title: 'Age',
+                          title: 'Generation',
                           value: controller.user.value.profile!.age!,
                           onTap: () {},
                         ),

@@ -366,12 +366,12 @@ class PersonalInformationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final personalInfo = [
-      {'label': 'Koas Number', 'value': koasNumber},
+      {'label': 'NIM', 'value': koasNumber},
       {'label': 'Status', 'value': status},
       {'label': 'Departement', 'value': departement},
       {'label': 'Phone', 'value': phone},
       {'label': 'Gender', 'value': gender},
-      {'label': 'Age', 'value': age},
+      {'label': 'Generation', 'value': age},
     ];
 
     return Padding(

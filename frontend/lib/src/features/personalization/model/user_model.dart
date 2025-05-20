@@ -9,7 +9,7 @@ import 'package:denta_koas/src/utils/formatters/formatter.dart';
 import 'package:logger/logger.dart';
 
 class UserModel {
-  final String? id;
+  late final String? id;
   final String? givenName;
   final String? familyName;
   final String? name;
@@ -276,42 +276,67 @@ class UserModel {
 
 
 Map<String, dynamic> filterProfileByRole(Map<String, dynamic> data) {
+  // Safely extract role with null check
   String role = data['role'] ?? '';
-  Map<String, dynamic>? filteredProfile;
+  Map<String, dynamic> filteredProfile = {};
 
-  switch (role) {
-    case 'Fasilitator':
-      filteredProfile = {
-        'fasilitatorProfile': data['fasilitatorProfile'] != null
-            ? jsonDecode(data['fasilitatorProfile'])
-            : null,
-      };
-      break;
-    case 'Koas':
-      filteredProfile = {
-        'koasProfile': data['koasProfile'],
-      };
-      break;
-    case 'Pasien':
-      filteredProfile = {
-        'pasienProfile': data['pasienProfile'],
-      };
-      break;
-    default:
-      filteredProfile = {
-        'message': 'No profile available for this role',
-      };
+  try {
+    switch (role) {
+      case 'Fasilitator':
+        // Handle case when fasilitatorProfile is a string (JSON) or already a Map
+        if (data['fasilitatorProfile'] != null) {
+          if (data['fasilitatorProfile'] is String) {
+            try {
+              filteredProfile = {
+                'fasilitatorProfile': jsonDecode(data['fasilitatorProfile']),
+              };
+            } catch (e) {
+              Logger().e("Error decoding fasilitatorProfile: $e");
+              filteredProfile = {'fasilitatorProfile': null};
+            }
+          } else {
+            filteredProfile = {
+              'fasilitatorProfile': data['fasilitatorProfile']
+            };
+          }
+        } else {
+          filteredProfile = {'fasilitatorProfile': null};
+        }
+        break;
+      case 'Koas':
+        filteredProfile = {
+          'koasProfile': data['koasProfile'],
+        };
+        break;
+      case 'Pasien':
+        filteredProfile = {
+          'pasienProfile': data['pasienProfile'],
+        };
+        break;
+      default:
+        filteredProfile = {
+          'message': 'No profile available for this role',
+        };
+    }
+
+    return {
+      'id': data['id'] ?? '',
+      'email': data['email'] ?? '',
+      'password': data['password'] ?? '',
+      'role': role,
+      ...filteredProfile, // Spread the filtered profile into the result
+    };
+  } catch (e) {
+    Logger().e("Error in filterProfileByRole: $e");
+    // Return a safe default in case of error
+    return {
+      'id': data['id'] ?? '',
+      'email': data['email'] ?? '',
+      'password': data['password'] ?? '',
+      'role': role,
+      'error': 'Failed to process profile data',
+    };
   }
-
-  return {
-    'id': data['id'],
-    'email': data['email'],
-    'password': data['password'],
-    'role': role,
-    ...filteredProfile, // Spread the filtered profile into the result
-  };
-
-  
 }
 
 enum Role { Koas, Pasien, Fasilitator, Admin }

@@ -1,4 +1,3 @@
-
 class TValidator {
 
 static String? validateUserInput(
@@ -130,6 +129,46 @@ static String? validateRating(double rating) {
     if (rating == 0) {
       return 'Rating is required.';
     }
+    return null;
+  }
+
+static String? validateNIM(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'NIM is required.';
+    }
+
+    // Check if NIM consists of only digits
+    if (!RegExp(r'^\d+$').hasMatch(value)) {
+      return 'NIM should contain only numbers.';
+    }
+
+    // Check if NIM has the correct length (12 digits based on example 231611101055)
+    if (value.length != 12) {
+      return 'NIM should be 12 digits long.';
+    }
+
+    // Extract and validate components
+    final yearPart = value.substring(0, 2);
+    final facultyCode = value.substring(2, 4);
+    final departmentCode = value.substring(4, 6);
+
+    // Validate year part (should be 23 or 24)
+    if (yearPart != '23' && yearPart != '24') {
+      return 'Invalid entry year. Year should be 23 or 24.';
+    }
+
+    // Optional: Add specific validations for faculty and department codes if needed
+    // For example, if faculty code must be 16 for medical faculty
+    if (facultyCode != '16') {
+      return 'Invalid faculty code in NIM. Faculty code should be 16 for Medicine.';
+    }
+
+    // Optional: Add specific validations for department codes if needed
+    // For example, if department code must be 11 for a specific department
+    if (departmentCode != '11') {
+      return 'Invalid department code in NIM. Department code should be 11 for Medicine.';
+    }
+
     return null;
   }
 }

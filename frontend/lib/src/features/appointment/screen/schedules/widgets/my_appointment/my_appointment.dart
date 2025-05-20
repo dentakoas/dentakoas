@@ -111,10 +111,12 @@ class MyAppointmentScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              buildDetailRow('Koas Number',
+              buildDetailRow(
+                  'NIM',
                   appointment.koas?.koasNumber.toString() ?? 'N/A'),
               buildDetailRow('Gender', appointment.koas?.gender ?? 'N/A'),
-              buildDetailRow('Age', appointment.koas?.age.toString() ?? 'N/A'),
+              buildDetailRow(
+                  'Generation', appointment.koas?.age.toString() ?? 'N/A'),
               buildDetailRow(
                   'Departement', appointment.koas?.departement ?? 'N/A'),
 
@@ -134,7 +136,7 @@ class MyAppointmentScreen extends StatelessWidget {
                   'Full Name', appointment.pasien?.user?.fullName ?? 'N/A'),
               buildDetailRow('Gender', appointment.pasien?.gender ?? 'N/A'),
               buildDetailRow(
-                  'Age', appointment.pasien?.age.toString() ?? 'N/A'),
+                  'Generation', appointment.pasien?.age.toString() ?? 'N/A'),
               buildDetailRow('Phone', appointment.pasien?.user?.phone ?? 'N/A'),
               const SizedBox(height: 20),
               const Divider(),

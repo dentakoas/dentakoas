@@ -42,6 +42,7 @@ class AuthenticationRepository extends GetxController {
   }
 
 screenRedirect() async {
+    try {
     final user = _auth.currentUser;
     if (user != null) {
       final uid = user.uid;
@@ -59,48 +60,63 @@ screenRedirect() async {
       final userController = Get.find<UserController>();
 
       try {
+          // Check for profile data consistency
         final userDetail = await userRepository.getUserProfile(uid);
+        
         final userMap = userDetail.toJson();
+          final profiles = filterProfileByRole(userMap);
+          final hasNullField = userController.hasEmptyFields(profiles);
 
-        final users = filterProfileByRole(userMap);
-        final hasNullField = userController.hasEmptyFields(users);
-
-        Logger().i(['User Profile: $users']);
-        Logger().i(['Has Null Field: $hasNullField']);
-
-        final isOauth =
-            userDetail.password!.isEmpty || userDetail.password == null;
+          Logger().i('User Profile: $profiles');
+          Logger().i('Has Null Field: $hasNullField');
 
         if (user.emailVerified) {
-          if (userDetail.role == null ||
-              userDetail.role == '' ||
-              isOauth && userDetail.role == null ||
-              userDetail.role == '') {
+            // Check for complete user data
+            if (userDetail.role == null || userDetail.role!.isEmpty) {
             Get.offAll(() => const ChooseRolePage());
-          } else if (userDetail.role != null && hasNullField) {
+            } else if (hasNullField) {
+              // Save role for profile setup
             storage.write("TEMP_ROLE", userDetail.role);
             Get.offAll(() => const ProfileSetupScreen());
-          } else if (userDetail.role != null && !hasNullField) {
-            Get.offAll(() => const NavigationMenu());
+            } else {
+              Get.off(() => const NavigationMenu());
           }
         } else {
-          Get.offAll(() => const VerifyEmailScreen());
+            // Email not verified
+            Get.offAll(() => VerifyEmailScreen(email: user.email ?? ""));
         }
       } catch (e) {
         Logger().e("Error during screen redirect: $e");
-        // Handle error gracefully
-        storage.writeIfNull('isFirstTime', true);
-        Get.offAll(() => const SigninScreen());
+        
+          // Determine if this is a 404 error (user not found)
+          if (e.toString().contains("404")) {
+            // User exists in Firebase but not in backend database
+            // Handle as a special case - if email verified, go to role selection
+            if (user.emailVerified) {
+              Get.offAll(() => const ChooseRolePage());
+            } else {
+              Get.offAll(() => VerifyEmailScreen(email: user.email ?? ""));
+            }
+          } else {
+            // For other errors, go to sign in screen
+            storage.writeIfNull('isFirstTime', true);
+            Get.offAll(() => const SigninScreen());
+          }
       }
     } else {
-      // local storage
-      storage.writeIfNull('isFirstTime', true);
-      // check if user is already logged in
+        // No user signed in
+        storage.writeIfNull('isFirstTime', true);
       storage.read('isFirstTime') != true
           ? Get.offAll(() => const SigninScreen())
           : Get.offAll(() => const OnBoardingScreen());
     }
-  }
+    } catch (e) {
+      // Global error handler
+      Logger().e("Critical error in screenRedirect: $e");
+      storage.writeIfNull('isFirstTime', true);
+      Get.offAll(() => const SigninScreen());
+    }
+}
 
 
   // ----------------- Check if user is exist by email -----------------

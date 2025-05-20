@@ -15,47 +15,70 @@ class TermAndConditions extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SignUpController.instance;
     final dark = THelperFunctions.isDarkMode(context);
+    
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 24,
-          height: 24,
-          child: Obx(
-            () => Checkbox(
-              value: controller.provicyPolicy.value,
-              onChanged: (value) => controller.provicyPolicy.value = value!,
+        // Use a more stable approach with GestureDetector + Container instead of direct Checkbox
+        GestureDetector(
+          onTap: () {
+            controller.provicyPolicy.value = !controller.provicyPolicy.value;
+          },
+          child: Container(
+            width: 24,
+            height: 24,
+            margin: const EdgeInsets.only(top: 2), // Align with text
+            child: Obx(
+              () => Checkbox(
+                value: controller.provicyPolicy.value,
+                // Use a simple function reference instead of lambda
+                onChanged: _onCheckboxChanged(controller),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
             ),
           ),
         ),
         const SizedBox(width: TSizes.spaceBtwItems),
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                  text: '${TTexts.iAgreeTo} ',
-                  style: Theme.of(context).textTheme.bodySmall),
-              TextSpan(
-                  text: '${TTexts.privacyPolicy} ',
-                  style: Theme.of(context).textTheme.bodyMedium!.apply(
-                        color: dark ? TColors.white : TColors.primary,
-                        decoration: TextDecoration.underline,
-                        decorationColor: dark ? TColors.white : TColors.primary,
-                      )),
-              TextSpan(
-                  text: '${TTexts.and2} ',
-                  style: Theme.of(context).textTheme.bodySmall),
-              TextSpan(
-                  text: '${TTexts.termsOfUse} ',
-                  style: Theme.of(context).textTheme.bodyMedium!.apply(
-                        color: dark ? TColors.white : TColors.primary,
-                        decoration: TextDecoration.underline,
-                        decorationColor: dark ? TColors.white : TColors.primary,
-                    ),
-              ),
-            ],
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                    text: '${TTexts.iAgreeTo} ',
+                    style: Theme.of(context).textTheme.bodySmall),
+                TextSpan(
+                    text: '${TTexts.privacyPolicy} ',
+                    style: Theme.of(context).textTheme.bodyMedium!.apply(
+                          color: dark ? TColors.white : TColors.primary,
+                          decoration: TextDecoration.underline,
+                          decorationColor: dark ? TColors.white : TColors.primary,
+                        )),
+                TextSpan(
+                    text: '${TTexts.and2} ',
+                    style: Theme.of(context).textTheme.bodySmall),
+                TextSpan(
+                    text: '${TTexts.termsOfUse} ',
+                    style: Theme.of(context).textTheme.bodyMedium!.apply(
+                          color: dark ? TColors.white : TColors.primary,
+                          decoration: TextDecoration.underline,
+                          decorationColor: dark ? TColors.white : TColors.primary,
+                      ),
+                ),
+              ],
+            ),
           ),
         )
       ],
     );
+  }
+  
+  // Extract checkbox handler to a separate method
+  ValueChanged<bool?>? _onCheckboxChanged(SignUpController controller) {
+    return (bool? value) {
+      if (value != null) {
+        controller.provicyPolicy.value = value;
+      }
+    };
   }
 }

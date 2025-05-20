@@ -50,9 +50,9 @@ class ChangePersonalInformation extends StatelessWidget {
                           TextFormField(
                             controller: controller.koasNumber,
                             validator: (value) => TValidator.validateEmptyText(
-                                "Koas Number", value),
+                                "NIM", value),
                             decoration: const InputDecoration(
-                              labelText: 'Koas Number',
+                              labelText: 'NIM',
                               prefixIcon: Icon(Iconsax.personalcard),
                             ),
                           ),
@@ -87,9 +87,10 @@ class ChangePersonalInformation extends StatelessWidget {
                           TextFormField(
                             controller: controller.age,
                             validator: (value) =>
-                                TValidator.validateEmptyText("Age", value),
+                                TValidator.validateEmptyText(
+                                "Generation", value),
                             decoration: const InputDecoration(
-                              labelText: 'Age',
+                              labelText: 'Generation',
                               prefixIcon: Icon(Iconsax.cake),
                             ),
                             inputFormatters: [

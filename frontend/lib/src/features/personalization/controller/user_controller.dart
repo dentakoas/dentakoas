@@ -128,12 +128,15 @@ String updateGreetingMessage() {
       final key = entry.key;
       final value = entry.value;
 
+      // Skip null checks for certain fields that can be optional
+      if (['bio', 'image'].contains(key)) continue;
+
       // Cek kondisi untuk berbagai tipe data
       if (value == null ||
           (value is String && value.trim().isEmpty) ||
           (value is List && value.isEmpty) ||
           (value is Map && value.isEmpty)) {
-        print('Field kosong ditemukan pada key: $key, value: $value');
+        Logger().i('Empty field found at key: $key, value: $value');
         return true; // Ada field kosong
       }
 
@@ -147,36 +150,72 @@ String updateGreetingMessage() {
     return false; // Tidak ada field kosong
 }
 
-
-
 bool hasEmptyFields(Map<String, dynamic> data) {
-  // Daftar key yang akan diperiksa
-  const List<String> keysToCheck = ['koasProfile', 'pasienProfile', 'fasilitatorProfile'];
-
-  for (var entry in data.entries) {
-    final key = entry.key;
-    final value = entry.value;
-
-    // Lewati key yang tidak perlu diperiksa
-    if (!keysToCheck.contains(key)) continue;
-
-    // Cek kondisi untuk berbagai tipe data
-    if (value == null ||
-        (value is String && value.trim().isEmpty) ||
-        (value is List && value.isEmpty) ||
-        (value is Map && value.isEmpty)) {
-      print('Field kosong ditemukan pada key: $key, value: $value');
-      return true; // Ada field kosong
+    String role = data['role'] ?? '';
+    List<String> keysToCheck = [];
+  
+    switch (role) {
+      case 'Koas':
+        keysToCheck = ['koasProfile'];
+        break;
+      case 'Pasien':
+        keysToCheck = ['pasienProfile'];
+        break;
+      case 'Fasilitator':
+        keysToCheck = ['fasilitatorProfile'];
+        break;
+      default:
+        return true; // No valid role means profile is incomplete
     }
 
-    // Jika nilai adalah Map, cek secara rekursif
-    if (value is Map<String, dynamic>) {
-        final hasEmptyInNested = hasEmptyFields2(value);
-      if (hasEmptyInNested) return true;
+    // Check if the relevant profile key exists and is not null
+    for (var key in keysToCheck) {
+      if (!data.containsKey(key) || data[key] == null) {
+        Logger().i('Profile key missing: $key');
+        return true;
+      }
+    
+      // If the profile exists, check if it has required fields
+      if (data[key] is Map<String, dynamic>) {
+        final profileData = data[key] as Map<String, dynamic>;
+      
+        // Define required fields for each role type
+        List<String> requiredFields = [];
+        switch (key) {
+          case 'koasProfile':
+            requiredFields = [
+              'koasNumber',
+              'university',
+              'departement',
+              'gender'
+            ];
+            break;
+          case 'pasienProfile':
+            requiredFields = ['gender'];
+            break;
+          case 'fasilitatorProfile':
+            requiredFields = ['university'];
+            break;
+        }
+      
+        // Check if required fields exist and are not empty
+        for (var field in requiredFields) {
+          if (!profileData.containsKey(field) ||
+              profileData[field] == null ||
+              (profileData[field] is String &&
+                  profileData[field].trim().isEmpty)) {
+            Logger().i('Required field missing in $key: $field');
+            return true;
+          }
+        }
+      } else {
+        // Profile isn't a map, so it's not properly structured
+        Logger().i('Profile $key is not a proper Map');
+        return true;
     }
   }
 
-  return false; // Tidak ada field kosong
+    return false; // No empty required fields found
 }
 
 setStatusColor() {
@@ -260,7 +299,7 @@ setStatusColor() {
   void deleteUserAccount() async {
     try {
       TFullScreenLoader.openLoadingDialog(
-          'Proccecing....', TImages.loadingHealth);
+          'Proccesing....', TImages.loadingHealth);
 
       final auth = AuthenticationRepository.instance;
       final provider =
