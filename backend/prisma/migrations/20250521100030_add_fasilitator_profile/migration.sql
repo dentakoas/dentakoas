@@ -19,13 +19,13 @@
 
 */
 -- DropForeignKey
-ALTER TABLE `appointment` DROP FOREIGN KEY `Appointment_koas_id_fkey`;
+ALTER TABLE `appointments` DROP FOREIGN KEY `Appointment_koas_id_fkey`;
 
 -- DropForeignKey
-ALTER TABLE `appointment` DROP FOREIGN KEY `Appointment_pasien_id_fkey`;
+ALTER TABLE `appointments` DROP FOREIGN KEY `Appointment_pasien_id_fkey`;
 
 -- DropForeignKey
-ALTER TABLE `appointment` DROP FOREIGN KEY `Appointment_schedule_id_fkey`;
+ALTER TABLE `appointments` DROP FOREIGN KEY `Appointment_schedule_id_fkey`;
 
 -- DropForeignKey
 ALTER TABLE `koas-profile` DROP FOREIGN KEY `koas-profile_user_id_fkey`;
@@ -94,7 +94,7 @@ ALTER TABLE `verificationrequest` DROP COLUMN `identifier`,
     ADD COLUMN `email` VARCHAR(191) NOT NULL;
 
 -- DropTable
-DROP TABLE `appointment`;
+DROP TABLE `appointments`;
 
 -- DropTable
 DROP TABLE `koas-profile`;
