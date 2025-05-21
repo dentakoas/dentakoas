@@ -93,7 +93,7 @@ export const SparklesCore = (props: SparklesProps) => {
       number: {
         density: {
           enable: true,
-          area: particleDensity,
+          width: particleDensity,
         },
         value: 80,
       },
