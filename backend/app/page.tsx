@@ -1,9 +1,9 @@
 'use client'
 
-import { ArrowRight, CheckCircle, Download, MessageCircle, Shield, Smartphone, Users } from 'lucide-react'
+import { ArrowRight, CheckCircle, Download, MessageCircle, Shield, Smartphone, Users, ChevronLeft, ChevronRight, Quote } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -35,24 +35,48 @@ const navItems = [
   },
 ]
 
-const team = [
+const testimonials = [
   {
     id: 1,
     name: "Dr. Andi",
-    designation: "Lead Dentist",
-    image: "/placeholder.svg?height=200&width=200",
+    role: "Lead Dentist",
+    image: "/image/60467e1ae6f97acb8964f5aa617c7ecb.png",
+    quote: "DentaKoas has revolutionized how our dental students find patients. The matching algorithm has improved clinical practice efficiency by over 50%."
   },
   {
     id: 2,
-    name: "Dr. Budi",
-    designation: "Dental Specialist",
-    image: "/placeholder.svg?height=200&width=200",
+    name: "Dr. Ria",
+    role: "Dental Specialist",
+    image: "/image/50382765fd5648c7876d91cc37b273.png",
+    quote: "The platform has been instrumental in helping students meet their clinical requirements on time. It's a win-win for both students and patients."
   },
   {
     id: 3,
     name: "Dr. Citra",
-    designation: "Orthodontist",
-    image: "/placeholder.svg?height=200&width=200",
+    role: "Orthodontist",
+    image: "/image/b00e1ebc65fc7f2c53c9a9a955a49be5.png",
+    quote: "As an educator, I've seen firsthand how DentaKoas bridges the gap between students who need clinical experience and patients who need affordable care."
+  },
+  {
+    id: 4,
+    name: "Budi Santoso",
+    role: "Patient",
+    image: "https://avatars.githubusercontent.com/u/245?v=4",
+    quote: "I needed dental work but couldn't afford regular rates. Through DentaKoas, I received excellent care from supervised students at a price I could manage."
+  },
+  {
+    id: 5,
+    name: "Lina Wijaya",
+    role: "Dental Student",
+    image: "https://avatars.githubusercontent.com/u/389?v=4",
+    quote: "Finding specific cases for my requirements was always a challenge. DentaKoas helped me find exactly what I needed to complete my clinical practice."
+  },
+  {
+    id: 6,
+    name: "Rudi Hartono",
+    role: "Patient",
+    image: "https://avatars.githubusercontent.com/u/123?v=4",
+    quote: "I was skeptical at first, but the care I received was top-notch. The students were well-supervised, and I felt safe throughout the process."
   },
 ]
 
@@ -72,49 +96,68 @@ export default function Home() {
       {/* Navigation */}
       <FloatingNavbar navItems={navItems} />
 
-      {/* Hero Section */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden py-20">
+      {/* Hero Section - Updated to match reference image */}
+      <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden py-12">
         <BackgroundBeams className="opacity-20" />
-        <div className="container mx-auto relative z-10 px-4 md:px-6 max-w-6xl">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2 items-center">
-            <div className="flex flex-col justify-center space-y-4">
-              <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 px-3 py-1 text-sm">
-                  REVOLUTIONARY DENTAL PLATFORM
-                </div>
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
-                  Denta koas
-                </h1>
-                <div className="h-20">
-                  <TextGenerateEffect
-                    words="Connecting dental students with patients through blockchain technology"
-                    className="max-w-[600px] text-xl text-gray-300"
-                  />
-                </div>
+
+        {/* New announcement badge */}
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="inline-flex items-center rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 px-4 py-2 mb-6 border border-purple-500/30">
+            <span className="flex h-2 w-2 rounded-full bg-green-400 mr-2"></span>
+            <span className="text-sm font-medium">New! Connect dental students with patients seamlessly</span>
+          </div>
+
+          {/* Main headline - Simplified and centered */}
+          <div className="max-w-5xl text-center space-y-4">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
+                Dental matchmaking. Centralize treatment scheduling.
+              </span>
+            </h1>
+
+            <p className="mx-auto max-w-2xl text-xl text-gray-300 mt-4">
+              Record and organize dental treatments automatically. Focus on what matters -
+              connecting students with patients who need care.
+            </p>
+
+            {/* Call-to-action button */}
+            <div className="mt-8">
+              <Link href="#download">
+                <Button size="lg" className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold px-8 py-6 rounded-md text-lg shadow-lg">
+                  Get started - it's free <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* App preview floating gently */}
+          <div className="mt-12 relative max-w-sm mx-auto">
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-blue-500/30 rounded-[30px] blur-xl"
+              style={{ transform: "translateY(10px)" }}
+            ></div>
+            <BackgroundGradient className="rounded-[22px] p-1 bg-black">
+              <div className="relative h-[500px] w-[300px] overflow-hidden rounded-[20px] bg-black">
+                <Image
+                  src="/image/showcase1.jpg"
+                  alt="Denta koas App Preview"
+                  className="object-cover"
+                  fill
+                  priority
+                />
               </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <HoverBorderGradient className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full bg-black border border-purple-500/20 hover:bg-black/90">
-                    Download App <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </HoverBorderGradient>
-                {/* <Button size="lg" variant="outline" className="border-purple-500/20 text-white hover:bg-black/20">
-                  Learn More
-                </Button> */}
+            </BackgroundGradient>
+
+            {/* Floating elements around the app preview */}
+            <div className="hidden md:block absolute -right-16 top-10 bg-gradient-to-r from-purple-400/20 to-blue-400/20 p-0.5 rounded-lg rotate-6">
+              <div className="bg-black rounded-lg p-4">
+                <Shield className="h-6 w-6 text-purple-400" />
               </div>
             </div>
-            <div className="flex items-center justify-center">
-              <BackgroundGradient className="rounded-[22px] p-1 bg-black">
-                <div className="relative h-[450px] w-[300px] overflow-hidden rounded-[20px] bg-black">
-                  <Image
-                    src="/placeholder.svg?height=900&width=600"
-                    alt="Denta koas App Preview"
-                    className="object-cover"
-                    fill
-                    priority
-                  />
-                </div>
-              </BackgroundGradient>
+            <div className="hidden md:block absolute -left-16 bottom-10 bg-gradient-to-r from-blue-400/20 to-purple-400/20 p-0.5 rounded-lg -rotate-6">
+              <div className="bg-black rounded-lg p-4">
+                <MessageCircle className="h-6 w-6 text-blue-400" />
+              </div>
             </div>
           </div>
         </div>
@@ -304,13 +347,50 @@ export default function Home() {
                   </p>
                 </CardContent>
               </Card>
-              <div className="flex flex-wrap justify-center gap-8 py-10">
-                <AnimatedTooltip items={team} />
-              </div>
+
+
             </div>
           </div>
         </section>
       </TracingBeam>
+
+      {/* Testimonial Grid - 3 columns layout */}
+      <div className="w-full max-w-6xl mx-auto my-0">
+        <h3 className="text-3xl text-center py-8 font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
+          What People Are Saying
+        </h3>
+
+        {/* Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial) => (
+            <BackgroundGradient
+              key={testimonial.id}
+              className="rounded-2xl p-1 bg-black h-full"
+            >
+              <Card className="bg-black/70 border-purple-500/20 rounded-xl h-full">
+                <CardContent className="p-6 flex flex-col h-full">
+                  <Quote className="h-8 w-8 text-purple-400 mb-4 opacity-70" />
+                  <p className="text-base text-gray-100 italic mb-6 flex-grow">"{testimonial.quote}"</p>
+                  <div className="flex items-center mt-auto">
+                    <div className="relative h-10 w-10 overflow-hidden rounded-full mr-3">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        className="object-cover"
+                        fill
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm">{testimonial.name}</h4>
+                      <p className="text-xs text-gray-400">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </BackgroundGradient>
+          ))}
+        </div>
+      </div>
 
       {/* Download Section */}
       <section id="download" className="relative w-full py-12 md:py-24 lg:py-32 overflow-hidden">

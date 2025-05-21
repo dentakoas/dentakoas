@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
+import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 
@@ -47,31 +49,45 @@ class RoundedImage extends StatelessWidget {
               ? BorderRadius.circular(borderRadius)
               : BorderRadius.zero,
           child: isNetworkImage
-              ? Image.network(
-                  imageUrl,
-                  fit: fit,
-                  loadingBuilder: (BuildContext context, Widget child,
-                      ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    } else {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  (loadingProgress.expectedTotalBytes ?? 1)
-                              : null,
-                        ),
-                      );
-                    }
-                  },
-                )
+              ? _buildNetworkImage()
               : Image.asset(
                   imageUrl,
                   fit: fit,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Return a fallback image if the asset image fails to load
+                    return Image.asset(
+                      TImages.defaultImage,
+                      fit: fit,
+                    );
+                  },
                 ),
         ),
       ),
+    );
+  }
+
+  // ADDED: Improved network image loading with better error handling
+  Widget _buildNetworkImage() {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: fit,
+      placeholder: (context, url) => Container(
+        color: Colors.grey.shade200,
+        child: const Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        ),
+      ),
+      errorWidget: (context, url, error) {
+        // Log the error for debugging
+        debugPrint("Image loading error: $error, URL: $url");
+        // Return a fallback image when network image fails
+        return Image.asset(
+          TImages.defaultImage,
+          fit: fit,
+        );
+      },
     );
   }
 }

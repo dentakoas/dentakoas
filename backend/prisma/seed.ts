@@ -5,6 +5,7 @@ import { seedPosts } from './seeds/posts';
 import { seedSchedules } from './seeds/schedules';
 import { seedAppointments } from './seeds/appointments';
 import { seedLikes } from './seeds/likes';
+import { seedUniversities } from './seeds/universities';
 
 const prisma = new PrismaClient({
   log: ['error'],
@@ -13,6 +14,11 @@ const prisma = new PrismaClient({
 async function main() {
   try {
     console.log('Starting database seeding...');
+
+    // Seed the univesity data
+    console.log('Seeding university data...');
+    const universities = await seedUniversities(prisma);
+    console.log('University data seeding completed');
 
     // Check if data already exists and seed users
     console.log('Checking existing users and seeding if needed...');

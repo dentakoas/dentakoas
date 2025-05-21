@@ -503,6 +503,11 @@ setStatusColor() {
     }
   }
 
-
-
+  // ADDED: Method to safely get user image with fallback
+  String getUserImage(String? imageUrl) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return imageUrl;
+    }
+    return TImages.user; // Default user image
+  }
 }

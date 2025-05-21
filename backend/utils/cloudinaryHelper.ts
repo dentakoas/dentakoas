@@ -51,7 +51,7 @@ const dentalCategories = [
  * Get a random avatar image using Faker
  */
 export function getRandomAvatar(): string {
-  return faker.image.avatar();
+  return faker.image.avatarGitHub();
 }
 
 /**

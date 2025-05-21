@@ -1,4 +1,3 @@
-
 /* -- App Image Strings -- */
 
 /// This class contains all the App Images in String formats.
@@ -261,6 +260,9 @@ class TImages {
   static const String treatmentImage14 = "assets/icons/categories/tooth-14.png";
   static const String treatmentImage15 = "assets/icons/categories/tooth-15.png";
   static const String treatmentImage16 = "assets/icons/categories/tooth-16.png";
+  
+  // ADDED: Default image to use when loading fails
+  static const String defaultImage = 'assets/images/default_image.png';
   
 }
 

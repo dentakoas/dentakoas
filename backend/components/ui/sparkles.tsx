@@ -25,7 +25,7 @@ export const SparklesCore = (props: SparklesProps) => {
     maxSize = 1.4,
     speed = 1,
     particleColor = "#FFFFFF",
-    particleDensity = 100,
+    particleDensity = 10,
   } = props
   const [init, setInit] = useState(false)
 
@@ -47,12 +47,12 @@ export const SparklesCore = (props: SparklesProps) => {
       enable: false,
       zIndex: 1,
     },
-    fpsLimit: 120,
+    // Reduce FPS limit to save resources
+    fpsLimit: 60,
     interactivity: {
       events: {
         onClick: {
-          enable: true,
-          mode: "push",
+          enable: false, // Disable click interactions to reduce calculations
         },
         onHover: {
           enable: true,
@@ -60,12 +60,9 @@ export const SparklesCore = (props: SparklesProps) => {
         },
       },
       modes: {
-        push: {
-          quantity: 4,
-        },
         repulse: {
-          distance: 200,
-          duration: 0.4,
+          distance: 100, // Reduce repulse distance
+          duration: 0.3, // Shorter duration
         },
       },
     },
@@ -77,28 +74,28 @@ export const SparklesCore = (props: SparklesProps) => {
         color: particleColor,
         distance: 150,
         enable: true,
-        opacity: 0.5,
-        width: 1,
+        opacity: 0.4,
+        width: 0.8, // Thinner lines for better performance
       },
       move: {
         direction: "none",
         enable: true,
         outModes: {
-          default: "bounce",
+          default: "out", // Change from "bounce" to "out" for better performance
         },
         random: false,
-        speed: speed,
+        speed: speed * 0.8, // Slightly slower for better performance
         straight: false,
       },
       number: {
         density: {
           enable: true,
-          width: particleDensity,
+          width: particleDensity * 1.5, // Increase area per particle
         },
-        value: 80,
+        value: 40, // Reduce number of particles from 80 to 40
       },
       opacity: {
-        value: 0.5,
+        value: 0.4, // Slightly lower opacity
       },
       shape: {
         type: "circle",
@@ -107,7 +104,7 @@ export const SparklesCore = (props: SparklesProps) => {
         value: { min: minSize, max: maxSize },
       },
     },
-    detectRetina: true,
+    detectRetina: false, // Disable retina detection for better performance
   }
 
   if (init) {
