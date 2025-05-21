@@ -1,70 +1,171 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StatusPost } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import {
+  PostWithRelations,
+  KoasProfileWithUser,
+  TreatmentSeedData,
+} from '../types/seeding';
+import { getRandomPostImages } from '../../utils/cloudinaryHelper';
 
 export const seedPosts = async (
   prisma: PrismaClient,
-  users: any,
-  treatments: any
-) => {
-  // Clean up existing data
-  await prisma.post.deleteMany({});
+  treatments: TreatmentSeedData[]
+): Promise<PostWithRelations[]> => {
+  try {
+    // Clean up existing data
+    await prisma.post.deleteMany({});
 
-  // Extract user IDs
-  const koasUsers = users.koasUsers;
+    // Get all approved koas profiles
+    const koasProfiles = (await prisma.koasProfile.findMany({
+      where: { status: 'Approved' },
+      include: {
+        user: true,
+      },
+    })) as KoasProfileWithUser[];
 
-  // Sample post descriptions
-  const postDescriptions = [
-    'Looking for patients who need dental cleaning. Treatment will be supervised by a senior dentist.',
-    'Root canal treatment available for patients with tooth decay or infection. Supervised by Dr. Ahmad.',
-    'Offering dental fillings for cavities. This is part of my clinical practice requirement.',
-    'Need patients for orthodontic consultation and treatment planning. Will be supervised by specialists.',
-    'Wisdom tooth extraction service available. This is part of my surgical dentistry module.',
-    'Seeking patients for complete dental check-up and cleaning as part of my clinical assessment.',
-    'Offering teeth whitening treatment. Looking for patients with mild to moderate discoloration.',
-    'Gum disease treatment available. Seeking patients with gingivitis or early periodontitis.',
-    'Dental crown preparation and fitting service. Need patients with damaged teeth.',
-    'Pediatric dental care available. Looking for children aged 6-12 for routine check-ups.',
-  ];
+    if (koasProfiles.length === 0) {
+      console.log('No approved koas profiles found. Skipping post creation.');
+      return [];
+    }
 
-  // Create posts for each koas user
-  const posts = [];
+    // Ensure we have treatments to work with
+    if (!treatments || treatments.length === 0) {
+      console.log('No treatments found. Skipping post creation.');
+      return [];
+    }
 
-  for (let i = 0; i < koasUsers.length; i++) {
-    const koas = koasUsers[i];
+    const posts: PostWithRelations[] = [];
+    const now = new Date();
+    const totalPostsToCreate = 50; // Create 50 posts
 
-    // Create 2-3 posts for each koas
-    const numPosts = 2 + Math.floor(Math.random() * 2); // 2 or 3 posts
+    for (let i = 0; i < totalPostsToCreate; i++) {
+      // Select a random koas
+      const koas = faker.helpers.arrayElement(koasProfiles);
 
-    for (let j = 0; j < numPosts; j++) {
-      const treatmentIndex = Math.floor(Math.random() * treatments.length);
-      const treatment = treatments[treatmentIndex];
+      // Select a random treatment
+      const treatment = faker.helpers.arrayElement(treatments);
 
-      const descIndex = Math.floor(Math.random() * postDescriptions.length);
-      const description = postDescriptions[descIndex];
+      // Generate 1-3 random images for the post
+      const numImages = faker.helpers.rangeToNumber({ min: 1, max: 3 });
 
-      const requiredParticipants = 2 + Math.floor(Math.random() * 5); // 2-6 participants
+      // Prefer the new images for most posts (80% chance)
+      const useNewImages = faker.helpers.weightedArrayElement([
+        { value: true, weight: 80 },
+        { value: false, weight: 20 },
+      ]);
 
-      const post = await prisma.post.create({
-        data: {
-          userId: koas.id,
-          koasId: koas.KoasProfile.id,
-          treatmentId: treatment.id,
-          title: `${treatment.name} Service by ${koas.name}`,
-          desc: description,
-          images: JSON.stringify(['/data/post-image.jpg']),
-          patientRequirement: JSON.stringify({
-            ageMin: 18,
-            ageMax: 60,
-            conditions: ['No severe heart disease', 'No uncontrolled diabetes'],
-          }),
-          requiredParticipant: requiredParticipants,
-          status: 'Open',
-          published: true,
-        },
+      // Get post images, preferring new ones if specified
+      const postImages = useNewImages;
+
+      getRandomPostImages(numImages, false);
+
+      // Generate 2-5 patient requirements
+      const numRequirements = faker.helpers.rangeToNumber({ min: 2, max: 5 });
+      const patientRequirements: string[] = [];
+      const possibleRequirements = [
+        'Tidak memiliki riwayat penyakit jantung',
+        'Tidak sedang mengonsumsi obat pengencer darah',
+        'Tidak memiliki alergi anestesi',
+        'Tidak sedang hamil',
+        'Usia minimal 18 tahun',
+        'Tidak memiliki infeksi gusi akut',
+        'Sudah pernah melakukan pemeriksaan gigi sebelumnya',
+        'Tidak memiliki riwayat diabetes',
+        'Tidak mengalami tekanan darah tinggi',
+        'Bersedia mengikuti instruksi pasca perawatan',
+        'Membawa KTP',
+        'Bersedia Review',
+        'Membawa Tissue',
+      ];
+      for (let j = 0; j < numRequirements; j++) {
+        const req = faker.helpers.arrayElement(possibleRequirements);
+        if (!patientRequirements.includes(req)) {
+          patientRequirements.push(req);
+        }
+      }
+
+      // Generate required participants (3-10)
+      const requiredParticipant = faker.helpers.rangeToNumber({
+        min: 3,
+        max: 10,
       });
 
-      posts.push(post);
-    }
-  }
+      // Create post title based on treatment
+      const titles = [
+        `Mencari Pasien untuk ${treatment.name}`,
+        `${treatment.alias} - Butuh Partisipan`,
+        `Program ${treatment.name} oleh KOAS UNJ`,
+        `${treatment.name} - Gratis untuk Pasien Terpilih`,
+        `Jadwal Terbuka: ${treatment.alias}`,
+      ];
+      const title = faker.helpers.arrayElement(titles);
 
-  return posts;
+      // Post description
+      const desc = faker.lorem.paragraph().substring(0, 500);
+
+      // 70% chance post is published
+      const published = faker.helpers.weightedArrayElement([
+        { value: true, weight: 70 },
+        { value: false, weight: 30 },
+      ]);
+
+      // Post status based on publishing state
+      let status: StatusPost;
+      if (!published) {
+        status = 'Pending';
+      } else {
+        // For published posts, 70% Open, 30% Closed
+        status = faker.helpers.weightedArrayElement([
+          { value: 'Open' as StatusPost, weight: 70 },
+          { value: 'Closed' as StatusPost, weight: 30 },
+        ]);
+      }
+
+      try {
+        const post = await prisma.post.create({
+          data: {
+            userId: koas.userId,
+            koasId: koas.id,
+            treatmentId: treatment.id || '', // Ensure we have an ID
+            title: title,
+            desc: desc,
+            // Use Cloudinary images
+            images: postImages, // Use the selected Cloudinary images
+            patientRequirement: patientRequirements, // Prisma will handle JSON conversion
+            requiredParticipant: requiredParticipant,
+            status: status,
+            published: published,
+            createdAt: faker.date.recent({ days: 90 }),
+          },
+          include: {
+            user: {
+              include: {
+                KoasProfile: true,
+              },
+            },
+            koas: {
+              include: {
+                user: true,
+              },
+            },
+            treatment: true,
+          },
+        });
+
+        posts.push({
+          ...post,
+          likes: 0,
+          Schedule: [],
+        } as PostWithRelations);
+      } catch (error) {
+        console.error('Error creating post:', error);
+      }
+    }
+
+    console.log(`Successfully created ${posts.length} posts`);
+    return posts;
+  } catch (error) {
+    console.error('Error in seedPosts:', error);
+    return [];
+  }
 };

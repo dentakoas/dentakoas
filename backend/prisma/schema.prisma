@@ -4,13 +4,11 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL_DEV")
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id                 String              @id
-  givenName          String?
-  familyName         String?
   name               String?             @unique @db.VarChar(50)
   email              String?             @unique
   emailVerified      DateTime?           @map("email_verified")
@@ -21,6 +19,8 @@ model User {
   role               Role?
   createdAt          DateTime            @default(now()) @map("created_at")
   updateAt           DateTime            @updatedAt @map("updated_at")
+  familyName         String?
+  givenName          String?
   Account            Account[]
   FasilitatorProfile FasilitatorProfile?
   KoasProfile        KoasProfile?
@@ -36,17 +36,17 @@ model User {
 }
 
 model Account {
-  id                String   @id @default(cuid())
-  userId            String   @map("user_id")
   type              String?
   provider          String
-  providerAccountId String   @map("provider_account_id")
-  token_type        String?
-  refresh_token     String?  @db.Text
+  scope             String?
   access_token      String?  @db.Text
   expires_at        Int?
-  scope             String?
   id_token          String?  @db.Text
+  providerAccountId String   @map("provider_account_id")
+  refresh_token     String?  @db.Text
+  token_type        String?
+  userId            String   @map("user_id")
+  id                String   @id @default(cuid())
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -58,10 +58,10 @@ model Account {
 
 model Session {
   id           String   @id @default(cuid())
-  userId       String?  @map("user_id")
-  sessionToken String   @map("session_token") @db.Text
-  accessToken  String?  @map("access_token") @db.Text
   expires      DateTime
+  sessionToken String   @map("session_token") @db.Text
+  userId       String?  @map("user_id")
+  accessToken  String?  @map("access_token") @db.Text
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -98,7 +98,7 @@ model KoasProfile {
   universityId String?
   experience   Int?           @default(0)
   Appointment  Appointment[]
-  University   University?    @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  University   University?    @relation(fields: [universityId], references: [id])
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   Notification Notification[]
   Post         Post[]
@@ -153,13 +153,13 @@ model Post {
   treatmentId         String        @map("treatment_id")
   title               String
   desc                String        @db.VarChar(500)
-  images              Json?
   patientRequirement  Json?         @map("patient_requirement")
-  requiredParticipant Int           @default(0) @map("required_participant")
   status              StatusPost    @default(Pending)
   published           Boolean       @default(false)
   createdAt           DateTime      @default(now()) @map("created_at")
   updateAt            DateTime      @updatedAt @map("updated_at")
+  requiredParticipant Int           @default(0) @map("required_participant")
+  images              Json?
   likes               Like[]
   koas                KoasProfile   @relation(fields: [koasId], references: [id], onDelete: Cascade)
   treatment           TreatmentType @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
@@ -221,9 +221,9 @@ model TreatmentType {
 model Schedule {
   id          String        @id @default(cuid())
   postId      String        @map("post_id")
-  dateStart   DateTime      @map("date_start")
-  dateEnd     DateTime      @map("date_end")
   createdAt   DateTime      @default(now()) @map("created_at")
+  dateEnd     DateTime      @map("date_end")
+  dateStart   DateTime      @map("date_start")
   updateAt    DateTime      @updatedAt @map("updated_at")
   Appointment Appointment[]
   post        Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -235,12 +235,12 @@ model Schedule {
 
 model Timeslot {
   id                  String        @id @default(cuid())
-  scheduleId          String        @map("schedule_id")
   startTime           String        @map("start_time")
   endTime             String        @map("end_time")
   maxParticipants     Int?          @map("max_participants")
   currentParticipants Int           @default(0) @map("current_participants")
   isAvailable         Boolean       @default(true) @map("is_available")
+  scheduleId          String        @map("schedule_id")
   Appointment         Appointment[]
   schedule            Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
 
@@ -256,7 +256,7 @@ model Review {
   comment     String?      @db.VarChar(500)
   createdAt   DateTime     @default(now()) @map("created_at")
   koasId      String?      @map("koas_id")
-  KoasProfile KoasProfile? @relation(fields: [koasId], references: [userId], onDelete: SetNull)
+  KoasProfile KoasProfile? @relation(fields: [koasId], references: [userId])
   post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
   user        User         @relation(fields: [pasienId], references: [id], onDelete: Cascade)
 
@@ -290,11 +290,11 @@ model Appointment {
 
 model verificationrequest {
   id        String   @id
-  email     String
   token     String   @unique(map: "VerificationRequest_token_key")
   expires   DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime
+  email     String
 
   @@unique([email, token], map: "VerificationRequest_email_token_key")
 }

@@ -1,167 +1,358 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import Link from "next/link";
-import {
-  ArrowRight,
-  CheckCircle,
-  Code,
-  Zap,
-  Users,
-  Calendar,
-  Clock,
-} from "lucide-react";
+import { ArrowRight, CheckCircle, Download, MessageCircle, Shield, Smartphone, Users } from 'lucide-react'
+import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useState } from "react"
 
-export default function WelcomePage() {
-  const [email, setEmail] = useState("");
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { BackgroundBeams } from "@/components/ui/background-beams"
+import { BackgroundGradient } from "@/components/ui/background-gradient"
+import { SparklesCore } from "@/components/ui/sparkles"
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect"
+import { TracingBeam } from "@/components/ui/tracing-beam"
+import { FloatingNavbar } from "@/components/ui/floating-navbar"
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient"
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip"
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitted email:", email);
-  };
+const navItems = [
+  {
+    name: "Features",
+    link: "#features",
+  },
+  {
+    name: "Benefits",
+    link: "#benefits",
+  },
+  {
+    name: "About",
+    link: "#about",
+  },
+  {
+    name: "Download",
+    link: "#download",
+  },
+]
+
+const team = [
+  {
+    id: 1,
+    name: "Dr. Andi",
+    designation: "Lead Dentist",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+  {
+    id: 2,
+    name: "Dr. Budi",
+    designation: "Dental Specialist",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+  {
+    id: 3,
+    name: "Dr. Citra",
+    designation: "Orthodontist",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+]
+
+export default function Home() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link className="flex items-center space-x-2" href="#">
-              <Zap className="h-6 w-6 text-black-500" />
-              <span className="text-2xl font-bold">DentalAPI</span>
-            </Link>
-            <nav className="hidden md:flex gap-6">
-              <Link
-                className="text-sm font-medium hover:underline underline-offset-4"
-                href="#features"
-              >
-                Endpoints
-              </Link>
-              <Link
-                className="text-sm font-medium hover:underline underline-offset-4"
-                href="#pricing"
-              >
-                Pricing
-              </Link>
-              <Link
-                className="text-sm font-medium hover:underline underline-offset-4"
-                href="#docs"
-              >
-                Documentation
-              </Link>
-            </nav>
+    <div className="flex min-h-screen flex-col bg-black text-white">
+      {/* Navigation */}
+      <FloatingNavbar navItems={navItems} />
+
+      {/* Hero Section */}
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden py-20">
+        <BackgroundBeams className="opacity-20" />
+        <div className="container mx-auto relative z-10 px-4 md:px-6 max-w-6xl">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2 items-center">
+            <div className="flex flex-col justify-center space-y-4">
+              <div className="space-y-2">
+                <div className="inline-block rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 px-3 py-1 text-sm">
+                  REVOLUTIONARY DENTAL PLATFORM
+                </div>
+                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
+                  Denta koas
+                </h1>
+                <div className="h-20">
+                  <TextGenerateEffect
+                    words="Connecting dental students with patients through blockchain technology"
+                    className="max-w-[600px] text-xl text-gray-300"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                <HoverBorderGradient className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full bg-black border border-purple-500/20 hover:bg-black/90">
+                    Download App <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </HoverBorderGradient>
+                {/* <Button size="lg" variant="outline" className="border-purple-500/20 text-white hover:bg-black/20">
+                  Learn More
+                </Button> */}
+              </div>
+            </div>
+            <div className="flex items-center justify-center">
+              <BackgroundGradient className="rounded-[22px] p-1 bg-black">
+                <div className="relative h-[450px] w-[300px] overflow-hidden rounded-[20px] bg-black">
+                  <Image
+                    src="/placeholder.svg?height=900&width=600"
+                    alt="Denta koas App Preview"
+                    className="object-cover"
+                    fill
+                    priority
+                  />
+                </div>
+              </BackgroundGradient>
+            </div>
           </div>
         </div>
-      </header>
+      </section>
 
-      <main className="flex-1">
-        {/* Hero Section with Notion-style background */}
-        <section className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48 overflow-hidden">
-          {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" />
+      {/* Stats Section */}
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-black border-t border-purple-500/20">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+          <div className="grid gap-6 text-center md:grid-cols-3 lg:gap-12">
+            <Card className="bg-black/50 border-purple-500/20">
+              <CardContent className="p-6 space-y-2">
+                <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">57.6%</h2>
+                <p className="text-gray-400">Indonesians with dental issues</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-black/50 border-purple-500/20">
+              <CardContent className="p-6 space-y-2">
+                <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">10.2%</h2>
+                <p className="text-gray-400">Receive professional treatment</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-black/50 border-purple-500/20">
+              <CardContent className="p-6 space-y-2">
+                <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">82.8%</h2>
+                <p className="text-gray-400">Dental caries prevalence</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
 
-          {/* Geometric patterns */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, rgba(0,0,0,0.05) 1px, transparent 0)`,
-              backgroundSize: "24px 24px",
-            }}
+      {/* Features Section */}
+      <section id="features" className="relative w-full py-12 md:py-24 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 w-full h-full">
+          <SparklesCore
+            id="tsparticlesfull"
+            background="transparent"
+            minSize={0.6}
+            maxSize={1.4}
+            particleDensity={100}
+            className="w-full h-full"
+            particleColor="#8B5CF6"
           />
-
-          {/* Animated gradient blobs */}
-          <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
-
-          <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
-              <div className="inline-block mb-6">
-                <span className="inline-flex items-center justify-center px-4 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                  Frontend Developer Tools
-                </span>
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-                Dental Practice API for Frontend Developers
-              </h1>
-              <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300 max-w-2xl">
-                Seamlessly integrate appointment scheduling, patient management,
-                and dental records into your frontend applications with our
-                comprehensive REST API.
+        </div>
+        <div className="container mx-auto relative z-10 px-4 md:px-6 max-w-6xl">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
+                Key Features
+              </h2>
+              <p className="max-w-[900px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Denta koas provides innovative features powered by blockchain technology
               </p>
-              <div className="mt-10 w-full max-w-md">
-                <form
-                  onSubmit={handleSubmit}
-                  className="flex flex-col sm:flex-row gap-3"
-                >
-                  <input
-                    className="flex h-10 w-full rounded-md border border-input bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    placeholder="Enter your email for API key"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  <button
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-500 h-10 px-4 py-2 shadow-lg hover:shadow-xl transition-shadow duration-200"
-                    type="submit"
-                  >
-                    Get API Key
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </button>
-                </form>
-                <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-                  Free tier available. No credit card required.
+            </div>
+          </div>
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
+            <BackgroundGradient className="rounded-[22px] p-1 bg-black">
+              <Card className="flex h-full flex-col items-center space-y-2 rounded-[20px] border-purple-500/20 bg-black p-6">
+                <div className="rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-3">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold">Patient Matching</h3>
+                <p className="text-center text-gray-400">
+                  Smart matching algorithm connects students with suitable patients
                 </p>
-              </div>
+              </Card>
+            </BackgroundGradient>
+            <BackgroundGradient className="rounded-[22px] p-1 bg-black">
+              <Card className="flex h-full flex-col items-center space-y-2 rounded-[20px] border-purple-500/20 bg-black p-6">
+                <div className="rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-3">
+                  <MessageCircle className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold">Secure Messaging</h3>
+                <p className="text-center text-gray-400">
+                  End-to-end encrypted communication between students and patients
+                </p>
+              </Card>
+            </BackgroundGradient>
+            <BackgroundGradient className="rounded-[22px] p-1 bg-black">
+              <Card className="flex h-full flex-col items-center space-y-2 rounded-[20px] border-purple-500/20 bg-black p-6">
+                <div className="rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-3">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold">Data Security</h3>
+                <p className="text-center text-gray-400">
+                  Blockchain-based security for all personal and medical data
+                </p>
+              </Card>
+            </BackgroundGradient>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <TracingBeam className="px-6">
+        <section id="benefits" className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+            <div className="grid gap-10 lg:grid-cols-2 lg:gap-12">
+              <Card className="bg-black/50 border-purple-500/20">
+                <CardContent className="p-6 space-y-4">
+                  <div className="inline-block rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-3 py-1 text-sm">
+                    For Dental Students
+                  </div>
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    Accelerate Your Clinical Practice
+                  </h2>
+                  <p className="max-w-[600px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    Denta koas helps you find patients that match your requirements
+                  </p>
+                  <ul className="grid gap-2">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Find patients matching your requirements</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Manage treatment schedules efficiently</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Organized case documentation</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Complete your clinical practice on time</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card className="bg-black/50 border-purple-500/20">
+                <CardContent className="p-6 space-y-4">
+                  <div className="inline-block rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-3 py-1 text-sm">
+                    For Patients
+                  </div>
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    Affordable Dental Care
+                  </h2>
+                  <p className="max-w-[600px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    Access quality dental care at more affordable rates
+                  </p>
+                  <ul className="grid gap-2">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Dental care at more affordable rates</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Treated by students under experienced dentist supervision</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Flexible treatment schedules</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <span className='text-gray-400'>Contribute to dental education</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
 
-        {/* Rest of the sections remain the same */}
-        {/* Features Section */}
-        <section
-          id="features"
-          className="w-full py-0 bg-gray-50 dark:bg-gray-800"
-        >
-          {/* ... (rest of the features section code remains unchanged) ... */}
+        {/* About Section */}
+        <section id="about" className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
+                  About Denta koas
+                </h2>
+                <p className="max-w-[900px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Connecting dental students at Jember University with patients who need affordable dental care
+                </p>
+              </div>
+              <Card className="mx-auto max-w-3xl bg-black/50 border-purple-500/20">
+                <CardContent className="p-6 space-y-4 text-left">
+                  <p className="text-gray-400">
+                    Denta koas was born from the need to address two main problems: the difficulty dental students face in finding patients who match their requirements, and limited access to affordable dental care services.
+                  </p>
+                  <p className="text-gray-400">
+                    According to data from the Indonesian Ministry of Health in 2018, around 57.6% of Indonesians experience dental and oral problems. Unfortunately, only 10.2% of them receive treatment from medical professionals.
+                  </p>
+                  <p className="text-gray-400">
+                    With Denta koas, we hope to bridge the needs of dental students and the community, so that both parties can benefit. Students can complete their clinical practice on time, while the community gains access to affordable dental care.
+                  </p>
+                </CardContent>
+              </Card>
+              <div className="flex flex-wrap justify-center gap-8 py-10">
+                <AnimatedTooltip items={team} />
+              </div>
+            </div>
+          </div>
         </section>
+      </TracingBeam>
 
-        {/* Pricing Section */}
-        <section id="pricing" className="w-full py-0">
-          {/* ... (rest of the pricing section code remains unchanged) ... */}
-        </section>
-      </main>
+      {/* Download Section */}
+      <section id="download" className="relative w-full py-12 md:py-24 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black via-purple-900/20 to-black" />
+        <div className="container mx-auto relative z-10 px-4 md:px-6 max-w-6xl">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
+                Download Denta koas Now
+              </h2>
+              <p className="max-w-[900px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Available for Android devices
+              </p>
+            </div>
+            <div className="mx-auto w-full max-w-sm space-y-2">
+              <BackgroundGradient className="rounded-[22px] p-1 bg-black">
+                <Button size="lg" className="w-full bg-black hover:bg-black/90">
+                  Download from Google Play <Download className="ml-2 h-4 w-4" />
+                </Button>
+              </BackgroundGradient>
+              <p className="text-xs text-gray-400">
+                Compatible with Android 6.0 (Marshmallow) and newer versions
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <footer className="border-t">
-        {/* ... (footer code remains unchanged) ... */}
+      {/* Footer */}
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-purple-500/20">
+        <div className="container mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between">
+          <p className="text-xs text-gray-400">© 2024 Denta koas. All rights reserved.</p>
+          <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+            <Link className="text-xs hover:text-purple-400 transition-colors" href="#">
+              Privacy Policy
+            </Link>
+            <Link className="text-xs hover:text-purple-400 transition-colors" href="#">
+              Terms & Conditions
+            </Link>
+          </nav>
+        </div>
       </footer>
-
-      {/* Add animations */}
-      <style jsx global>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </div>
-  );
+  )
 }
