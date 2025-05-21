@@ -27,6 +27,11 @@ const generateWhatsAppLink = (phone: string): string => {
   return `https://wa.me/${cleanPhone}`;
 };
 
+// Helper function to generate a unique name
+const generateUniqueName = (firstName: string, lastName: string, index: number): string => {
+  return `${firstName} ${lastName}${index > 0 ? ` ${index}` : ''}`;
+};
+
 export const seedUsers = async (
   prisma: PrismaClient,
   resetFirebase: boolean = false
@@ -170,74 +175,6 @@ async function createAllUsersFromScratch(prisma: PrismaClient, universityId: str
   };
 }
 
-// Helper function to sync existing Firebase users to database
-async function syncExistingFirebaseUsers(
-  prisma: PrismaClient, 
-  existingFirebaseUsers: UserRecord[], 
-  universityId: string
-): Promise<UserSeedResult> {
-  console.log('Syncing existing Firebase users to database...');
-  
-  // Group users by role (from custom claims)
-  const adminUsers: UserRecord[] = [];
-  const fasilitatorUsers: UserRecord[] = [];
-  const koasUsers: UserRecord[] = [];
-  const pasienUsers: UserRecord[] = [];
-  const koasData: KoasData[] = [];
-  
-  for (const user of existingFirebaseUsers) {
-    const customClaims = user.customClaims as { role?: string } | undefined;
-    const role = customClaims?.role || 'Pasien'; // Default to Pasien
-    
-    switch (role) {
-      case 'Admin':
-        adminUsers.push(user);
-        break;
-      case 'Fasilitator':
-        fasilitatorUsers.push(user);
-        break;
-      case 'Koas':
-        koasUsers.push(user);
-        // Generate koas number if syncing existing users
-        const entryYear = faker.helpers.arrayElement([23, 24]);
-        const koasNumber = `${entryYear}1611${faker.string.numeric(6)}`;
-        koasData.push({
-          id: user.uid,
-          koasNumber: koasNumber,
-          entryYear: entryYear,
-        });
-        break;
-      default: // Pasien or unknown roles
-        pasienUsers.push(user);
-        break;
-    }
-  }
-  
-  console.log(`Categorized users: ${adminUsers.length} admins, ${fasilitatorUsers.length} facilitators, ${koasUsers.length} koas, ${pasienUsers.length} patients`);
-  
-  // Create database records for each user type
-  let adminUser = null;
-  if (adminUsers.length > 0) {
-    adminUser = await createExistingAdminRecord(prisma, adminUsers[0]);
-  } else {
-    // Create admin if none exists
-    adminUser = await createAdminUser(prisma);
-  }
-  
-  await createFasilitatorRecords(prisma, fasilitatorUsers);
-  await createKoasRecords(prisma, koasUsers, koasData, universityId);
-  await createPatientRecords(prisma, pasienUsers);
-  
-  console.log('User synchronization complete!');
-  
-  return {
-    admin: adminUser,
-    fasilitatorCount: fasilitatorUsers.length,
-    koasCount: koasUsers.length,
-    pasienCount: pasienUsers.length,
-  };
-}
-
 // Create admin user if none exists
 async function createAdminUser(prisma: PrismaClient) {
   let adminFirebase;
@@ -317,16 +254,19 @@ async function createFasilitators(count: number, userList: UserRecord[]) {
       .email({ firstName, lastName, provider: 'unej.ac.id' })
       .toLowerCase();
     
+    // Add index to name to ensure uniqueness
+    const displayName = generateUniqueName(`Dr. ${firstName}`, lastName, i);
+    
     const firebaseUser = await firebaseAdmin.auth().createUser({
       email: email,
       password: 'password123',
-      displayName: `Dr. ${firstName} ${lastName}`,
+      displayName: displayName,
       photoURL: getGenderBasedAvatar(gender),
     });
     
     await firebaseAdmin
       .auth()
-      .setCustomUserClaims(firebaseUser.uid, { role: 'Fasilitator' });
+      .setCustomUserClaims(firebaseUser.uid, { role: 'Fasilitator', gender });
       
     userList.push(firebaseUser);
   }
@@ -334,11 +274,26 @@ async function createFasilitators(count: number, userList: UserRecord[]) {
 
 // Create koas users in Firebase
 async function createKoas(count: number, userList: UserRecord[], koasDataList: KoasData[]) {
+  const usedNames = new Set<string>();
+  
   for (let i = 0; i < count; i++) {
     // Determine gender randomly
     const gender = faker.helpers.arrayElement(['male', 'female']);
     const firstName = faker.person.firstName(gender as any);
     const lastName = faker.person.lastName();
+    
+    // Create a unique name with index suffix if needed
+    let displayName = `${firstName} ${lastName}`;
+    let nameIndex = 0;
+    
+    // If name already exists, add a number suffix
+    while (usedNames.has(displayName.toLowerCase())) {
+      nameIndex++;
+      displayName = generateUniqueName(firstName, lastName, nameIndex);
+    }
+    
+    usedNames.add(displayName.toLowerCase());
+    
     const email = faker.internet
       .email({ firstName, lastName, provider: 'student.unej.ac.id' })
       .toLowerCase();
@@ -349,13 +304,13 @@ async function createKoas(count: number, userList: UserRecord[], koasDataList: K
     const firebaseUser = await firebaseAdmin.auth().createUser({
       email: email,
       password: 'password123',
-      displayName: `${firstName} ${lastName}`,
+      displayName: displayName,
       photoURL: getGenderBasedAvatar(gender),
     });
     
     await firebaseAdmin
       .auth()
-      .setCustomUserClaims(firebaseUser.uid, { role: 'Koas' });
+      .setCustomUserClaims(firebaseUser.uid, { role: 'Koas', gender });
       
     userList.push(firebaseUser);
     koasDataList.push({
@@ -369,26 +324,148 @@ async function createKoas(count: number, userList: UserRecord[], koasDataList: K
 
 // Create patient users in Firebase
 async function createPatients(count: number, userList: UserRecord[]) {
+  const usedNames = new Set<string>();
+  
   for (let i = 0; i < count; i++) {
     // Determine gender randomly
     const gender = faker.helpers.arrayElement(['male', 'female']);
     const firstName = faker.person.firstName(gender as any);
     const lastName = faker.person.lastName();
+    
+    // Create a unique name with index suffix if needed
+    let displayName = `${firstName} ${lastName}`;
+    let nameIndex = 0;
+    
+    // If name already exists, add a number suffix
+    while (usedNames.has(displayName.toLowerCase())) {
+      nameIndex++;
+      displayName = generateUniqueName(firstName, lastName, nameIndex);
+    }
+    
+    usedNames.add(displayName.toLowerCase());
+    
     const email = faker.internet.email({ firstName, lastName }).toLowerCase();
     
     const firebaseUser = await firebaseAdmin.auth().createUser({
       email: email,
       password: 'password123',
-      displayName: `${firstName} ${lastName}`,
+      displayName: displayName,
       photoURL: getGenderBasedAvatar(gender),
     });
     
     await firebaseAdmin
       .auth()
-      .setCustomUserClaims(firebaseUser.uid, { role: 'Pasien' });
+      .setCustomUserClaims(firebaseUser.uid, { role: 'Pasien', gender });
       
     userList.push(firebaseUser);
   }
+}
+
+// Helper function to sync existing Firebase users to database
+async function syncExistingFirebaseUsers(
+  prisma: PrismaClient, 
+  existingFirebaseUsers: UserRecord[], 
+  universityId: string
+): Promise<UserSeedResult> {
+  console.log('Syncing existing Firebase users to database...');
+  
+  // Track used names to ensure uniqueness
+  const usedNames = new Set<string>();
+  
+  // Group users by role (from custom claims)
+  const adminUsers: UserRecord[] = [];
+  const fasilitatorUsers: UserRecord[] = [];
+  const koasUsers: UserRecord[] = [];
+  const pasienUsers: UserRecord[] = [];
+  const koasData: KoasData[] = [];
+  
+  // First pass to collect all existing names
+  for (const user of existingFirebaseUsers) {
+    if (user.displayName) {
+      usedNames.add(user.displayName.toLowerCase());
+    }
+  }
+  
+  // Process users by role
+  for (let user of existingFirebaseUsers) {
+    const customClaims = user.customClaims as { role?: string; gender?: string } | undefined;
+    const role = customClaims?.role || 'Pasien';
+    
+    // Ensure user has a unique display name
+    if (!user.displayName || user.displayName.trim() === '') {
+      // Generate a display name if none exists
+      const nameParts = user.email?.split('@')[0].split('.') || ['User'];
+      const firstName = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1) || 'User';
+      const lastName = nameParts[1]?.charAt(0).toUpperCase() + nameParts[1]?.slice(1) || '';
+      
+      // Create a base display name
+      let displayName = `${firstName}${lastName ? ' ' + lastName : ''}`;
+      let nameIndex = 0;
+      
+      // Ensure uniqueness
+      while (usedNames.has(displayName.toLowerCase())) {
+        nameIndex++;
+        displayName = `${firstName}${lastName ? ' ' + lastName : ''} ${nameIndex}`;
+      }
+      
+      usedNames.add(displayName.toLowerCase());
+      
+      // Update Firebase user with the new display name
+      await firebaseAdmin.auth().updateUser(user.uid, {
+        displayName: displayName,
+      });
+      
+      // Update our local user record
+      user = await firebaseAdmin.auth().getUser(user.uid);
+    }
+    
+    switch (role) {
+      case 'Admin':
+        adminUsers.push(user);
+        break;
+      case 'Fasilitator':
+        fasilitatorUsers.push(user);
+        break;
+      case 'Koas':
+        koasUsers.push(user);
+        // Generate koas number if syncing existing users
+        const entryYear = faker.helpers.arrayElement([23, 24]);
+        const koasNumber = `${entryYear}1611${faker.string.numeric(6)}`;
+        koasData.push({
+          id: user.uid,
+          koasNumber: koasNumber,
+          entryYear: entryYear,
+        });
+        break;
+      default: // Pasien or unknown roles
+        pasienUsers.push(user);
+        break;
+    }
+  }
+  
+  console.log(`Categorized users: ${adminUsers.length} admins, ${fasilitatorUsers.length} facilitators, ${koasUsers.length} koas, ${pasienUsers.length} patients`);
+  
+  // Create database records for each user type
+  let adminUser = null;
+  if (adminUsers.length > 0) {
+    adminUser = await createExistingAdminRecord(prisma, adminUsers[0]);
+  } else {
+    // Create admin if none exists
+    adminUser = await createAdminUser(prisma);
+  }
+  
+  await createFasilitatorRecords(prisma, fasilitatorUsers);
+  await createKoasRecords(prisma, koasUsers, koasData, universityId);
+  await createPatientRecords(prisma, pasienUsers);
+  
+  console.log('User synchronization complete!');
+  
+  return {
+    admin: adminUser,
+    fasilitatorCount: fasilitatorUsers.length,
+    koasCount: koasUsers.length,
+    pasienCount: pasienUsers.length,
+  };
 }
 
 // Create facilitator records in database
@@ -396,42 +473,41 @@ async function createFasilitatorRecords(prisma: PrismaClient, users: UserRecord[
   // Skip if no users
   if (users.length === 0) return;
   
-  // Create user records
-  await prisma.user.createMany({
-    data: users.map((fbUser) => {
-      // Determine gender from displayName or use random
-      const displayName = fbUser.displayName || '';
-      // Simple heuristic for gender detection from Firebase user
-      let gender = 'male';
-      if (fbUser.customClaims?.gender) {
-        gender = fbUser.customClaims.gender as string;
-      }
+  // Create user records one by one to handle potential duplicates
+  for (const fbUser of users) {
+    try {
+      // Determine gender from claims
+      const customClaims = fbUser.customClaims as { gender?: string } | undefined;
+      const gender = customClaims?.gender || 'male';
       
       const phoneNumber = generatePhoneNumber();
       
-      return {
-        id: fbUser.uid,
-        givenName: `Dr. ${displayName.split(' ')[1] || ''}`,
-        familyName: displayName.split(' ')[2] || '',
-        name: displayName,
-        email: fbUser.email || '',
-        password: '$2a$10$Ab6y1GO/BF.MMuZ97zj9B.S2s8wVEMRFXDn8GK9tmlpHt.T2HzYHW',
-        role: 'Fasilitator',
-        image: fbUser.photoURL || getGenderBasedAvatar(gender),
-        phone: phoneNumber,
-        address: faker.location.streetAddress(),
-      };
-    }),
-  });
-  
-  // Create facilitator profiles
-  const facilitatorIds = users.map((fbUser) => fbUser.uid);
-  await prisma.fasilitatorProfile.createMany({
-    data: facilitatorIds.map((id) => ({
-      userId: id,
-      university: 'Universitas Negeri Jember',
-    })),
-  });
+      await prisma.user.create({
+        data: {
+          id: fbUser.uid,
+          givenName: fbUser.displayName?.split(' ')[1] || '', // Skip "Dr." prefix
+          familyName: fbUser.displayName?.split(' ').slice(2).join(' ') || '',
+          name: fbUser.displayName || 'User' + fbUser.uid.substring(0, 6), // Ensure uniqueness
+          email: fbUser.email || '',
+          password: '$2a$10$Ab6y1GO/BF.MMuZ97zj9B.S2s8wVEMRFXDn8GK9tmlpHt.T2HzYHW',
+          role: 'Fasilitator',
+          image: fbUser.photoURL || getGenderBasedAvatar(gender),
+          phone: phoneNumber,
+          address: faker.location.streetAddress(),
+        },
+      });
+      
+      // Create facilitator profile
+      await prisma.fasilitatorProfile.create({
+        data: {
+          userId: fbUser.uid,
+          university: 'Universitas Negeri Jember',
+        },
+      });
+    } catch (error) {
+      console.error(`Error creating Fasilitator record for ${fbUser.uid}:`, error);
+    }
+  }
 }
 
 // Create koas records in database
@@ -439,68 +515,83 @@ async function createKoasRecords(prisma: PrismaClient, users: UserRecord[], koas
   // Skip if no users
   if (users.length === 0) return;
   
-  // Create user records
-  await prisma.user.createMany({
-    data: users.map((fbUser) => {
+  // Create user records one by one to handle potential duplicates
+  for (const fbUser of users) {
+    try {
       // Find koas data to get gender
       const koasInfo = koasData.find(k => k.id === fbUser.uid);
       const gender = koasInfo?.gender || 'male';
       
       const phoneNumber = generatePhoneNumber();
       
-      return {
-        id: fbUser.uid,
-        givenName: fbUser.displayName?.split(' ')[0] || '',
-        familyName: fbUser.displayName?.split(' ')[1] || '',
-        name: fbUser.displayName || '',
-        email: fbUser.email || '',
-        password: '$2a$10$Ab6y1GO/BF.MMuZ97zj9B.S2s8wVEMRFXDn8GK9tmlpHt.T2HzYHW',
-        role: 'Koas',
-        image: fbUser.photoURL || getGenderBasedAvatar(gender),
-        phone: phoneNumber,
-        address: faker.location.streetAddress(),
-      };
-    }),
-  });
-  
-  // Create koas profiles
-  for (const user of users) {
-    // Find corresponding koas data
-    const koasInfo = koasData.find(k => k.id === user.uid);
-    
-    if (!koasInfo) {
-      console.log(`No koas data found for user ${user.uid}, skipping profile creation`);
-      continue;
+      // Create user record
+      await prisma.user.create({
+        data: {
+          id: fbUser.uid,
+          givenName: fbUser.displayName?.split(' ')[0] || '',
+          familyName: fbUser.displayName?.split(' ').slice(1).join(' ') || '',
+          name: fbUser.displayName || 'User' + fbUser.uid.substring(0, 6), // Ensure uniqueness
+          email: fbUser.email || '',
+          password: '$2a$10$Ab6y1GO/BF.MMuZ97zj9B.S2s8wVEMRFXDn8GK9tmlpHt.T2HzYHW',
+          role: 'Koas',
+          image: fbUser.photoURL || getGenderBasedAvatar(gender),
+          phone: phoneNumber,
+          address: faker.location.streetAddress(),
+        },
+      });
+      
+      // Find corresponding koas data
+      if (!koasInfo) {
+        console.log(`No koas data found for user ${fbUser.uid}, generating new data`);
+        const entryYear = faker.helpers.arrayElement([23, 24]);
+        const koasNumber = `${entryYear}1611${faker.string.numeric(6)}`;
+        
+        // Create koas profile with new data
+        await prisma.koasProfile.create({
+          data: {
+            userId: fbUser.uid,
+            koasNumber: koasNumber,
+            age: `20${entryYear}`,
+            gender: gender === 'female' ? 'Female' : 'Male',
+            departement: 'Profesi Dokter Gigi',
+            university: 'Universitas Negeri Jember',
+            universityId: universityId,
+            bio: generateShortBio(),
+            whatsappLink: generateWhatsAppLink(phoneNumber),
+            status: faker.helpers.weightedArrayElement([
+              { value: 'Approved' as StatusKoas, weight: 70 },
+              { value: 'Pending' as StatusKoas, weight: 30 },
+            ]),
+            experience: faker.helpers.rangeToNumber({ min: 0, max: 5 }),
+          },
+        });
+      } else {
+        // Create koas profile with existing data
+        const whatsappLink = generateWhatsAppLink(phoneNumber);
+        const formattedAge = `20${koasInfo.koasNumber.substring(0, 2)}`;
+        
+        await prisma.koasProfile.create({
+          data: {
+            userId: fbUser.uid,
+            koasNumber: koasInfo.koasNumber,
+            age: formattedAge,
+            gender: gender === 'female' ? 'Female' : 'Male',
+            departement: 'Profesi Dokter Gigi',
+            university: 'Universitas Negeri Jember',
+            universityId: universityId,
+            bio: generateShortBio(),
+            whatsappLink: whatsappLink,
+            status: faker.helpers.weightedArrayElement([
+              { value: 'Approved' as StatusKoas, weight: 70 },
+              { value: 'Pending' as StatusKoas, weight: 30 },
+            ]),
+            experience: faker.helpers.rangeToNumber({ min: 0, max: 5 }),
+          },
+        });
+      }
+    } catch (error) {
+      console.error(`Error creating Koas record for ${fbUser.uid}:`, error);
     }
-    
-    const koasUser = await prisma.user.findUnique({
-      where: { id: user.uid },
-      select: { phone: true },
-    });
-    
-    const phoneNumber = koasUser?.phone || generatePhoneNumber();
-    const whatsappLink = generateWhatsAppLink(phoneNumber);
-    const formattedAge = `20${koasInfo.koasNumber.substring(0, 2)}`;
-    const gender = koasInfo.gender || faker.helpers.arrayElement(['male', 'female']);
-    
-    await prisma.koasProfile.create({
-      data: {
-        userId: user.uid,
-        koasNumber: koasInfo.koasNumber,
-        age: formattedAge,
-        gender: gender === 'female' ? 'Female' : 'Male',
-        departement: 'Profesi Dokter Gigi',
-        university: 'Universitas Negeri Jember',
-        universityId: universityId,
-        bio: generateShortBio(),
-        whatsappLink: whatsappLink,
-        status: faker.helpers.weightedArrayElement([
-          { value: 'Approved' as StatusKoas, weight: 70 },
-          { value: 'Pending' as StatusKoas, weight: 30 },
-        ]),
-        experience: faker.helpers.rangeToNumber({ min: 0, max: 5 }),
-      },
-    });
   }
 }
 
@@ -509,46 +600,44 @@ async function createPatientRecords(prisma: PrismaClient, users: UserRecord[]) {
   // Skip if no users
   if (users.length === 0) return;
   
-  // Create user records
-  await prisma.user.createMany({
-    data: users.map((fbUser) => {
-      // Extract gender from the name or avatar or use random
-      let gender = 'male';
-      if (fbUser.customClaims?.gender) {
-        gender = fbUser.customClaims.gender as string;
-      }
+  // Create user records one by one to handle potential duplicates
+  for (const fbUser of users) {
+    try {
+      // Extract gender from claims
+      const customClaims = fbUser.customClaims as { gender?: string } | undefined;
+      const gender = customClaims?.gender || 'male';
       
-      return {
-        id: fbUser.uid,
-        givenName: fbUser.displayName?.split(' ')[0] || '',
-        familyName: fbUser.displayName?.split(' ')[1] || '',
-        name: fbUser.displayName || '',
-        email: fbUser.email || '',
-        password: '$2a$10$Ab6y1GO/BF.MMuZ97zj9B.S2s8wVEMRFXDn8GK9tmlpHt.T2HzYHW',
-        role: 'Pasien',
-        image: fbUser.photoURL || getGenderBasedAvatar(gender),
-        phone: generatePhoneNumber(),
-        address: faker.location.streetAddress(),
-      };
-    }),
-  });
-  
-  // Create patient profiles
-  await prisma.pasienProfile.createMany({
-    data: users.map((fbUser) => {
-      let gender = 'male';
-      if (fbUser.customClaims?.gender) {
-        gender = fbUser.customClaims.gender as string;
-      }
+      const phoneNumber = generatePhoneNumber();
       
-      return {
-        userId: fbUser.uid,
-        age: faker.helpers.rangeToNumber({ min: 18, max: 70 }).toString(),
-        gender: gender === 'female' ? 'Female' : 'Male',
-        bio: generateShortBio(),
-      };
-    }),
-  });
+      // Create user record
+      await prisma.user.create({
+        data: {
+          id: fbUser.uid,
+          givenName: fbUser.displayName?.split(' ')[0] || '',
+          familyName: fbUser.displayName?.split(' ').slice(1).join(' ') || '',
+          name: fbUser.displayName || 'User' + fbUser.uid.substring(0, 6), // Ensure uniqueness
+          email: fbUser.email || '',
+          password: '$2a$10$Ab6y1GO/BF.MMuZ97zj9B.S2s8wVEMRFXDn8GK9tmlpHt.T2HzYHW',
+          role: 'Pasien',
+          image: fbUser.photoURL || getGenderBasedAvatar(gender),
+          phone: phoneNumber,
+          address: faker.location.streetAddress(),
+        },
+      });
+      
+      // Create patient profile
+      await prisma.pasienProfile.create({
+        data: {
+          userId: fbUser.uid,
+          age: faker.helpers.rangeToNumber({ min: 18, max: 70 }).toString(),
+          gender: gender === 'female' ? 'Female' : 'Male',
+          bio: generateShortBio(),
+        },
+      });
+    } catch (error) {
+      console.error(`Error creating Pasien record for ${fbUser.uid}:`, error);
+    }
+  }
 }
 
 // Helper function to generate a hash from a string (for consistent avatar IDs)
