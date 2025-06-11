@@ -3,7 +3,7 @@ class Endpoints {
   static const devUrl = "http://192.168.1.8:3000";
   static const String prodUrl = 'https://dentakoas.vercel.app';
 
-  static const String baseUrl = '$devUrl/api';
+  static const String baseUrl = '$prodUrl/api';
 
   static const String baseAuthUrl = '$baseUrl/auth';
   static const String baseAuthSignin = '$baseAuthUrl/signin';
