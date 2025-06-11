@@ -5,6 +5,7 @@ import 'package:denta_koas/src/commons/widgets/state_screeen/state_screen.dart';
 import 'package:denta_koas/src/features/appointment/controller/university.controller/university_controller.dart';
 import 'package:denta_koas/src/features/appointment/screen/explore/widget/tab_parnert.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/parnert_post/post_with_specific_university.dart';
+import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +67,11 @@ class AllUniversitiesScreen extends StatelessWidget {
                       distance: '1.5km',
                       time: '15 min',
                       koasCount: university.koasCount,
-                      image: university.image ?? '',
+                      // Use getImageWithFallback for university images
+                      image: UserController.instance.getImageWithFallback(
+                        university.image,
+                        'university',
+                      ),
                       onTap: () => Get.to(
                         () => const PostWithSpecificUniversity(),
                         arguments: university,

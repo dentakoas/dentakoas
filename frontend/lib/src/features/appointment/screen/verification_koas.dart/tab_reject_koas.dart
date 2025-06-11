@@ -64,6 +64,7 @@ class TabRejectedKoas extends StatelessWidget {
                         timestamp:
                             TFormatter.formatTimeToLocal(koas.updateAt),
                         primaryBtnText: 'Details',
+                        showPrimaryBtn: true,
                         onPrimaryBtnPressed: () {},
                         onSecondaryBtnPressed: () {},
                         onTap: () => Get.to(() => const KoasDetailScreen(),

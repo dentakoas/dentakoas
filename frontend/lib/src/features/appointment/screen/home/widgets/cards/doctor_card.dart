@@ -1,9 +1,11 @@
 import 'package:denta_koas/src/commons/widgets/koas/rating/rating_bar_indicator.dart';
 import 'package:denta_koas/src/commons/widgets/text/title_with_verified.dart';
+import 'package:denta_koas/src/features/appointment/screen/posts/koas_post/post_with_specific_koas.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
 import 'package:denta_koas/src/utils/constants/enums.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class KoasCard extends StatelessWidget {
   final String name;
@@ -167,7 +169,21 @@ class KoasCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () {},
+                  onPressed: () {
+                    if (onTap != null) {
+                      onTap!();
+                    } else {
+                      // Navigasi ke PostWithSpecificKoas dengan GetX
+                      Get.to(() => const PostWithSpecificKoas(), arguments: {
+                        'name': name,
+                        'university': university,
+                        'distance': distance,
+                        'rating': rating,
+                        'totalReviews': totalReviews,
+                        'image': image,
+                      });
+                    }
+                  },
                 style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(

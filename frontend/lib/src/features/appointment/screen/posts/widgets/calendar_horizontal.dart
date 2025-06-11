@@ -68,7 +68,7 @@ class CalendarHorizontal extends StatelessWidget {
               );
 
               postController.selectedDate.value =
-                  DateFormat('dd MMM yyyy').format(selectedDate);
+                  selectedDate.toUtc().toIso8601String();
             }
           },
           child: Obx(() {
@@ -116,8 +116,7 @@ class CalendarHorizontal extends StatelessWidget {
                               : () {
                                   calendarController.updateSelectedDay(index);
                                   postController.selectedDate.value =
-                                      DateFormat('dd MMM yyyy')
-                                          .format(currentDate);
+                                      currentDate.toUtc().toIso8601String();
                                 },
                           child: Container(
                             width: 80,

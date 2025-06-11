@@ -1,5 +1,6 @@
 import 'package:denta_koas/src/features/authentication/controller/signup/signup_controller.dart';
 import 'package:denta_koas/src/features/authentication/screen/signup/widgets/signup_term_and_conditions.dart';
+import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:denta_koas/src/utils/constants/text_strings.dart';
 import 'package:denta_koas/src/utils/validators/validation.dart';
@@ -15,6 +16,7 @@ class SignUpForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SignUpController());
+    Get.put(UserController());
 
     return Form(
       key: controller.signupFormKey,

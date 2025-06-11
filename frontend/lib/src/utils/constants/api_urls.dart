@@ -3,8 +3,7 @@ class Endpoints {
   static const devUrl = "http://192.168.1.8:3000";
   static const String prodUrl = 'https://dentakoas.vercel.app';
 
-  static const String baseUrl =
-      '$prodUrl/api';
+  static const String baseUrl = '$devUrl/api';
 
   static const String baseAuthUrl = '$baseUrl/auth';
   static const String baseAuthSignin = '$baseAuthUrl/signin';
@@ -13,7 +12,7 @@ class Endpoints {
   static const String signinWithCredentials = '$baseAuthSignin/credentials';
   static const String signinWithGoogle = '$baseAuthSignin/google';
   static const String signinWithFacebook = '$baseAuthSignin/facebook';
-  static const String signinWithApple = '$baseAuthSignin/apple'; 
+  static const String signinWithApple = '$baseAuthSignin/apple';
   static const String signinWithGithub = '$baseAuthSignin/github';
 
   static const String signup = '$baseAuthUrl/signup';
@@ -60,7 +59,6 @@ class Endpoints {
   static String schedule(String id) => '$baseUrl/schedules/$id';
   static String scheduleAvailability(String id) =>
       '$baseUrl/schedules/$id/availability';
-  
 
   // Timeslot Endpoints
   static const String timeslots = '$baseUrl/timeslots';
@@ -72,7 +70,6 @@ class Endpoints {
   static String appointmentWithSpecificUser(String userId) =>
       '$baseUrl/users/$userId/appointments';
 
-
   // Review Endpoints
   static const String reviews = '$baseUrl/reviews';
   static String review(String id) => '$baseUrl/reviews/$id';
@@ -82,7 +79,8 @@ class Endpoints {
   //     '$baseUrl/review/$userId/post/$postId';
 
   // Notification Endpoints
-  static String notificationsUser(String id) => '$baseUrl/users/$id/notifications';
+  static String notificationsUser(String id) =>
+      '$baseUrl/users/$id/notifications';
   static String notifications = '$baseUrl/notifications';
   static String notification(String id) => '$baseUrl/notifications/$id';
   // static String createNotification(String id) =>

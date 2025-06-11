@@ -1,3 +1,4 @@
+import 'package:denta_koas/src/commons/widgets/images/rounded_image_container.dart';
 import 'package:denta_koas/src/commons/widgets/layouts/grid_layout.dart';
 import 'package:denta_koas/src/commons/widgets/partnert/partner_showcase.dart';
 import 'package:denta_koas/src/commons/widgets/shimmer/card_showcase_shimmer.dart';
@@ -10,6 +11,7 @@ import 'package:denta_koas/src/features/appointment/screen/universities/all_univ
 import 'package:denta_koas/src/utils/constants/colors.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
+import 'package:faker/faker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -53,10 +55,14 @@ class TabParnert extends StatelessWidget {
                     .whereType<String>()
                     .toList();
 
-                return CardShowcase(
+                return const CardShowcase(
                   title: 'Our Top Partners',
                   subtitle: 'Find the best partners in your area',
-                  images: popularImages,
+                  images: [
+                    TImages.defaultUniversity,
+                    TImages.defaultUniversity,
+                    TImages.defaultUniversity,
+                  ],
                 );
               }),
 
@@ -80,10 +86,14 @@ class TabParnert extends StatelessWidget {
                     .whereType<String>()
                     .toList();
 
-                return CardShowcase(
+                return const CardShowcase(
                   title: 'Newest Universities',
                   subtitle: 'Check out the latest universities',
-                  images: newestImages,
+                  images: [
+                    TImages.defaultUniversity,
+                    TImages.defaultUniversity,
+                    TImages.defaultUniversity,
+                  ],
                 );
               }),
 
@@ -127,7 +137,9 @@ class TabParnert extends StatelessWidget {
                   itemBuilder: (_, index) {
                     final university = controller.featuredUniversities[index];
                     return UniversityCard(
-                      image: university.image ?? TImages.banner1,
+                      image: Faker()
+                          .image
+                          .loremPicsum(random: 1, width: 200, height: 200),
                       title: university.name,
                       subtitle: university.alias,
                       address: university.location,
@@ -154,21 +166,24 @@ class TabParnert extends StatelessWidget {
 class UniversityCard extends StatelessWidget {
   const UniversityCard({
     super.key,
-    this.isNetworkImage = false,
-    required this.image,
     required this.title,
     required this.subtitle,
     required this.address,
     required this.distance,
-    this.time = '0 min',
-    this.koasCount = 0,
+    required this.time,
+    required this.koasCount,
+    required this.image,
     this.onTap,
   });
 
-  final String image, title, subtitle, address, distance, time;
+  final String title;
+  final String subtitle;
+  final String address;
+  final String distance;
+  final String time;
   final int koasCount;
-  final bool isNetworkImage;
-  final GestureTapCallback? onTap;
+  final String image;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -183,53 +198,44 @@ class UniversityCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(TSizes.cardRadiusLg),
-                    topRight: Radius.circular(TSizes.cardRadiusLg),
-                  ),
-                  child: image.startsWith('http')
-                      ? Image.network(
-                          image,
-                          width: double.infinity,
-                          height: 150,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          TImages.promoBanner1,
-                          width: double.infinity,
-                          height: 150,
-                          fit: BoxFit.cover,
-                        ),
-                ),
-                const Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Icon(Icons.favorite_border, color: Colors.white),
-                ),
-                Positioned(
-                  bottom: 10,
-                  right: 10,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    color: Colors.black54,
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.person_2_fill,
-                            color: TColors.white, size: 14),
-                        const SizedBox(width: 5),
-                        Text(
-                          '$koasCount Koas',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ],
+            // Image with fallback handling
+            RoundedImage(
+              width: double.infinity,
+              height: 150,
+              isNetworkImage: image.isNotEmpty && image.startsWith('http'),
+              imageUrl: image.isNotEmpty
+                  ? image
+                  : Faker()
+                      .image
+                      .loremPicsum(random: 1, width: 200, height: 200),
+              applyImageRadius: true,
+              borderRadius: 10,
+              fit: BoxFit.cover,
+            ),
+            const Positioned(
+              top: 10,
+              right: 10,
+              child: Icon(Icons.favorite_border, color: Colors.white),
+            ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                color: Colors.black54,
+                child: Row(
+                  children: [
+                    const Icon(CupertinoIcons.person_2_fill,
+                        color: TColors.white, size: 14),
+                    const SizedBox(width: 5),
+                    Text(
+                      '$koasCount Koas',
+                      style: const TextStyle(color: Colors.white),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(10),

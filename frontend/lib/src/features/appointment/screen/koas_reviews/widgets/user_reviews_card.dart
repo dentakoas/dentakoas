@@ -57,21 +57,25 @@ class UserReviewsCard extends StatelessWidget {
         ),
         const SizedBox(height: TSizes.spaceBtwItems),
 
-        ReadMoreText(
-          comment,
-          trimLines: 2,
-          trimMode: TrimMode.Line,
-          trimExpandedText: ' Show less ',
-          trimCollapsedText: ' Show more ',
-          moreStyle: const TextStyle(
-            fontSize: TSizes.fontSizeSm,
-            color: TColors.primary,
-            fontWeight: FontWeight.bold,
-          ),
-          lessStyle: const TextStyle(
-            fontSize: TSizes.fontSizeSm,
-            color: TColors.primary,
-            fontWeight: FontWeight.bold,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ReadMoreText(
+            comment,
+            trimLines: 2,
+            trimMode: TrimMode.Line,
+            trimExpandedText: ' Show less ',
+            trimCollapsedText: ' Show more ',
+            moreStyle: const TextStyle(
+              fontSize: TSizes.fontSizeSm,
+              color: TColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+            lessStyle: const TextStyle(
+              fontSize: TSizes.fontSizeSm,
+              color: TColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.start,
           ),
         ),
         const SizedBox(height: TSizes.spaceBtwSections),

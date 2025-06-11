@@ -75,7 +75,7 @@ class SignUpController extends GetxController {
       Logger().i('Registering user with Firebase Authentication');
       final userCredentials = await AuthenticationRepository.instance
           .signUpWithCredential(email.text.trim(), password.text.trim());
-      
+
       // Get user role
       Logger().i('Reading user role from storage');
       final role = storage.read('TEMP_ROLE');
@@ -145,5 +145,4 @@ class SignUpController extends GetxController {
       TLoaders.errorSnackBar(title: 'Oh snap', message: e.toString());
     }
   }
-
 }

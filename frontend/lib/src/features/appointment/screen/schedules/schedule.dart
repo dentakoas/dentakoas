@@ -14,7 +14,8 @@ import 'package:denta_koas/src/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 
 class AppointmentsScreen extends StatelessWidget {
-  const AppointmentsScreen({super.key});
+  final int? initialTabIndex;
+  const AppointmentsScreen({super.key, this.initialTabIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class AppointmentsScreen extends StatelessWidget {
 
     return DefaultTabController(
       length: isFasilitator ? 3 : 6,
-      initialIndex: isFasilitator ? 1 : 2,
+      initialIndex: initialTabIndex ?? (isFasilitator ? 1 : 2),
       child: Scaffold(
         body: Column(
           children: [

@@ -3,6 +3,7 @@ import 'package:denta_koas/src/commons/widgets/shimmer/schedule_card_shimmer.dar
 import 'package:denta_koas/src/commons/widgets/state_screeen/state_screen.dart';
 import 'package:denta_koas/src/features/appointment/controller/appointment.controller/appointments_controller.dart';
 import 'package:denta_koas/src/features/appointment/screen/koas_reviews/add_review/add_review.dart';
+import 'package:denta_koas/src/features/appointment/screen/koas_reviews/koas_reviews.dart';
 import 'package:denta_koas/src/features/appointment/screen/schedules/widgets/my_appointment/my_appointment.dart';
 import 'package:denta_koas/src/features/appointment/screen/schedules/widgets/schedule_card.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
@@ -58,6 +59,14 @@ class TabCompletedAppointments extends StatelessWidget {
                       final appointment =
                           controller.completedAppointments[index];
                       final role = UserController.instance.user.value.role;
+                      final isPasien = role == Role.Pasien.name;
+                      final currentUserId =
+                          UserController.instance.user.value.id;
+                      final postReviews =
+                          appointment.schedule!.post.reviews ?? [];
+                      final userReview = postReviews.firstWhereOrNull(
+                          (review) => review.pasienId == currentUserId);
+                      final hasReviewed = userReview != null;
                       return ScheduleCard(
                         imgUrl: role == Role.Koas.name
                             ? appointment.pasien!.user!.image ?? TImages.user
@@ -71,23 +80,32 @@ class TabCompletedAppointments extends StatelessWidget {
                         timestamp: controller
                             .getAppointmentTimestampRange(appointment),
                         primaryBtnText: 'Details',
-                        secondaryBtnText: 'Review',
-                        showSecondaryBtn:
-                            appointment.schedule!.post.reviews!.isEmpty
-                                ? true
-                                : false,
+                        secondaryBtnText: hasReviewed ? 'See Review' : 'Review',
+                        showSecondaryBtn: isPasien,
                         onPrimaryBtnPressed: () {
                           Get.to(
                             () => const MyAppointmentScreen(),
                             arguments: appointment,
                           );
                         },
-                        onSecondaryBtnPressed: () {
-                          Get.to(
-                            () => const KoasAddReviewScreen(),
-                            arguments: appointment,
-                          );
-                        },
+                        onSecondaryBtnPressed: isPasien
+                            ? () {
+                                if (hasReviewed) {
+                                  Get.to(
+                                    () => const KoasReviewsScreen(),
+                                    arguments: [
+                                      [userReview],
+                                      userReview.rating,
+                                    ],
+                                  );
+                                } else {
+                                  Get.to(
+                                    () => const KoasAddReviewScreen(),
+                                    arguments: appointment,
+                                  );
+                                }
+                              }
+                            : null,
                         onTap: () => Get.to(
                           () => const MyAppointmentScreen(),
                           arguments: appointment,

@@ -1,0 +1,167 @@
+[
+  {
+    "id": 1,
+    "nama": "Hana Fathin Novitasari",
+    "email": "hanafathin2000@gmail.com",
+    "koas_number": "231611101031",
+    "phone": "085729968336",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749560934/img-koas/1.jpg",
+    "desc": "Gigi bungsu sudah tumbuh tetapi masih ada sebagian gusi yang menutupi sebagian gigi"
+  },
+  {
+    "id": 2,
+    "nama": "Melinda Yulistia Rahmayani",
+    "email": "Melindayulistiar@gmail.com",
+    "koas_number": "241611101048",
+    "phone": "082339418071",
+    "entry_year": 2024,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749560990/img-koas/2.jpg",
+    "desc": "Denture stomatitis"
+  },
+  {
+    "id": 3,
+    "nama": "Muhammad Taufik Teguh Samudera",
+    "email": "taufikteguh9002@gmail.com",
+    "koas_number": "241611101038",
+    "phone": "082113209387",
+    "entry_year": 2024,
+    "gender": "Laki-Laki",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561011/img-koas/3.jpg",
+    "desc": "sisa akar, persistensi gigi sulung"
+  },
+  {
+    "id": 4,
+    "nama": "Hafidah",
+    "email": "hafidah1631@gmail.com",
+    "koas_number": "231611101047",
+    "phone": "087854787470",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561827/img-koas/gtk3fexwnsjuchnao7nh.jpg",
+    "desc": "Gigi 37 Karies profunda perforasi, Klas 2 G V Black"
+  },
+  {
+    "id": 5,
+    "nama": "Karin Annisa",
+    "email": "karin.annisa01@gmail.com",
+    "koas_number": "231611101187",
+    "phone": "082141033459",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561016/img-koas/ifshvqifh82uvptoszhq.jpg",
+    "desc": "Pasien anak usia 6-11tahun, gigi berlubang besar, tidak pernah sakit, ingin dibuatkan tambalan berupa mahkota gigi anak yang kuat"
+  },
+  {
+    "id": 6,
+    "nama": "Dita Aulia",
+    "email": "ditagrangerrr@gmail.com",
+    "koas_number": "231611101188",
+    "phone": "082362257903",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://drive.google.com/open?id=1BxKGk5yWwlTci5OpwycUmHsY8Mzx3XSC",
+    "desc": "Gigi anak berlubang besar, belum pernah merasakan sakit cekot2 dan tiba2"
+  },
+  {
+    "id": 7,
+    "nama": "Pungky Amelia Purwoko Putri",
+    "email": "pungkyamelia01@gmail.com",
+    "koas_number": "241611101102",
+    "phone": "081252763728",
+    "entry_year": 2024,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561109/img-koas/roxayvtvyhnqatyt96oa.jpg",
+    "desc": "gigi geraham berlubang hitam di permukaan oklusal"
+  },
+  {
+    "id": 8,
+    "nama": "Adelia Putri Vadiyanti",
+    "email": "adelia.ap34@gmail.com",
+    "koas_number": "241611101111",
+    "phone": "082142492329",
+    "entry_year": 2024,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561136/img-koas/mlbj7mh5rmvjcyjjztrw.png",
+    "desc": "gigi belakang geraham berlubang, terasa cekot cekot"
+  },
+  {
+    "id": 9,
+    "nama": "Revy Amelia Sudarji",
+    "email": "ameliarevy2003@gmail.com",
+    "koas_number": "241611101105",
+    "phone": "081252237180",
+    "entry_year": 2024,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561146/img-koas/rvi2bppc54j1o7lx6vka.png",
+    "desc": "gigi belakang berlubang pada bagian permukaan yang digunakan untuk mengunyah"
+  },
+  {
+    "id": 10,
+    "nama": "Cita Kalaning Redja",
+    "email": "kalaningcitaaaaa@gmail.com",
+    "koas_number": "231611101038",
+    "phone": "088217201386",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561149/img-koas/ybd0mxazcdxmb0dt2gck.jpg",
+    "desc": "Hairy tounge"
+  },
+  {
+    "id": 11,
+    "nama": "Isrofafullaily",
+    "email": "isrofafullaily@gmail.com",
+    "koas_number": "231611101035",
+    "phone": "082231040703",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561157/img-koas/j5kaqoehnemdvdpkbana.jpg",
+    "desc": "Lubang gigi"
+  },
+  {
+    "id": 12,
+    "nama": "Nabila",
+    "email": "nbldwnt66@gmail.com",
+    "koas_number": "231611101030",
+    "phone": "081210242513",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561168/img-koas/a7hiaqswrit9f4suh1kg.jpg",
+    "desc": "terdapat gusi yang menganggu di atas gigi bungsu bawah"
+  },
+  {
+    "id": 13,
+    "nama": "Maria Fransiska",
+    "email": "mariaFransiska123@gmail.com",
+    "koas_number": "231611101037",
+    "phone": "081329633655",
+    "entry_year": 2023,
+    "gender": "Perempuan",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561171/img-koas/d1iodvypm0bxfwenx6bn.jpg",
+    "desc": "Hiperpigmentasi di mukosa"
+  },
+  {
+    "id": 14,
+    "nama": "Prima Rahman Lazuardi",
+    "email": "primarahmanl@gmail.com",
+    "koas_number": "231611101055",
+    "phone": "082147482219",
+    "entry_year": 2023,
+    "gender": "Laki-Laki",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561174/img-koas/syeq6fzadvz05hyt3tah.jpg",
+    "desc": "Gusi merah dan bengkak"
+  },
+  {
+    "id": 15,
+    "nama": "Bima Aji Pramono",
+    "email": "bimaajipramono@gmail.com",
+    "koas_number": "231611101132",
+    "phone": "081232403645",
+    "entry_year": 2023,
+    "gender": "Laki-Laki",
+    "img": "https://res.cloudinary.com/dxw9ywgfq/image/upload/v1749561177/img-koas/pj9faph6hfsoiqddkx0d.jpg",
+    "desc": "Lubang besar pada gigi belakang, baik rahang atas maupun bawah. Belum pernah sakit/ terasa nyut-nyut,  berdenyut, sakit spontan"
+  }
+]

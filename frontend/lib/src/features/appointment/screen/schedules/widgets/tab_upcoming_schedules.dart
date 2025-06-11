@@ -57,11 +57,14 @@ class TabUpcomingAppointments extends StatelessWidget {
                       final appointment =
                           controller.confirmedAppointments[index];
                       final role = UserController.instance.user.value.role;
+                      final canStart = controller.canStartSession(appointment);
+                      final isKoas = role == Role.Koas.name;
+                      final isPasien = role == Role.Pasien.name;
                       return ScheduleCard(
-                        imgUrl: role == Role.Koas.name
+                        imgUrl: isKoas
                             ? appointment.pasien!.user!.image ?? TImages.user
                             : appointment.koas!.user!.image ?? TImages.user,
-                        name: role == Role.Koas.name
+                        name: isKoas
                             ? appointment.pasien?.user?.fullName ?? ''
                             : appointment.koas?.user?.fullName ?? '',
                         category: appointment.schedule!.post.treatment.alias,
@@ -69,20 +72,38 @@ class TabUpcomingAppointments extends StatelessWidget {
                             controller.formatAppointmentDate(appointment.date),
                         timestamp: controller
                             .getAppointmentTimestampRange(appointment),
-                        showPrimaryBtn: false,
-                        showSecondaryBtn: true,
-                        secondaryBtnText: 'Cancel',
-                        onPrimaryBtnPressed: () {},
-                        onSecondaryBtnPressed: () {
-                          controller.cancelAppointmentConfirmation(
-                            appointment.id!,
-                            appointment.pasien?.id ?? '',
-                            appointment.koas?.user?.id ?? '',
-                            appointment.koas?.id ?? '',
-                            appointment.schedule!.id,
-                            appointment.schedule!.timeslot.first.id,
-                          );
-                        },
+                        showPrimaryBtn: isPasien,
+                        primaryBtnText: 'Details',
+                        onPrimaryBtnPressed: isPasien
+                            ? () => Get.to(() => const MyAppointmentScreen(),
+                                arguments: appointment)
+                            : null,
+                        showSecondaryBtn: isKoas,
+                        secondaryBtnText: canStart ? 'Start Session' : 'Cancel',
+                        onSecondaryBtnPressed: isKoas
+                            ? (canStart
+                                ? () {
+                                    controller
+                                        .startAppointmentSessionConfirmation(
+                                      appointment.id!,
+                                      appointment.pasien!.user!.id!,
+                                      appointment.koas!.user!.id!,
+                                      appointment.koas!.id!,
+                                      appointment.scheduleId!,
+                                      appointment.timeslotId!,
+                                    );
+                                  }
+                                : () {
+                                    controller.cancelAppointmentConfirmation(
+                                      appointment.id!,
+                                      appointment.pasien!.user!.id!,
+                                      appointment.koas!.user!.id!,
+                                      appointment.koas!.id!,
+                                      appointment.schedule!.id,
+                                      appointment.schedule!.timeslot.first.id,
+                                    );
+                                  })
+                            : null,
                         onTap: () => Get.to(() => const MyAppointmentScreen(),
                             arguments: appointment),
                       );

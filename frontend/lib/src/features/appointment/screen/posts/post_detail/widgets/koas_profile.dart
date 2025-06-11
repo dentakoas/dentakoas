@@ -1,3 +1,4 @@
+import 'package:denta_koas/src/commons/widgets/images/rounded_image_container.dart';
 import 'package:denta_koas/src/commons/widgets/text/title_with_verified.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
@@ -9,7 +10,6 @@ class KoasProfileCard extends StatelessWidget {
     required this.name,
     required this.university,
     required this.koasNumber,
-    this.isNetworkImage = false,
     required this.image,
   });
 
@@ -17,42 +17,33 @@ class KoasProfileCard extends StatelessWidget {
   final String university;
   final String koasNumber;
   final String image;
-  final bool isNetworkImage;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Image Profile
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            width: 100,
-            height: 100,
-            color: Colors.grey[200], // Placeholder color for missing image
-            child: Image(
-              image: image.startsWith('http')
-                  ? NetworkImage(image)
-                  : AssetImage(image),
-              fit: BoxFit.cover,
-            ),
-          ),
+        // Profile image with fallback
+        RoundedImage(
+          width: 80,
+          height: 80,
+          imageUrl: image,
+          isNetworkImage: image.startsWith('http'),
+          borderRadius: 40,
+          fit: BoxFit.cover,
         ),
-        const SizedBox(width: TSizes.spaceBtwItems),
-
-        // Doctor Details
+        
+        const SizedBox(width: 12),
+        
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Doctor Name
               Text(
                 name,
-                style: Theme.of(context).textTheme.titleMedium!.apply(
-                      color: TColors.textPrimary,
-                    ),
+                style: Theme.of(context).textTheme.headlineSmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
 

@@ -48,6 +48,37 @@ class TabPendingAppointments extends StatelessWidget {
                     ),
                   );
                 }
+                if (UserController.instance.user.value.role ==
+                    Role.Pasien.name) {
+                  return DGridLayout(
+                    itemCount: controller.pendingAppointments.length,
+                    crossAxisCount: 1,
+                    mainAxisExtent: 230,
+                    itemBuilder: (_, index) {
+                      final appointment = controller.pendingAppointments[index];
+                      return ScheduleCard(
+                        imgUrl: appointment.koas!.user!.image ?? TImages.user,
+                        name: appointment.koas!.user!.fullName,
+                        category: appointment.schedule!.post.treatment.alias,
+                        date:
+                            controller.formatAppointmentDate(appointment.date),
+                        timestamp: controller
+                            .getAppointmentTimestampRange(appointment),
+                        showPrimaryBtn: true,
+                        primaryBtnText: 'Details',
+                        onPrimaryBtnPressed: () => Get.to(
+                          () => const MyAppointmentScreen(),
+                          arguments: appointment,
+                        ),
+                        onSecondaryBtnPressed: () {},
+                        onTap: () => Get.to(
+                          () => const MyAppointmentScreen(),
+                          arguments: appointment,
+                        ),
+                      );
+                    },
+                  );
+                }
                 if (UserController.instance.user.value.role != 'Koas') {
                   return DGridLayout(
                     itemCount: controller.pendingAppointments.length,
@@ -100,11 +131,13 @@ class TabPendingAppointments extends StatelessWidget {
                         showSecondaryBtn: true,
                         primaryBtnText: 'Confirm',
                         secondaryBtnText: 'Reject',
+                        showPrimaryBtn: true,
                         onPrimaryBtnPressed: () {
                           controller.confirmAppointmentConfirmation(
                             appointment.id!,
-                            appointment.pasien?.id ?? '',
-                            appointment.koas?.id ?? '',
+                            appointment.pasien!.user!.id!,
+                            appointment.koas!.user!.id!,
+                            appointment.koas!.id!,
                             appointment.schedule?.id ?? '',
                             appointment.schedule?.timeslot.first.id ?? '',
                           );
@@ -112,8 +145,9 @@ class TabPendingAppointments extends StatelessWidget {
                         onSecondaryBtnPressed: () {
                           controller.rejectAppointmentConfirmation(
                             appointment.id!,
-                            appointment.pasien?.id ?? '',
-                            appointment.koas?.id ?? '',
+                            appointment.pasien!.user!.id!,
+                            appointment.koas!.user!.id!,
+                            appointment.koas!.id!,
                             appointment.schedule?.id ?? '',
                             appointment.schedule?.timeslot.first.id ?? '',
                           );

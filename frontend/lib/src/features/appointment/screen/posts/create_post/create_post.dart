@@ -8,6 +8,7 @@ import 'package:denta_koas/src/commons/widgets/text/section_heading.dart';
 import 'package:denta_koas/src/features/appointment/controller/post.controller/posts_controller.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/create_post/general.information/create_general_information.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/create_post/widget/card_post_user.dart';
+import 'package:denta_koas/src/features/appointment/screen/posts/my_posts_screen.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/post_detail/post_detail.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
@@ -89,7 +90,9 @@ class CreatePostScreen extends StatelessWidget {
                   SectionHeading(
                     title: '',
                     showActionButton: true,
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => const MyPostsScreen());
+                    },
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems / 2),
                   DGridLayout(

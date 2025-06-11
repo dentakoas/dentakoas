@@ -13,6 +13,7 @@ import 'package:denta_koas/src/features/appointment/screen/posts/widgets/bottom_
 import 'package:denta_koas/src/features/appointment/screen/posts/widgets/calendar_horizontal.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/widgets/patient_requirment.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/widgets/timestamp.dart';
+import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,39 +30,14 @@ class PostDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(PostDetailController());
     final Post post = Get.arguments;
-
-    // Add debug logging to identify the issue
-    print("DEBUG - Post user ID: ${post.user.id}");
-    print("DEBUG - Post koasProfile: ${post.user.koasProfile != null}");
-    if (post.user.koasProfile != null) {
-      print("DEBUG - KoasProfile ID: ${post.user.koasProfile!.id}");
-      print("DEBUG - KoasProfile user: ${post.user.koasProfile!.user != null}");
-      if (post.user.koasProfile!.user != null) {
-        print(
-            "DEBUG - KoasProfile user ID: ${post.user.koasProfile!.user!.id}");
-      }
-    }
-    print("DEBUG - Has schedules: ${post.schedule.isNotEmpty}");
-    if (post.schedule.isNotEmpty) {
-      print("DEBUG - Has timeslots: ${post.schedule[0].timeslot.isNotEmpty}");
-    }
-
     // Simplify null checks to ensure the bottom navigation appears
     final hasKoasProfile = post.user.koasProfile != null;
     final hasSchedules = post.schedule.isNotEmpty;
     final hasTimeslots = hasSchedules && post.schedule[0].timeslot.isNotEmpty;
-    
-    // Debug the post data - especially koas-related fields
-    print("DEBUG - Post info:");
-    print("DEBUG - Post ID: ${post.id}");
-    print(
-        "DEBUG - Post koasId: ${post.koasId}"); // This should be the koasProfile ID
-    print(
-        "DEBUG - Post userId: ${post.userId}"); // This should be the user ID of the koas
-    
+
     // Always show bottom navigation if we have the minimum required data
     final showBottomNav = hasKoasProfile && hasSchedules && hasTimeslots;
-    
+
     return Scaffold(
       appBar: DAppBar(
         title: const Text(
@@ -89,7 +65,7 @@ class PostDetailScreen extends StatelessWidget {
               // Use the koasProfile ID with fallback
               koasProfileId: post.koasId ??
                   post.user.koasProfile!.id ??
-                  '', // FIXED: koasProfile ID 
+                  '', // FIXED: koasProfile ID
               scheduleId: post.schedule[0].id,
               timeslotId: post.schedule[0].timeslot[0].id,
             )
@@ -101,14 +77,13 @@ class PostDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(TSizes.defaultSpace),
               child: Column(
                 children: [
-                  // Doctor Profile
+                  // Doctor Profile with image fallback
                   KoasProfileCard(
                     name: post.user.fullName,
-                    university:
-                        post.user.koasProfile!.university!,
-                    koasNumber:
-                        post.user.koasProfile!.koasNumber!,
-                    image: post.user.image ?? TImages.userProfileImage2,
+                    university: post.user.koasProfile!.university!,
+                    koasNumber: post.user.koasProfile!.koasNumber!,
+                    image: UserController.instance
+                        .getImageWithFallback(post.user.image, 'user'),
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
 
@@ -162,24 +137,21 @@ class PostDetailScreen extends StatelessWidget {
                   // Post Title
                   TitlePost(
                     title: post.title,
-                    content:
-                        post.desc,
+                    content: post.desc,
                   ),
                   const SizedBox(height: TSizes.spaceBtwSections),
 
                   // Post Badges
                   PostBadges(
                     category: post.treatment.alias,
-                    requiredParticipants:
-                        post.requiredParticipant,
+                    requiredParticipants: post.requiredParticipant,
                     currentParticipants: post.totalCurrentParticipants,
                   ),
                   const SizedBox(height: TSizes.spaceBtwSections),
 
                   // Patient Requirements
                   PatientRequirments(
-                      patientRequirements:
-                          post.patientRequirement),
+                      patientRequirements: post.patientRequirement),
                   const SizedBox(height: TSizes.spaceBtwSections),
 
                   // Calendar Horizontal
@@ -190,19 +162,22 @@ class PostDetailScreen extends StatelessWidget {
                   const SizedBox(height: TSizes.spaceBtwSections),
 
                   // Available time
-                  TimeStamp(
-                    timeslots: post.schedule
-                        .expand((schedule) => schedule.timeslot)
-                        .map((timeslot) => {
-                              'id': timeslot.id,
-                              'startTime': timeslot.startTime,
-                              'endTime': timeslot.endTime,
-                              'maxParticipants': timeslot.maxParticipants,
-                              'currentParticipants':
-                                  timeslot.currentParticipants,
-                              'isAvailable': timeslot.isAvailable,
-                            })
-                        .toList(),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TimeStamp(
+                      timeslots: post.schedule
+                          .expand((schedule) => schedule.timeslot)
+                          .map((timeslot) => {
+                                'id': timeslot.id,
+                                'startTime': timeslot.startTime,
+                                'endTime': timeslot.endTime,
+                                'maxParticipants': timeslot.maxParticipants,
+                                'currentParticipants':
+                                    timeslot.currentParticipants,
+                                'isAvailable': timeslot.isAvailable,
+                              })
+                          .toList(),
+                    ),
                   ),
                   const SizedBox(height: TSizes.spaceBtwSections),
 
@@ -211,9 +186,7 @@ class PostDetailScreen extends StatelessWidget {
                     title: 'Reviews & Ratings',
                     isSuffixIcon: true,
                     suffixIcon: CupertinoIcons.chevron_right,
-                    onPressed: () => Get.to(() => const KoasReviewsScreen(
-                     
-                    )),
+                    onPressed: () => Get.to(() => const KoasReviewsScreen()),
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
                   Obx(
@@ -263,7 +236,7 @@ class PostDetailScreen extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
 //     final controller = Get.put(PostDetailController());
-    
+
 //     return Scaffold(
 //       appBar: const DAppBar(
 //         title: Text(

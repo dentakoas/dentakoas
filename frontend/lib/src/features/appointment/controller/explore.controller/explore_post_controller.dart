@@ -56,10 +56,23 @@ class ExplorePostController extends GetxController {
                 postWithStatusOpen.length < 3 ? postWithStatusOpen.length : 3),
       );
 
-      // Last changed posts (3 post terlama berdasarkan createdAt)
+      // Last changed posts (3 post terlama berdasarkan schedule yang paling cepat selesai)
       lastChangePost.assignAll(
         (List.of(postWithStatusOpen)
-              ..sort((a, b) => a.createdAt.compareTo(b.createdAt)))
+              ..sort((a, b) {
+                // Ambil dateEnd paling awal dari setiap post
+                final aSoonestEnd = a.schedule.isNotEmpty
+                    ? a.schedule
+                        .map((s) => s.dateEnd)
+                        .reduce((v, e) => v.isBefore(e) ? v : e)
+                    : DateTime(2100);
+                final bSoonestEnd = b.schedule.isNotEmpty
+                    ? b.schedule
+                        .map((s) => s.dateEnd)
+                        .reduce((v, e) => v.isBefore(e) ? v : e)
+                    : DateTime(2100);
+                return aSoonestEnd.compareTo(bSoonestEnd);
+              }))
             .sublist(0,
                 postWithStatusOpen.length < 3 ? postWithStatusOpen.length : 3),
       );

@@ -10,6 +10,15 @@ export async function POST(req: Request) {
 
     console.log("Received Body:", body);
 
+    // Validate userId exists
+    const user = await db.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     const newNotification = await db.notification.create({
       data: {
         senderId,
@@ -31,14 +40,13 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
+    let errorMessage = "Internal Server Error";
     if (error instanceof Error) {
-      console.log("Error: ", error.stack);
+      console.log('Error: ', error.stack);
+      errorMessage = error.message;
     }
-    console.error("Error creating notification:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error('Error creating notification:', error);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 

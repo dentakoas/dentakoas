@@ -6,6 +6,7 @@ import { seedSchedules } from './seeds/schedules';
 import { seedAppointments } from './seeds/appointments';
 import { seedLikes } from './seeds/likes';
 import { seedUniversities } from './seeds/universities';
+import { fixPostImages } from '../scripts/fix-post-images';
 
 const prisma = new PrismaClient({
   log: ['error'],
@@ -102,6 +103,8 @@ async function main() {
     }
 
     console.log('Database seeding completed successfully');
+
+    // await fixPostImages();
   } catch (error) {
     console.error('Error during database seeding:', error);
     if (error instanceof Error) console.error(error.stack);

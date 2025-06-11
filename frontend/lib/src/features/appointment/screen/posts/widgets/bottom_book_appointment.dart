@@ -39,6 +39,10 @@ class BottomBookAppointment extends StatelessWidget {
     final appointmentController = Get.put(AppointmentsController());
     
     return Obx(() {
+      print('DEBUG BottomBookAppointment:');
+      print('ROLE: \\${UserController.instance.user.value.role}');
+      print('selectedDate: \\${controller.selectedDate.value}');
+      print('selectedTime: \\${controller.selectedTime.value}');
       // If user is not a patient, don't show the booking UI
       if (UserController.instance.user.value.role != 'Pasien') {
         return const SizedBox.shrink();
@@ -103,7 +107,7 @@ class BottomBookAppointment extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${controller.selectedDate.value} | ${controller.selectedTime.value}',
+                  '${_formatDateForUi(controller.selectedDate.value)} | ${controller.selectedTime.value}',
                   style: Theme.of(context).textTheme.labelLarge!.apply(
                         color: dark ? TColors.white : TColors.textPrimary,
                       ),
@@ -147,5 +151,37 @@ class BottomBookAppointment extends StatelessWidget {
         ),
       );
     });
+  }
+
+  String _formatDateForUi(String isoDate) {
+    try {
+      final date = DateTime.parse(isoDate);
+      return '${_weekdayShort(date)}, ${_monthShort(date)} ${date.year.toString().substring(2)}';
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  String _weekdayShort(DateTime date) {
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return weekdays[date.weekday - 1];
+  }
+
+  String _monthShort(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return months[date.month - 1];
   }
 }

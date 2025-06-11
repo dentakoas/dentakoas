@@ -56,21 +56,40 @@ class TabOngoingAppointments extends StatelessWidget {
                     itemBuilder: (_, index) {
                       final appointment = controller.ongoingAppointments[index];
                       final role = UserController.instance.user.value.role;
+                      final isKoas = role == Role.Koas.name;
+                      final isPasien = role == Role.Pasien.name;
                       return ScheduleCard(
-                        imgUrl: role == Role.Koas.name
-                        ? appointment.pasien!.user!.image ?? TImages.user
-                        : appointment.koas!.user!.image ?? TImages.user,
-                    name: role == Role.Koas.name
-                        ? appointment.pasien?.user?.fullName ?? ''
-                        : appointment.koas?.user?.fullName ?? '',
+                        imgUrl: isKoas
+                            ? appointment.pasien!.user!.image ?? TImages.user
+                            : appointment.koas!.user!.image ?? TImages.user,
+                        name: isKoas
+                            ? appointment.pasien?.user?.fullName ?? ''
+                            : appointment.koas?.user?.fullName ?? '',
                         category: appointment.schedule!.post.treatment.alias,
                         date:
                             controller.formatAppointmentDate(appointment.date),
                         timestamp: controller
                             .getAppointmentTimestampRange(appointment),
+                        showPrimaryBtn: isPasien,
                         primaryBtnText: 'Details',
-                        onPrimaryBtnPressed: () {},
-                        onSecondaryBtnPressed: () {},
+                        onPrimaryBtnPressed: isPasien
+                            ? () => Get.to(() => const MyAppointmentScreen(),
+                                arguments: appointment)
+                            : null,
+                        showSecondaryBtn: isKoas,
+                        secondaryBtnText: 'End Session',
+                        onSecondaryBtnPressed: isKoas
+                            ? () {
+                                controller.endAppointmentSessionConfirmation(
+                                  appointment.id!,
+                                  appointment.pasien!.user!.id!,
+                                  appointment.koas!.user!.id!,
+                                  appointment.koas!.id!,
+                                  appointment.scheduleId!,
+                                  appointment.timeslotId!,
+                                );
+                              }
+                            : null,
                         onTap: () => Get.to(() => const MyAppointmentScreen(),
                             arguments: appointment),
                       );

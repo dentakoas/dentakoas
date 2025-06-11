@@ -112,6 +112,7 @@ class KoasDetailScreen extends StatelessWidget {
 
             // Footer Button
             FooterButton(
+              koas: koas,
               userKoasId: koas.koasProfile?.id,
               koasId: koas.id,
               status: koas.koasProfile?.status ?? 'N/A',
@@ -766,12 +767,14 @@ class KoasUpcomingEvent extends StatelessWidget {
 class FooterButton extends StatelessWidget {
   const FooterButton({
     super.key,
+    this.koas,
     this.userKoasId,
     this.koasId,
     required this.status,
     required this.koasUniversity,
   });
 
+  final UserModel? koas;
   final String? userKoasId;
   final String? koasId;
   final String status;
@@ -865,7 +868,8 @@ class FooterButton extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () => Get.to(() => const PostWithSpecificKoas()),
+                onPressed: () =>
+                    Get.to(() => const PostWithSpecificKoas(), arguments: koas),
                 child: const Text(
                   'Book Appointment',
                   style: TextStyle(fontSize: 16),

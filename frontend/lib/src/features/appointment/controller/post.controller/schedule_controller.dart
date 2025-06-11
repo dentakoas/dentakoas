@@ -15,7 +15,7 @@ class SchedulePostController extends GetxController {
   var selectedIndex = 0.obs;
   var selectedDate = DateTime.now().obs;
 
-  var selectedDateRange = <DateTime?>[].obs;
+  var selectedDateRange = <DateTime?>[DateTime.now(), DateTime.now()].obs;
 
   final GlobalKey<FormState> schedulePostFormKey = GlobalKey<FormState>();
 

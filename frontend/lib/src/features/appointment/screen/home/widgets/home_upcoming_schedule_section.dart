@@ -6,6 +6,7 @@ import 'package:denta_koas/src/features/appointment/screen/home/widgets/cards/ap
 import 'package:denta_koas/src/features/appointment/screen/schedules/widgets/my_appointment/my_appointment.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/features/personalization/model/user_model.dart';
+import 'package:denta_koas/src/features/personalization/screen/setting/my.appointments/my_appointments.dart';
 import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -29,14 +30,18 @@ class HomeUpcomingScheduleSection extends StatelessWidget {
               return SectionHeading(
                 title: 'Upcoming Schedule',
                 showActionButton: true,
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(() => const MyOngoingAppointmentsScreen());
+                },
               );
             }
             if (controller.ongoingAppointments.isNotEmpty) {
               return SectionHeading(
                 title: 'Ongoing Schedule',
                 showActionButton: true,
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(() => const MyOngoingAppointmentsScreen());
+                },
               );
             }
             

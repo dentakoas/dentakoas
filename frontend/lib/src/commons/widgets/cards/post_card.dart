@@ -24,6 +24,7 @@ class PostCard extends StatelessWidget {
   final bool isNetworkImage;
   final void Function()? onPressed;
   final void Function()? onTap;
+  final bool showJoinButton;
 
   const PostCard({
     super.key,
@@ -44,6 +45,7 @@ class PostCard extends StatelessWidget {
     required this.dateEnd,
     this.onPressed,
     this.onTap,
+    this.showJoinButton = true,
   });
 
   @override
@@ -133,7 +135,9 @@ class PostCard extends StatelessWidget {
                   dateStart: dateStart,
                   dateEnd: dateEnd,
                   likesCount: likesCount,
-                  onPressed: onPressed),
+                onPressed: onPressed,
+                showJoinButton: showJoinButton,
+              ),
             ],
           ),
         ),

@@ -13,15 +13,17 @@ class CardShowcase extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.prefixImage,
+    this.onTap,
   });
 
   final List<String>? images;
   final String title, subtitle;
   final String? prefixImage;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return RoundedContainer(
+    final cardContent = RoundedContainer(
       showBorder: true,
       borderColor: TColors.darkGrey,
       backgroundColor: TColors.transparent,
@@ -48,6 +50,14 @@ class CardShowcase extends StatelessWidget {
         ],
       ),
     );
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TSizes.md),
+        child: cardContent,
+      );
+    }
+    return cardContent;
   }
 }
 

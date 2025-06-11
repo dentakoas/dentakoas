@@ -32,7 +32,12 @@ class SearchPostController extends GetxController {
 
   void setSort(String sort) {
     print('Setting sort to: $sort');
-    selectedSort.value = sort;
+    // Normalize for 'Last Change' regardless of case or spacing
+    if (sort.trim().toLowerCase().replaceAll(' ', '') == 'lastchange') {
+      selectedSort.value = 'Last Change';
+    } else {
+      selectedSort.value = sort;
+    }
     query.value = '';
     _updateInitialSuggestions(); // Update suggestions when sort changes
     _updateFilteredPosts(showAll: true);
@@ -165,6 +170,21 @@ class SearchPostController extends GetxController {
         break;
       case 'Oldest':
         posts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case 'Last Change':
+        posts.sort((a, b) {
+          final aSoonestEnd = a.schedule.isNotEmpty
+              ? a.schedule
+                  .map((s) => s.dateEnd)
+                  .reduce((v, e) => v.isBefore(e) ? v : e)
+              : DateTime(2100);
+          final bSoonestEnd = b.schedule.isNotEmpty
+              ? b.schedule
+                  .map((s) => s.dateEnd)
+                  .reduce((v, e) => v.isBefore(e) ? v : e)
+              : DateTime(2100);
+          return aSoonestEnd.compareTo(bSoonestEnd);
+        });
         break;
       default:
         posts.sort((a, b) {

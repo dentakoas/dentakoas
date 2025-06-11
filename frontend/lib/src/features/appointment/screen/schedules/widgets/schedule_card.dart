@@ -22,11 +22,11 @@ class ScheduleCard extends StatelessWidget {
     this.subtittleColor = TColors.textSecondary,
     this.iconColor = TColors.textSecondary,
     this.dividerColor = TColors.textSecondary,
-    this.showPrimaryBtn = true,
+    this.showPrimaryBtn = false,
     this.primaryBtnColor = TColors.primary,
     this.secondaryBtnColor,
     this.padding = 0,
-    this.primaryBtnText = 'Reschedule',
+    this.primaryBtnText = '',
     this.secondaryBtnText = 'Add Review',
     this.onPrimaryBtnPressed,
     this.onSecondaryBtnPressed,
@@ -65,6 +65,7 @@ class ScheduleCard extends StatelessWidget {
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: EdgeInsets.all(padding),
@@ -74,6 +75,7 @@ class ScheduleCard extends StatelessWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -241,6 +243,7 @@ class ScheduleCard extends StatelessWidget {
                         ),
                     ],
                   ),
+                const SizedBox(height: 8),
               ],
             ),
           ),

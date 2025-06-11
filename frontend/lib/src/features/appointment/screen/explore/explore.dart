@@ -9,7 +9,6 @@ import 'package:denta_koas/src/features/appointment/controller/search_controller
 import 'package:denta_koas/src/features/appointment/controller/treatment_controller.dart';
 import 'package:denta_koas/src/features/appointment/screen/categories/all_category.dart';
 import 'package:denta_koas/src/features/appointment/screen/explore/widget/tab_koas.dart';
-import 'package:denta_koas/src/features/appointment/screen/explore/widget/tab_parnert.dart';
 import 'package:denta_koas/src/features/appointment/screen/explore/widget/tab_post.dart';
 import 'package:denta_koas/src/features/appointment/screen/posts/category_post/post_with_specific_category.dart';
 import 'package:denta_koas/src/features/personalization/controller/koas_controller.dart';
@@ -30,7 +29,7 @@ class ExploreScreen extends StatelessWidget {
     final dark = THelperFunctions.isDarkMode(context);
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: DAppBar(
           title: Text('Explore',
@@ -129,7 +128,7 @@ class ExploreScreen extends StatelessWidget {
                           bottom: const TabBarApp(tabs: [
                             Tab(text: 'Posts'),
                             Tab(text: 'Dentist'),
-                            Tab(text: 'Partners'),
+                            // Tab(text: 'Partners'),
                           ]),
                         ),
                       ];
@@ -138,7 +137,7 @@ class ExploreScreen extends StatelessWidget {
                       children: [
                         TabPost(),
                         TabKoas(),
-                        TabParnert(),
+                        // TabParnert(),
                       ],
                     ),
                   ),

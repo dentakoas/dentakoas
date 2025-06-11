@@ -262,7 +262,9 @@ class TImages {
   static const String treatmentImage16 = "assets/icons/categories/tooth-16.png";
   
   // ADDED: Default image to use when loading fails
-  static const String defaultImage = 'assets/images/default_image.png';
+  static const String defaultImage = 'assets/images/content/default-image.png';
+  static const String defaultUniversity =
+      "assets/images/universities/university-default.png";
   
 }
 

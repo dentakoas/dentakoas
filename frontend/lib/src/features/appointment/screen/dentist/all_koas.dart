@@ -11,11 +11,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AllKoasScreen extends StatelessWidget {
-  const AllKoasScreen({super.key});
+  final String? filter;
+  const AllKoasScreen({super.key, this.filter});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(KoasController());
+    List koasList;
+    if (filter == 'top') {
+      koasList = controller.popularKoas;
+    } else if (filter == 'newest') {
+      koasList = controller.newestKoas;
+    } else {
+      koasList = controller.allKoas;
+    }
     return Scaffold(
       appBar: const DAppBar(
         title: Text('All Koas'),
@@ -55,11 +64,11 @@ class AllKoasScreen extends StatelessWidget {
               );
             }
             return DGridLayout(
-              itemCount: controller.allKoas.length,
+              itemCount: koasList.length,
               crossAxisCount: 1,
-              mainAxisExtent: 200,
+              mainAxisExtent: 210,
               itemBuilder: (_, index) {
-                final koas = controller.allKoas[index];
+                final koas = koasList[index];
                 return KoasCard(
                   name: koas.fullName,
                   university: koas.koasProfile!.university!,

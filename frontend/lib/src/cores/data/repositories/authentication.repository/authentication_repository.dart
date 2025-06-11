@@ -3,6 +3,7 @@ import 'package:denta_koas/src/cores/data/repositories/user.repository/user_repo
 import 'package:denta_koas/src/features/authentication/screen/signin/signin.dart';
 import 'package:denta_koas/src/features/authentication/screen/signup/profile-setup.dart';
 import 'package:denta_koas/src/features/authentication/screen/signup/role_option.dart';
+import 'package:denta_koas/src/features/authentication/screen/signup/verify_email.dart';
 import 'package:denta_koas/src/features/onboarding/screen/onboarding/onboarding.dart';
 import 'package:denta_koas/src/features/personalization/controller/user_controller.dart';
 import 'package:denta_koas/src/features/personalization/model/user_model.dart';
@@ -68,7 +69,13 @@ class AuthenticationRepository extends GetxController {
           Logger().i('User Profile: $profiles');
           Logger().i('Has Null Field: $hasNullField');
 
-          // Removed email verification check
+          // Restore email verification check
+          if (!(user.emailVerified)) {
+            // If not verified, go to verify email screen
+            Get.offAll(() => VerifyEmailScreen(email: user.email));
+            return;
+          }
+
           if (userDetail.role == null || userDetail.role!.isEmpty) {
             Get.offAll(() => const ChooseRolePage());
           } else if (hasNullField) {

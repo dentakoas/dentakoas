@@ -26,6 +26,7 @@ export interface KoasData {
   koasNumber: string;
   entryYear: number;
   gender?: string; // Add gender field for avatar generation
+  phone?: string | null;
 }
 
 // Treatment interfaces

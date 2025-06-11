@@ -1,6 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:denta_koas/src/utils/constants/colors.dart';
-import 'package:denta_koas/src/utils/constants/image_strings.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 
@@ -49,45 +47,71 @@ class RoundedImage extends StatelessWidget {
               ? BorderRadius.circular(borderRadius)
               : BorderRadius.zero,
           child: isNetworkImage
-              ? _buildNetworkImage()
+              ? Image.network(
+                  imageUrl,
+                  fit: fit,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint(
+                        "Failed to load image: $imageUrl, error: $error");
+                    return Container(
+                      color: Colors.grey.shade200,
+                      alignment: Alignment.center,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.broken_image, color: Colors.red, size: 40),
+                          SizedBox(height: 8),
+                          Text(
+                            'Failed to load image',
+                            style: TextStyle(
+                                color: Colors.red, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  loadingBuilder: (BuildContext context, Widget child,
+                      ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                )
               : Image.asset(
                   imageUrl,
                   fit: fit,
                   errorBuilder: (context, error, stackTrace) {
-                    // Return a fallback image if the asset image fails to load
-                    return Image.asset(
-                      TImages.defaultImage,
-                      fit: fit,
+                    debugPrint("Failed to load asset image: $imageUrl");
+                    return Container(
+                      color: Colors.grey.shade200,
+                      alignment: Alignment.center,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.broken_image, color: Colors.red, size: 40),
+                          SizedBox(height: 8),
+                          Text(
+                            'Image failed',
+                            style: TextStyle(
+                                color: Colors.red, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
         ),
       ),
-    );
-  }
-
-  // ADDED: Improved network image loading with better error handling
-  Widget _buildNetworkImage() {
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: fit,
-      placeholder: (context, url) => Container(
-        color: Colors.grey.shade200,
-        child: const Center(
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-          ),
-        ),
-      ),
-      errorWidget: (context, url, error) {
-        // Log the error for debugging
-        debugPrint("Image loading error: $error, URL: $url");
-        // Return a fallback image when network image fails
-        return Image.asset(
-          TImages.defaultImage,
-          fit: fit,
-        );
-      },
     );
   }
 }

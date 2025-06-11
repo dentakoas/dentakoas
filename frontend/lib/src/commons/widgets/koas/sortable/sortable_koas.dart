@@ -44,7 +44,8 @@ class SortableField extends StatelessWidget {
                 'Title',
                 'Popularity',
                 'Newest',
-                'Oldest'
+                'Oldest',
+                'Last Change',
               ],
               selectedItem: searchController.selectedSort.value,
               hintText: 'Sort by...',

@@ -52,7 +52,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
                   )
                 : null,
         title: Row(
-          mainAxisSize: MainAxisSize.min,  
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (avatar != null) ...[
               CircleAvatar(
@@ -62,7 +62,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               const SizedBox(width: 8), // Spasi antara avatar dan title
             ],
-            if (title != null) title!, // Title jika ada
+            if (title != null) Expanded(child: title!), // Title jika ada
           ],
         ),
         actions: showActions

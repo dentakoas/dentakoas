@@ -134,7 +134,12 @@ class DateRangePicker extends StatelessWidget {
         fontWeight: FontWeight.bold,
       ),
       dayBorderRadius: BorderRadius.circular(24),
-      selectableDayPredicate: (day) => !day.isBefore(DateTime.now()),
+      selectableDayPredicate: (day) {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final d = DateTime(day.year, day.month, day.day);
+        return !d.isBefore(today);
+      },
     );
 
     final selectedDates = await showModalBottomSheet<List<DateTime?>>(

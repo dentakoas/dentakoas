@@ -36,27 +36,26 @@ class SortablePostList extends StatelessWidget {
       itemBuilder: (_, index) {
         final post = searchController.filteredPosts[index];
         return PostCard(
-              postId: post.id,
-              name: post.user.fullName,
-              image: post.user.image ?? TImages.userProfileImage2,
-              postImages: post.postImages,
-              university: post.user.koasProfile?.university ?? '',
-              title: post.title,
-              description: post.desc,
-              category: post.treatment.alias,
-              timePosted: timeago.format(post.updateAt),
-              participantCount: post.totalCurrentParticipants,
-              requiredParticipant: post.requiredParticipant,
-              dateStart: post.schedule.isNotEmpty
-                  ? DateFormat('dd').format(post.schedule[0].dateStart)
-                  : 'N/A',
-              dateEnd: post.schedule.isNotEmpty
-                  ? DateFormat('dd MMM yyyy').format(post.schedule[0].dateEnd)
-                  : 'N/A',
-              likesCount: post.likeCount ?? 0,
-              onTap: onPostTap != null ? () => onPostTap!(post) : null,
-              onPressed:
-                  onPostPressed != null ? () => onPostPressed!(post) : null,
+          postId: post.id,
+          name: post.user.fullName,
+          image: post.user.image ?? TImages.user,
+          postImages: post.postImages,
+          university: post.user.koasProfile?.university ?? '',
+          title: post.title,
+          description: post.desc,
+          category: post.treatment.alias,
+          timePosted: timeago.format(post.updateAt),
+          participantCount: post.totalCurrentParticipants,
+          requiredParticipant: post.requiredParticipant,
+          dateStart: post.schedule.isNotEmpty
+              ? DateFormat('dd').format(post.schedule[0].dateStart)
+              : 'N/A',
+          dateEnd: post.schedule.isNotEmpty
+              ? DateFormat('dd MMM yyyy').format(post.schedule[0].dateEnd)
+              : 'N/A',
+          likesCount: post.likeCount ?? 0,
+          onTap: onPostTap != null ? () => onPostTap!(post) : null,
+          onPressed: onPostPressed != null ? () => onPostPressed!(post) : null,
         );
       },
     );

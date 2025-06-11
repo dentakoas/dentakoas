@@ -53,6 +53,8 @@ class TabPost extends StatelessWidget {
                             .take(3)
                             .map((post) => post.user.image ?? TImages.user)
                             .toList(),
+                        onTap: () => Get.to(
+                            () => const AllPostScreen(filter: 'Last Change')),
                       );
                     },
                   ),
@@ -74,6 +76,8 @@ class TabPost extends StatelessWidget {
                             .take(3)
                             .map((post) => post.user.image ?? TImages.user)
                             .toList(),
+                        onTap: () =>
+                            Get.to(() => const AllPostScreen(filter: 'newest')),
                       );
                     },
                   ),

@@ -58,6 +58,7 @@ class HomePopularKoasSection extends StatelessWidget {
               return DGridLayout(
                 itemCount: controller.popularKoas.length,
                 crossAxisCount: 1,
+                mainAxisExtent: 210,
                 itemBuilder: (_, index) {
                   final popularKoas = controller.popularKoas[index];
                   return KoasCard(

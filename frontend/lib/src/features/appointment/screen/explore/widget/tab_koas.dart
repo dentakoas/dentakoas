@@ -47,6 +47,7 @@ class TabKoas extends StatelessWidget {
                       .take(3)
                       .map((user) => user.image ?? TImages.user)
                       .toList(),
+                  onTap: () => Get.to(() => const AllKoasScreen(filter: 'top')),
                 );
               }),
 
@@ -69,6 +70,8 @@ class TabKoas extends StatelessWidget {
                       .take(3)
                       .map((user) => user.image ?? TImages.user)
                       .toList(),
+                  onTap: () =>
+                      Get.to(() => const AllKoasScreen(filter: 'newest')),
                 );
               }),
               const SizedBox(height: TSizes.spaceBtwItems),
@@ -102,8 +105,7 @@ class TabKoas extends StatelessWidget {
                   );
                 }
                 return DGridLayout(
-                  itemCount: controller.koas
-                      .length, // Use actual list length instead of hardcoded value
+                  itemCount: controller.koas.length < 2 ? 1 : 2,
                   mainAxisExtent: 205,
                   crossAxisCount: 1,
                   itemBuilder: (_, index) {

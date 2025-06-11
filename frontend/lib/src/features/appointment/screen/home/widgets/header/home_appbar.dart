@@ -49,6 +49,8 @@ class HomeAppBar extends StatelessWidget {
                     .textTheme
                     .headlineSmall!
                     .apply(color: TColors.black),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ],
           ),

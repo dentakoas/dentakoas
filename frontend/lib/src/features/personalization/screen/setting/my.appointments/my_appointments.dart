@@ -22,48 +22,93 @@ class MyOngoingAppointmentsScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(0),
-        child: Obx(
-          () {
-            if (controller.isLoading.value) {
-              return DGridLayout(
-                itemCount: controller.ongoingAppointments.isNotEmpty
-                    ? controller.ongoingAppointments.length
-                    : 3,
-                crossAxisCount: 1,
-                mainAxisExtent: 200,
-                itemBuilder: (_, index) {
-                  return const ScheduleCardShimmer();
-                },
-              );
-            }
-            if (controller.ongoingAppointments.isEmpty) {
-              return const StateScreen(
-                image: TImages.emptyCalendar,
-                title: 'No Appointments Found',
-                subtitle: "You don't have ongoing appointment for today",
-                isLottie: false,
-              );
-            }
+        child: Obx(() {
+          if (controller.isLoading.value) {
             return DGridLayout(
-              itemCount: 1,
+              itemCount: 3,
               crossAxisCount: 1,
-              mainAxisExtent: 130,
-              itemBuilder: (_, index) {
-                final appointment = controller.ongoingAppointments[index];
-                return ScheduleCard(
-                  isNetworkImage: true,
-                  imgUrl:
-                      'https://images.pexels.com/photos/4167541/pexels-photo-4167541.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-                  name: appointment.koas?.user?.name ?? 'N/A',
-                  category: appointment.schedule?.post.treatment.alias ?? 'N/A',
-                  date: controller.formatAppointmentDate(appointment.date),
-                  timestamp:
-                      controller.getAppointmentTimestampRange(appointment),
-                );
-              },
+              mainAxisExtent: 200,
+              itemBuilder: (_, index) => const ScheduleCardShimmer(),
             );
-          },
-        ),
+          }
+          final sections = [
+            {
+              'title': 'Ongoing',
+              'items': controller.ongoingAppointments,
+            },
+            {
+              'title': 'Upcoming',
+              'items': controller.confirmedAppointments,
+            },
+            {
+              'title': 'Completed',
+              'items': controller.completedAppointments,
+            },
+            {
+              'title': 'Canceled',
+              'items': controller.canceledAppointments,
+            },
+            {
+              'title': 'Pending',
+              'items': controller.pendingAppointments,
+            },
+            {
+              'title': 'Rejected',
+              'items': controller.rejectedAppointments,
+            },
+          ];
+          final hasAny = sections.any((s) => (s['items'] as List).isNotEmpty);
+          if (!hasAny) {
+            return const StateScreen(
+              image: TImages.emptyCalendar,
+              title: 'No Appointments Found',
+              subtitle: "You don't have any appointments yet.",
+              isLottie: false,
+            );
+          }
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final section in sections)
+                    if ((section['items'] as List).isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          section['title'] as String,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DGridLayout(
+                        itemCount: (section['items'] as List).length,
+                        crossAxisCount: 1,
+                        mainAxisExtent: 160,
+                        itemBuilder: (_, idx) {
+                          final appointment = (section['items'] as List)[idx];
+                          return ScheduleCard(
+                            isNetworkImage: true,
+                            imgUrl: appointment.koas?.user?.image ??
+                                'https://images.pexels.com/photos/4167541/pexels-photo-4167541.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+                            name: appointment.koas?.user?.fullName ?? 'N/A',
+                            category:
+                                appointment.schedule?.post.treatment.alias ??
+                                    'N/A',
+                            date: controller
+                                .formatAppointmentDate(appointment.date),
+                            timestamp: controller
+                                .getAppointmentTimestampRange(appointment),
+                          );
+                        },
+                      ),
+                    ],
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

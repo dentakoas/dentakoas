@@ -65,6 +65,7 @@ class TabApprovedKoas extends StatelessWidget {
                         timestamp: TFormatter.formatTimeToLocal(
                             koas.koasProfile?.updateAt),
                         primaryBtnText: 'Details',
+                        showPrimaryBtn: true,
                         onPrimaryBtnPressed: () => Get.to(
                             () => const KoasDetailScreen(),
                             arguments: koas),

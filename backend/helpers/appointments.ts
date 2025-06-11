@@ -1,7 +1,6 @@
 import db from "@/lib/db";
 import { getCurrentTime, getToday } from "@/utils/dateTime";
-import { format } from "date-fns";
-import { NextResponse } from "next/server";
+ 
 
 export async function updateExpiredAppointments() {
   try {

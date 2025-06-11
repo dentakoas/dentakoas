@@ -66,6 +66,7 @@ class TabPendingKoas extends StatelessWidget {
                             TFormatter.formatTimeToLocal(koas.createdAt),
                         primaryBtnText: 'Approve',
                         secondaryBtnText: 'Reject',
+                        showPrimaryBtn: true,
                         showSecondaryBtn: true,
                         onPrimaryBtnPressed: () =>
                             controller.approveConfirmation(

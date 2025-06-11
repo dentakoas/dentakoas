@@ -8,6 +8,7 @@ class FooterSection extends StatelessWidget {
   final String dateStart, dateEnd;
   final int likesCount;
   final void Function()? onPressed;
+  final bool showJoinButton;
 
   const FooterSection({
     super.key,
@@ -15,6 +16,7 @@ class FooterSection extends StatelessWidget {
     required this.dateEnd,
     required this.likesCount,
     this.onPressed,
+    this.showJoinButton = true,
   });
 
   @override
@@ -44,30 +46,31 @@ class FooterSection extends StatelessWidget {
             // ),
           ],
         ),
-        OutlinedButton(
-          onPressed: onPressed,
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            backgroundColor: TColors.primary,
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Join',
-                  style: TextStyle(
-                      fontSize: TSizes.fontSizeMd, color: TColors.white)),
-              SizedBox(width: 4),
-              Icon(
-                CupertinoIcons.chevron_right,
-                size: TSizes.iconSm,
-                color: TColors.white,
+        if (showJoinButton)
+          OutlinedButton(
+            onPressed: onPressed,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
+              backgroundColor: TColors.primary,
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Join',
+                    style: TextStyle(
+                        fontSize: TSizes.fontSizeMd, color: TColors.white)),
+                SizedBox(width: 4),
+                Icon(
+                  CupertinoIcons.chevron_right,
+                  size: TSizes.iconSm,
+                  color: TColors.white,
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }

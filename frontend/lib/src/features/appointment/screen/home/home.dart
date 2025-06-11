@@ -5,6 +5,7 @@ import 'package:denta_koas/src/features/appointment/screen/home/widgets/home_ban
 import 'package:denta_koas/src/features/appointment/screen/home/widgets/home_popular_koas.dart';
 import 'package:denta_koas/src/features/appointment/screen/home/widgets/home_popular_section.dart';
 import 'package:denta_koas/src/features/appointment/screen/home/widgets/home_upcoming_schedule_section.dart';
+import 'package:denta_koas/src/features/appointment/screen/posts/post_detail/post_detail.dart';
 import 'package:denta_koas/src/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,6 +31,9 @@ class HomeScreen extends StatelessWidget {
                           horizontal: TSizes.defaultSpace / 2),
                       child: SortablePostList(
                         posts: controller.filteredPosts,
+                        onPostTap: (post) {
+                          Get.to(const PostDetailScreen(), arguments: post);
+                        },
                       ),
                     ),
                   ]),

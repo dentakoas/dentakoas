@@ -15,12 +15,20 @@ import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class AllPostScreen extends StatelessWidget {
-  const AllPostScreen({super.key});
+  final String? filter;
+  const AllPostScreen({super.key, this.filter});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(PostController());
     final searchController = Get.put(SearchPostController());
+    if (filter == 'newest') {
+      searchController.setSort('Newest');
+    } else if (filter != null &&
+        (filter?.toLowerCase() == 'lastchange' ||
+            filter?.toLowerCase() == 'last change')) {
+      searchController.setSort('Last Change');
+    }
     return Scaffold(
       appBar: const DAppBar(
         title: Text('All Post'),

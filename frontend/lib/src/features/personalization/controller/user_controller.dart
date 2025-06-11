@@ -503,6 +503,38 @@ setStatusColor() {
     }
   }
 
+  /// Helper method to safely get an image with appropriate fallback
+  String getImageWithFallback(String? imageUrl, String type) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      // Return type-appropriate fallback
+      switch (type) {
+        case 'user':
+          return TImages.user;
+        case 'university':
+          return TImages.defaultUniversity;
+        default:
+          return TImages.defaultImage;
+      }
+    }
+    
+    // Check if the image URL has known issues
+    if (imageUrl.contains('cloudflare-ipfs.com') || 
+        imageUrl.contains('unej.ac.id') ||
+        !Uri.tryParse(imageUrl)!.hasAbsolutePath) {
+      // Return appropriate fallback for problematic URLs
+      switch (type) {
+        case 'user':
+          return TImages.user;
+        case 'university':
+          return TImages.defaultUniversity;
+        default:
+          return TImages.defaultImage;
+      }
+    }
+    
+    return imageUrl;
+  }
+  
   // ADDED: Method to safely get user image with fallback
   String getUserImage(String? imageUrl) {
     if (imageUrl != null && imageUrl.isNotEmpty) {

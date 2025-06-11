@@ -53,6 +53,10 @@ class ProfileSetupScreen extends StatelessWidget {
                             validator: (value) => TValidator.validateNIM(value),
                             decoration: const InputDecoration(
                               labelText: 'NIM',
+                              hintText: 'eg. 231611101031',
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                              ),
                               prefixIcon: Icon(Iconsax.personalcard),
                             ),
                             keyboardType: TextInputType.number,

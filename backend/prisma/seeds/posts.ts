@@ -6,6 +6,7 @@ import {
   TreatmentSeedData,
 } from '../types/seeding';
 import { getRandomPostImages } from '../../utils/cloudinaryHelper';
+import { koasUser } from '../data/users'; // pastikan import ini
 
 export const seedPosts = async (
   prisma: PrismaClient,
@@ -35,31 +36,29 @@ export const seedPosts = async (
     }
 
     const posts: PostWithRelations[] = [];
-    const now = new Date();
-    const totalPostsToCreate = 50; // Create 50 posts
 
-    for (let i = 0; i < totalPostsToCreate; i++) {
-      // Select a random koas
-      const koas = faker.helpers.arrayElement(koasProfiles);
+    // Buat 1 post untuk setiap koasUser, desc & image sesuai data
+    for (const koas of koasUser) {
+      // Cari koasProfile yang email-nya sama
+      const koasProfile = koasProfiles.find(
+        (kp) => kp.user?.email?.toLowerCase() === koas.email.toLowerCase()
+      );
+      if (!koasProfile) continue;
 
-      // Select a random treatment
+      // Pilih treatment random
       const treatment = faker.helpers.arrayElement(treatments);
 
-      // Generate 1-3 random images for the post
-      const numImages = faker.helpers.rangeToNumber({ min: 1, max: 3 });
+      // Title random
+      const titles = [
+        `Mencari Pasien untuk ${treatment.name}`,
+        `${treatment.alias} - Butuh Partisipan`,
+        `Program ${treatment.name} oleh KOAS UNJ`,
+        `${treatment.name} - Gratis untuk Pasien Terpilih`,
+        `Jadwal Terbuka: ${treatment.alias}`,
+      ];
+      const title = faker.helpers.arrayElement(titles);
 
-      // Prefer the new images for most posts (80% chance)
-      const useNewImages = faker.helpers.weightedArrayElement([
-        { value: true, weight: 80 },
-        { value: false, weight: 20 },
-      ]);
-
-      // Get post images, preferring new ones if specified
-      const postImages = useNewImages;
-
-      getRandomPostImages(numImages, false);
-
-      // Generate 2-5 patient requirements
+      // Patient requirement random
       const numRequirements = faker.helpers.rangeToNumber({ min: 2, max: 5 });
       const patientRequirements: string[] = [];
       const possibleRequirements = [
@@ -84,58 +83,30 @@ export const seedPosts = async (
         }
       }
 
-      // Generate required participants (3-10)
+      // Required participant random
       const requiredParticipant = faker.helpers.rangeToNumber({
         min: 3,
         max: 10,
       });
 
-      // Create post title based on treatment
-      const titles = [
-        `Mencari Pasien untuk ${treatment.name}`,
-        `${treatment.alias} - Butuh Partisipan`,
-        `Program ${treatment.name} oleh KOAS UNJ`,
-        `${treatment.name} - Gratis untuk Pasien Terpilih`,
-        `Jadwal Terbuka: ${treatment.alias}`,
-      ];
-      const title = faker.helpers.arrayElement(titles);
-
-      // Post description
-      const desc = faker.lorem.paragraph().substring(0, 500);
-
-      // 70% chance post is published
-      const published = faker.helpers.weightedArrayElement([
-        { value: true, weight: 70 },
-        { value: false, weight: 30 },
-      ]);
-
-      // Post status based on publishing state
-      let status: StatusPost;
-      if (!published) {
-        status = 'Pending';
-      } else {
-        // For published posts, 70% Open, 30% Closed
-        status = faker.helpers.weightedArrayElement([
-          { value: 'Open' as StatusPost, weight: 70 },
-          { value: 'Closed' as StatusPost, weight: 30 },
-        ]);
-      }
+      // Set status always 'Open' and createdAt default (today)
+      const status: StatusPost = 'Open';
+      const published = true;
 
       try {
         const post = await prisma.post.create({
           data: {
-            userId: koas.userId,
-            koasId: koas.id,
-            treatmentId: treatment.id || '', // Ensure we have an ID
+            userId: koasProfile.userId,
+            koasId: koasProfile.id,
+            treatmentId: treatment.id || '',
             title: title,
-            desc: desc,
-            // Use Cloudinary images
-            images: postImages, // Use the selected Cloudinary images
-            patientRequirement: patientRequirements, // Prisma will handle JSON conversion
+            desc: koas.desc,
+            images: [koas.img],
+            patientRequirement: patientRequirements,
             requiredParticipant: requiredParticipant,
             status: status,
             published: published,
-            createdAt: faker.date.recent({ days: 90 }),
+            // createdAt: default (today)
           },
           include: {
             user: {

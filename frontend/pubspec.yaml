@@ -2,7 +2,7 @@ name: denta_koas
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -31,8 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-
-# Utility Packages
+  # Utility Packages
   intl: ^0.19.0
   logger: ^2.5.0
   url_launcher: ^6.2.6
@@ -64,7 +63,7 @@ dependencies:
   crypto: ^3.0.3
   flutter_launcher_icons: ^0.14.3
   cached_network_image: ^3.2.3
-
+  faker: ^2.2.0
 
   # Icons
   iconsax: ^0.0.8
@@ -113,10 +112,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# flutter_icons:
-#   android: true
-#   ios: true
-#   image_path: "assets/logos/super_dental.png" # Path ke icon kamu
+  # flutter_icons:
+  #   android: true
+  #   ios: true
+  #   image_path: "assets/logos/super_dental.png" # Path ke icon kamu
 
   #--------------- LOCAL ASSETS ------------------#
   assets:
@@ -131,7 +130,6 @@ flutter:
     - assets/icons/payment_methods/
     - assets/images/on_boarding_images/
     - assets/images/states/empty/
-
 
   #--------------- LOCAL FONTS ------------------#
   fonts:

@@ -136,12 +136,6 @@ class AppointmentsController extends GetxController {
     String date,
   ) async {
     try {
-      Logger().d('Starting createAppointment process with:');
-      Logger().d('koasId (koasProfile ID): $koasId');
-      Logger().d('koasUserId (User ID): $koasUserId');
-      Logger().d('scheduleId: $scheduleId');
-      Logger().d('timeslotId: $timeslotId');
-      Logger().d('date: $date');
 
       // Start loading
       TFullScreenLoader.openLoadingDialog(
@@ -185,12 +179,6 @@ class AppointmentsController extends GetxController {
       }
       
       final pasienId = pasienDetail.pasienProfile!.id;
-      Logger().d('Fetched pasienId: $pasienId');
-      Logger().d('Creating appointment with:');
-      Logger().d('pasienId: $pasienId');
-      Logger().d('koasId: $koasId'); // Should be koasProfile ID
-      Logger().d('scheduleId: $scheduleId');
-      Logger().d('timeslotId: $timeslotId');
 
       // Initiate the request - Fix by using the right ID for koasId
       final newAppointment = AppointmentsModel(
@@ -203,16 +191,15 @@ class AppointmentsController extends GetxController {
       );
       
       // Print the full appointment model for debugging
-      Logger().d('Created appointment data:');
-      Logger().d('pasienId: ${newAppointment.pasienId}');
-      Logger().d('koasId: ${newAppointment.koasId}');
-      Logger().d('scheduleId: ${newAppointment.scheduleId}');
-      Logger().d('timeslotId: ${newAppointment.timeslotId}');
-      Logger().d('date: ${newAppointment.date}');
-      Logger().d('status: ${newAppointment.status}');
+      Logger().d(
+          'Created appointment data: pasienId: ${newAppointment.pasienId}, koasId: ${newAppointment.koasId}, scheduleId: ${newAppointment.scheduleId}, timeslotId: ${newAppointment.timeslotId}, date appointment: ${newAppointment.date}, status: ${newAppointment.status}');
+
+      
 
       // Save the appointment
       await appointmentRepository.createAppointment(newAppointment);
+
+      Logger().d('newAppointment: $newAppointment');
 
       // Create and send notification to koas - Fix by using koasUserId
       final newNotification = NotificationsModel(
@@ -221,7 +208,7 @@ class AppointmentsController extends GetxController {
         koasId: koasId, // Reference the koasId for the appointment
         title: 'New Appointment Request',
         message:
-            '${UserController.instance.user.value.fullName} has requested an appointment with you for $date. Please check your schedule.',
+            '${UserController.instance.user.value.fullName} has requested an appointment with you for ${formatAppointmentDate(date)}. Please check your schedule.',
         status: StatusNotification.Unread,
       );
       
@@ -299,24 +286,24 @@ class AppointmentsController extends GetxController {
       late NotificationsModel newNotification;
 
       if (userRole == 'Pasien') {
-        newNotification = NotificationsModel(
-          senderId: UserController.instance.user.value.id,
-          userId: koasId,
-          koasId: koasProfileId,
-          title: 'Appointment Canceled',
-          message:
-              'Your appointment has been canceled by user. Please check your schedule for more details',
-          status: StatusNotification.Read,
-        );
+        // newNotification = NotificationsModel(
+        //   senderId: UserController.instance.user.value.id,
+        //   userId: koasId,
+        //   koasId: koasProfileId,
+        //   title: 'Appointment Canceled',
+        //   message:
+        //       'Your appointment has been canceled by user. Please check your schedule for more details',
+        //   status: StatusNotification.Unread,
+        // );
       } else {
         newNotification = NotificationsModel(
           senderId: UserController.instance.user.value.id,
           userId: pasienId,
-          koasId: koasId,
+          koasId: koasProfileId,
           title: 'Appointment Canceled',
           message:
               'Your appointment has been canceled by koas. Please check your schedule for more details',
-          status: StatusNotification.Read,
+          status: StatusNotification.Unread,
         );
       }
 
@@ -339,7 +326,7 @@ class AppointmentsController extends GetxController {
       await fetchAppointments();
 
       // Close the dialog
-      Navigator.of(Get.overlayContext!).pop();
+      Get.back();
     } catch (e) {
       TFullScreenLoader.stopLoading();
       Logger().e(['Failed to cancel appointment: $e']);
@@ -354,6 +341,7 @@ class AppointmentsController extends GetxController {
     String appointmentId,
     String pasienId,
     String koasId,
+    String koasProfileId,
     scheduleId,
     timeslotId,
   ) async {
@@ -387,11 +375,11 @@ class AppointmentsController extends GetxController {
       final newNotification = NotificationsModel(
         senderId: UserController.instance.user.value.id,
         userId: UserController.instance.user.value.id,
-        koasId: koasId,
+        koasId: koasProfileId,
         title: 'Appointment Rejected',
         message:
             'Your appointment has been rejected. Please check your schedule for more details',
-        status: StatusNotification.Read,
+        status: StatusNotification.Unread,
       );
       Logger().d('Created newNotification: $newNotification');
 
@@ -432,6 +420,7 @@ class AppointmentsController extends GetxController {
     String appointmentId,
     String pasienId,
     String koasId,
+    String koasProfileId,
     scheduleId,
     timeslotId,
   ) async {
@@ -459,11 +448,11 @@ class AppointmentsController extends GetxController {
       final newNotification = NotificationsModel(
         senderId: UserController.instance.user.value.id,
         userId: UserController.instance.user.value.id,
-        koasId: koasId,
+        koasId: koasProfileId,
         title: 'Appointment Confirmed',
         message:
             'Your appointment has been confirmed. Please check your schedule for more details',
-        status: StatusNotification.Read,
+        status: StatusNotification.Unread,
       );
 
       // send the request to update the appointment
@@ -537,7 +526,7 @@ class AppointmentsController extends GetxController {
         ),
       ),
       cancel: OutlinedButton(
-        onPressed: () => Navigator.of(Get.overlayContext!).pop(),
+        onPressed: () => Get.back(),
         child: const Text('No'),
       ),
     );
@@ -577,7 +566,7 @@ class AppointmentsController extends GetxController {
         ),
       ),
       cancel: OutlinedButton(
-        onPressed: () => Navigator.of(Get.overlayContext!).pop(),
+        onPressed: () => Get.back(),
         child: const Text('No'),
       ),
     );
@@ -588,6 +577,7 @@ class AppointmentsController extends GetxController {
     String appointmentId,
     String pasienId,
     String koasId,
+    String koasProfileId,
     scheduleId,
     timeslotId,
   ) {
@@ -600,7 +590,8 @@ class AppointmentsController extends GetxController {
         onPressed: () {
           Get.back();
           rejectAppointment(
-              appointmentId, pasienId, koasId, scheduleId, timeslotId);
+              appointmentId, pasienId, koasId, koasProfileId,
+              scheduleId, timeslotId);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: TColors.error,
@@ -612,7 +603,7 @@ class AppointmentsController extends GetxController {
         ),
       ),
       cancel: OutlinedButton(
-        onPressed: () => Navigator.of(Get.overlayContext!).pop(),
+        onPressed: () => Get.back(),
         child: const Text('No'),
       ),
     );
@@ -623,6 +614,7 @@ class AppointmentsController extends GetxController {
     String appointmentId,
     String pasienId,
     String koasId,
+    String koasProfileId,
     scheduleId,
     timeslotId,
   ) {
@@ -634,7 +626,8 @@ class AppointmentsController extends GetxController {
       confirm: ElevatedButton(
         onPressed: () =>
             confirmAppointment(
-            appointmentId, pasienId, koasId, scheduleId, timeslotId),
+            appointmentId, pasienId, koasId,
+            koasProfileId, scheduleId, timeslotId),
         style: ElevatedButton.styleFrom(
           backgroundColor: TColors.primary,
           side: const BorderSide(color: TColors.primary),
@@ -645,7 +638,7 @@ class AppointmentsController extends GetxController {
         ),
       ),
       cancel: OutlinedButton(
-        onPressed: () => Navigator.of(Get.overlayContext!).pop(),
+        onPressed: () => Get.back(),
         child: const Text('No'),
       ),
     );
@@ -655,11 +648,20 @@ class AppointmentsController extends GetxController {
     if (dateTimeString == null) {
       return 'Unknown date';
     }
-    // Mengonversi string ke DateTime
-    DateTime dateTime = DateFormat("dd MMM yyyy").parse(dateTimeString);
-
-    // Memformat DateTime ke string yang diinginkan
-    return DateFormat('EEEE, dd MMMM').format(dateTime);
+    try {
+      // Coba parse sebagai ISO string
+      DateTime dateTime = DateTime.parse(dateTimeString);
+      return DateFormat('EEEE, dd MMMM').format(dateTime);
+    } catch (_) {
+      try {
+        // Fallback ke format lama
+        DateTime dateTime = DateFormat("dd MMM yyyy").parse(dateTimeString);
+        return DateFormat('EEEE, dd MMMM').format(dateTime);
+      } catch (_) {
+        // Jika gagal semua, tampilkan string aslinya
+        return dateTimeString;
+      }
+    }
   }
 
   String formatAppointmentTimestamp(DateTime? dateTime,
@@ -762,6 +764,278 @@ class AppointmentsController extends GetxController {
           message: 'Something went wrong. Please try again later.');
     }
   }
- 
 
+  // End the appointment session (mark as completed)
+  endAppointmentSession(
+    String appointmentId,
+    String pasienId,
+    String koasId,
+    String koasProfileId,
+    scheduleId,
+    timeslotId,
+  ) async {
+    try {
+      // Start loading
+      TFullScreenLoader.openLoadingDialog(
+          'Processing your action....', TImages.loadingHealth);
+
+      // Check connection
+      final isConected = await NetworkManager.instance.isConnected();
+      if (!isConected) {
+        TFullScreenLoader.stopLoading();
+        return;
+      }
+
+      // Initialize the update
+      final updateAppointmentStatus = AppointmentsModel(
+        pasienId: pasienId,
+        koasId: koasId,
+        scheduleId: scheduleId,
+        timeslotId: timeslotId,
+        status: StatusAppointment.Completed,
+      );
+
+      final userRole = UserController.instance.user.value.role;
+      late NotificationsModel newNotification;
+      if (userRole == 'Pasien') {
+        newNotification = NotificationsModel(
+          senderId: UserController.instance.user.value.id,
+          userId: koasId,
+          koasId: koasProfileId,
+          title: 'Session Completed',
+          message:
+              'The appointment session has been ended by the patient. Please check your schedule for more details.',
+          status: StatusNotification.Read,
+        );
+      } else {
+        newNotification = NotificationsModel(
+          senderId: UserController.instance.user.value.id,
+          userId: pasienId,
+          koasId: koasProfileId,
+          title: 'Session Completed',
+          message:
+              'The appointment session has been ended by koas. Please check your schedule for more details.',
+          status: StatusNotification.Unread,
+        );
+      }
+
+      // send the request to update the appointment
+      await AppointmentsRepository.instance
+          .updateAppointment(appointmentId, updateAppointmentStatus);
+
+      // send the notification
+      await NotificationRepository.instance.createNotification(newNotification);
+
+      // Stop loading
+      TFullScreenLoader.stopLoading();
+
+      // Show success message
+      TLoaders.successSnackBar(
+          title: 'Session ended successfully',
+          message: 'The appointment has been marked as completed.');
+
+      // Fetch appointments
+      await fetchAppointments();
+
+      // Close the dialog
+      if (Get.isDialogOpen ?? false) Get.back();
+    } catch (e) {
+      TFullScreenLoader.stopLoading();
+      Logger().e(['Failed to end appointment session: $e']);
+      TLoaders.errorSnackBar(
+          title: 'Failed to end session',
+          message: 'Something went wrong. Please try again later.');
+    }
+  }
+
+  // Pop up the dialog to end the appointment session
+  void endAppointmentSessionConfirmation(
+    String appointmentId,
+    String pasienId,
+    String koasId,
+    String koasProfileId,
+    scheduleId,
+    timeslotId,
+  ) {
+    Get.defaultDialog(
+      backgroundColor: TColors.white,
+      contentPadding: const EdgeInsets.all(TSizes.lg),
+      title: 'End Session',
+      middleText:
+          'Are you sure you want to end this session? This will mark the appointment as completed.',
+      confirm: ElevatedButton(
+        onPressed: () => endAppointmentSession(
+          appointmentId,
+          pasienId,
+          koasId,
+          koasProfileId,
+          scheduleId,
+          timeslotId,
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: TColors.primary,
+          side: const BorderSide(color: TColors.primary),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: TSizes.lg),
+          child: Text('Yes'),
+        ),
+      ),
+      cancel: OutlinedButton(
+        onPressed: () => Get.back(),
+        child: const Text('No'),
+      ),
+    );
+  }
+
+  // Check if the session can be started (date match or already passed)
+  bool canStartSession(AppointmentsModel appointment) {
+    if (appointment.date == null) {
+      return false;
+    }
+
+    try {
+      // Parse ISO8601 string ke DateTime (UTC)
+      final appointmentDateUtc = DateTime.parse(appointment.date!);
+
+      // Konversi ke waktu lokal (otomatis ke WIB jika device di WIB)
+      final appointmentDateLocal = appointmentDateUtc.toLocal();
+
+      // Ambil tanggal hari ini di waktu lokal
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final appointmentDay = DateTime(
+        appointmentDateLocal.year,
+        appointmentDateLocal.month,
+        appointmentDateLocal.day,
+      );
+
+      // Hanya allow jika hari ini sama atau setelah appointment date
+      return !today.isBefore(appointmentDay);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Start the appointment session (mark as ongoing)
+  startAppointmentSession(
+    String appointmentId,
+    String pasienId,
+    String koasId,
+    String koasProfileId,
+    scheduleId,
+    timeslotId,
+  ) async {
+    try {
+      // Start loading
+      TFullScreenLoader.openLoadingDialog(
+          'Processing your action....', TImages.loadingHealth);
+
+      // Check connection
+      final isConected = await NetworkManager.instance.isConnected();
+      if (!isConected) {
+        TFullScreenLoader.stopLoading();
+        return;
+      }
+
+      // Initialize the update
+      final updateAppointmentStatus = AppointmentsModel(
+        pasienId: pasienId,
+        koasId: koasId,
+        scheduleId: scheduleId,
+        timeslotId: timeslotId,
+        status: StatusAppointment.Ongoing,
+      );
+
+      final userRole = UserController.instance.user.value.role;
+      late NotificationsModel newNotification;
+      if (userRole == 'Pasien') {
+        newNotification = NotificationsModel(
+          senderId: UserController.instance.user.value.id,
+          userId: koasId,
+          koasId: koasProfileId,
+          title: 'Session Started',
+          message:
+              'The appointment session has been started by the patient. Please check your schedule for more details.',
+          status: StatusNotification.Unread,
+        );
+      } else {
+        newNotification = NotificationsModel(
+          senderId: UserController.instance.user.value.id,
+          userId: pasienId,
+          koasId: koasProfileId,
+          title: 'Session Started',
+          message:
+              'The appointment session has been started by koas. Please check your schedule for more details.',
+          status: StatusNotification.Unread,
+        );
+      }
+
+      // send the request to update the appointment
+      await AppointmentsRepository.instance
+          .updateAppointment(appointmentId, updateAppointmentStatus);
+
+      // send the notification
+      await NotificationRepository.instance.createNotification(newNotification);
+
+      // Stop loading
+      TFullScreenLoader.stopLoading();
+
+      // Show success message
+      TLoaders.successSnackBar(
+          title: 'Session started successfully',
+          message: 'The appointment has been marked as ongoing.');
+
+      // Fetch appointments
+      await fetchAppointments();
+
+      // Close the dialog
+      Get.back();
+    } catch (e) {
+      TFullScreenLoader.stopLoading();
+      Logger().e(['Failed to start appointment session: $e']);
+      TLoaders.errorSnackBar(
+          title: 'Failed to start session',
+          message: 'Something went wrong. Please try again later.');
+    }
+  }
+
+  // Pop up the dialog to start the appointment session
+  void startAppointmentSessionConfirmation(
+    String appointmentId,
+    String pasienId,
+    String koasId,
+    String koasProfileId,
+    scheduleId,
+    timeslotId,
+  ) {
+    Get.defaultDialog(
+      backgroundColor: TColors.white,
+      contentPadding: const EdgeInsets.all(TSizes.lg),
+      title: 'Start Session',
+      middleText: 'Are you sure you want to start this session now?',
+      confirm: ElevatedButton(
+        onPressed: () => startAppointmentSession(
+          appointmentId,
+          pasienId,
+          koasId,
+          koasProfileId,
+          scheduleId,
+          timeslotId,
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: TColors.primary,
+          side: const BorderSide(color: TColors.primary),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: TSizes.lg),
+          child: Text('Yes'),
+        ),
+      ),
+      cancel: OutlinedButton(
+        onPressed: () => Get.back(),
+        child: const Text('No'),
+      ),
+    );
+  }
 }
